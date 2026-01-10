@@ -1,7 +1,7 @@
 # Faz 0: Proje Kuralları ve Yapılandırma - Tamamlama Raporu
 
 **Tarih:** 2026-01-10
-**Geliştirici:** Cursor AI
+**Geliştirici:** Abdullah Doğan 
 **Commit Hash:** (İlk commit)
 
 ---
