@@ -1,0 +1,77 @@
+<script setup lang="ts">
+/**
+ * TruEditor - ORCID OAuth Callback Handler
+ * =========================================
+ */
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+
+const isProcessing = ref(true)
+const error = ref<string | null>(null)
+
+onMounted(async () => {
+  const code = route.query.code as string
+  const errorParam = route.query.error as string
+
+  if (errorParam) {
+    error.value = 'ORCID yetkilendirmesi iptal edildi'
+    isProcessing.value = false
+    return
+  }
+
+  if (!code) {
+    error.value = 'Geçersiz yetkilendirme kodu'
+    isProcessing.value = false
+    return
+  }
+
+  try {
+    await authStore.handleORCIDCallback(code)
+    
+    // Redirect to intended page or dashboard
+    const redirect = route.query.redirect as string || '/dashboard'
+    router.replace(redirect)
+  } catch (err: any) {
+    error.value = err.response?.data?.error?.message || 'Giriş işlemi başarısız'
+    isProcessing.value = false
+  }
+})
+
+function retryLogin() {
+  router.push('/login')
+}
+</script>
+
+<template>
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+    <div class="text-center">
+      <!-- Processing state -->
+      <template v-if="isProcessing">
+        <div class="mb-8">
+          <div class="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-800 mb-2">Giriş yapılıyor...</h2>
+        <p class="text-gray-600">ORCID hesabınız doğrulanıyor</p>
+      </template>
+
+      <!-- Error state -->
+      <template v-else-if="error">
+        <div class="mb-8">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+            <span class="text-3xl">❌</span>
+          </div>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-800 mb-2">Giriş Başarısız</h2>
+        <p class="text-gray-600 mb-6">{{ error }}</p>
+        <button @click="retryLogin" class="btn-primary">
+          Tekrar Dene
+        </button>
+      </template>
+    </div>
+  </div>
+</template>
