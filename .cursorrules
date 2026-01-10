@@ -1,0 +1,310 @@
+# ============================================
+# TRUEDITOR - Akademik Dergi Yönetim Sistemi
+# Cursor AI Geliştirme Kuralları
+# ============================================
+
+# PROJE BİLGİLERİ
+# ----------------
+# Proje Adı: TruEditor
+# Versiyon: 1.0.0
+# Açıklama: ORCID entegrasyonlu modern akademik dergi yönetim sistemi
+
+# TEKNOLOJİ YIĞINI
+# ----------------
+# Backend: Django 5.x + Django REST Framework
+# Frontend: Vue.js 3 + Pinia + TailwindCSS
+# Veritabanı: PostgreSQL
+# Cache/Queue: Redis
+# Async Tasks: Celery
+# PDF Engine: WeasyPrint
+# Dosya Depolama: AWS S3
+# Deploy: Railway.app
+
+# ============================================
+# GENEL KURALLAR
+# ============================================
+
+## Kod Yazım Kuralları
+1. Tüm kod yorumları ve commit mesajları TÜRKÇE olacak
+2. Her değişiklik öncesi mevcut kodu OKUMADAN değişiklik yapılmayacak
+3. Her fonksiyon/class için docstring yazılacak
+4. Type hints (Python) ve TypeScript kullanılacak
+5. Her adım sonrası CHANGELOG.md güncellenecek
+6. DRY (Don't Repeat Yourself) prensibi uygulanacak
+7. SOLID prensipleri takip edilecek
+
+## Modüler Mimari
+# ÖNEMLİ: Proje modüler yapıda geliştirilecek
+# Şu an geliştirilen: Author Module
+# Gelecekte eklenecek: Reviewer Module, Editor Module, Admin Module
+# Her modül bağımsız çalışabilmeli ve diğer modüllerle entegre olabilmeli
+
+# ============================================
+# MARKA VE TASARIM
+# ============================================
+
+## Marka Kimliği
+- Sistem Adı: TruEditor
+- Logo: Minimalist kalem + belge ikonu (SVG)
+- Slogan: "Akademik Yayıncılıkta Yeni Nesil"
+
+## Renk Paleti
+- Primary: #1e3a5f (Koyu Mavi) - Ana marka rengi
+- Secondary: #3b82f6 (Açık Mavi) - Butonlar, vurgular
+- Accent: #10b981 (Yeşil) - Başarı, CTA
+- ORCID: #a6ce39 (ORCID Yeşili) - ORCID butonları
+- Warning: #f59e0b (Turuncu) - Uyarılar
+- Error: #ef4444 (Kırmızı) - Hatalar
+
+## Tipografi
+- Başlıklar: Inter (Bold, SemiBold)
+- Metin: Source Sans Pro (Regular)
+- Kod: JetBrains Mono
+
+# ============================================
+# BACKEND KURALLARI (Django)
+# ============================================
+
+## Genel Backend Kuralları
+- Django 5.x ve DRF kullanılacak
+- Tüm API'ler /api/v1/ prefix'i ile başlar
+- Her ViewSet için select_related/prefetch_related kullanılacak
+- Pagination varsayılan olarak aktif (page_size=20)
+
+## Authentication
+- JWT (SimpleJWT) + ORCID OAuth
+- ORCID DOĞRULAMASI TÜM KULLANICILAR İÇİN ZORUNLUDUR
+- Email/şifre ile kayıt YOKTUR
+- Access Token: 15 dakika
+- Refresh Token: 7 gün (HttpOnly cookie)
+
+## Veritabanı
+- PostgreSQL (UUID primary keys)
+- Her model için created_at, updated_at alanları
+- Soft delete kullanılmayacak (gerçek silme)
+- Index stratejisi dokümante edilecek
+
+## Dosya Depolama
+- AWS S3 (django-storages)
+- Dosyalar public değil, presigned URL ile erişim
+- Max dosya boyutu: 50MB
+
+## Asenkron İşlemler
+- Celery + Redis
+- PDF oluşturma, email gönderme async olacak
+- Task durumu polling veya WebSocket ile takip
+
+## Durum Yönetimi
+- django-fsm ile durum makinesi
+- Geçersiz durum geçişleri engellenir
+
+## API Yanıt Formatı
+```python
+# Başarılı yanıt
+{
+    "success": True,
+    "data": {...},
+    "message": "İşlem başarılı"
+}
+
+# Hata yanıtı
+{
+    "success": False,
+    "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Geçersiz veri",
+        "details": [...]
+    }
+}
+```
+
+# ============================================
+# FRONTEND KURALLARI (Vue.js)
+# ============================================
+
+## Genel Frontend Kuralları
+- Vue 3 Composition API (<script setup>) kullanılacak
+- TypeScript zorunlu
+- Her component için props ve emits tanımlanacak
+
+## State Yönetimi
+- Pinia + pinia-plugin-persistedstate
+- Her store ayrı dosyada
+- Actions async olacak
+
+## Stillendirme
+- TailwindCSS (utility-first)
+- Özel component'lar için @apply kullanılabilir
+- CSS-in-JS kullanılmayacak
+
+## Form Yönetimi
+- VeeValidate + Zod
+- Her form için şema tanımlanacak
+- Gerçek zamanlı validasyon
+
+## HTTP İstekleri
+- Axios interceptors ile
+- Loading state otomatik yönetimi
+- Error boundary kullanımı
+
+## Animasyonlar
+- @vueuse/motion ile sayfa geçişleri
+- vue3-lottie ile özel animasyonlar
+- Skeleton loading tüm listelerde
+- Micro-interactions (hover, click feedback)
+- Staggered animations (liste öğeleri için)
+
+## Bileşen Yapısı
+```
+components/
+├── common/          # Button, Input, Modal, Toast, Skeleton
+├── layout/          # Header, Sidebar, Footer, Logo
+├── animations/      # FadeIn, SlideIn, ScaleIn
+├── auth/            # ORCIDButton, LoginForm
+└── submission/      # Wizard adımları, dosya yükleme
+```
+
+# ============================================
+# KOD ORGANİZASYONU
+# ============================================
+
+## Backend Klasör Yapısı
+```
+backend/
+├── core/                 # Proje ayarları
+│   ├── settings/
+│   │   ├── base.py
+│   │   ├── development.py
+│   │   └── production.py
+│   ├── celery.py
+│   ├── urls.py
+│   └── wsgi.py
+├── apps/
+│   ├── users/           # Kullanıcı yönetimi (ORCID)
+│   ├── submissions/     # Makale gönderimleri
+│   ├── files/           # Dosya yönetimi
+│   ├── notifications/   # Bildirimler
+│   └── common/          # Ortak utilities
+├── templates/
+│   └── pdf/             # PDF şablonları
+└── requirements/
+    ├── base.txt
+    ├── development.txt
+    └── production.txt
+```
+
+## Frontend Klasör Yapısı
+```
+frontend/
+├── src/
+│   ├── assets/
+│   │   ├── css/
+│   │   ├── images/
+│   │   └── fonts/
+│   ├── components/
+│   ├── composables/
+│   ├── router/
+│   ├── stores/
+│   ├── services/
+│   ├── views/
+│   ├── types/
+│   ├── utils/
+│   ├── App.vue
+│   └── main.ts
+├── public/
+└── package.json
+```
+
+# ============================================
+# COMMIT KURALLARI
+# ============================================
+
+## Conventional Commits
+- feat: Yeni özellik
+- fix: Bug düzeltme
+- docs: Dokümantasyon
+- style: Kod formatlama (işlevsel değişiklik yok)
+- refactor: Kod yeniden düzenleme
+- perf: Performans iyileştirme
+- test: Test ekleme/düzeltme
+- chore: Build/config değişiklikleri
+
+## Commit Mesajı Formatı
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+```
+
+## Örnekler
+```
+feat(auth): ORCID OAuth entegrasyonu eklendi
+fix(submission): Dosya sıralama hatası düzeltildi
+docs(readme): Kurulum talimatları güncellendi
+```
+
+# ============================================
+# GÜVENLİK KURALLARI
+# ============================================
+
+1. Hassas veriler .env dosyasında saklanacak
+2. .env dosyası asla commit edilmeyecek
+3. SQL injection'a karşı ORM kullanılacak
+4. XSS'e karşı template escaping aktif
+5. CSRF koruması aktif
+6. CORS sadece izin verilen origin'ler için
+7. Rate limiting uygulanacak
+8. Dosya yüklemelerinde tip ve boyut kontrolü
+
+# ============================================
+# TEST KURALLARI
+# ============================================
+
+## Backend
+- pytest kullanılacak
+- Her API endpoint için test
+- Coverage minimum %80
+
+## Frontend
+- Vitest kullanılacak
+- Component testleri
+- E2E testleri (opsiyonel, Playwright)
+
+# ============================================
+# RAPOR FORMATI
+# ============================================
+
+Her faz sonunda REPORTS/ klasörüne rapor eklenecek:
+- Tarih ve saat
+- Yapılan işlemler listesi
+- Oluşturulan/değiştirilen dosyalar
+- API endpoint'leri (varsa)
+- Bilinen sorunlar
+- Sonraki adım önerileri
+
+# ============================================
+# GELECEKTEKİ MODÜLLER (Planlanan)
+# ============================================
+
+# Bu modüller Author Module tamamlandıktan sonra eklenecek:
+# 
+# 1. Reviewer Module (Hakem Modülü)
+#    - Hakem davetleri
+#    - İnceleme formları
+#    - Değerlendirme raporları
+#
+# 2. Editor Module (Editör Modülü)
+#    - Makale atama
+#    - Karar verme
+#    - İş akışı yönetimi
+#
+# 3. Admin Module (Yönetici Modülü)
+#    - Kullanıcı yönetimi
+#    - Sistem ayarları
+#    - Raporlama
+
+# ============================================
+# SON GÜNCELLEME: 2026-01-10
+# ============================================
