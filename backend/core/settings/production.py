@@ -60,9 +60,18 @@ CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
 # STATİK DOSYALAR (WhiteNoise)
 # ============================================
 
+# WhiteNoise middleware (SecurityMiddleware'den hemen sonra)
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Django 5.x için STORAGES kullanılır
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # ============================================
 # EMAIL (SMTP)
@@ -124,16 +133,11 @@ if SENTRY_DSN:
         environment='production',
     )
 
-# Production logging
-LOGGING['handlers']['file'] = {
-    'class': 'logging.handlers.RotatingFileHandler',
-    'filename': BASE_DIR / 'logs' / 'trueditor.log',
-    'maxBytes': 1024 * 1024 * 10,  # 10 MB
-    'backupCount': 5,
-    'formatter': 'verbose',
-}
-
-LOGGING['root']['handlers'] = ['console', 'file']
+# Production logging - Render'da sadece console kullan
+LOGGING['root']['handlers'] = ['console']
 LOGGING['root']['level'] = 'WARNING'
+
+# Django logları
+LOGGING['loggers']['django']['level'] = 'WARNING'
 
 print("[PROD] Production ayarlari yuklendi")

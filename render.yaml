@@ -1,0 +1,45 @@
+# ============================================
+# TruEditor - Render.com Blueprint
+# ============================================
+# Bu dosya Render.com için deployment konfigürasyonunu tanımlar.
+
+services:
+  # Django Backend API
+  - type: web
+    name: trueditor-api
+    runtime: python
+    region: frankfurt  # Türkiye'ye yakın
+    rootDir: backend
+    buildCommand: ./build.sh
+    startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --worker-class gthread
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.7
+      - key: DJANGO_SETTINGS_MODULE
+        value: core.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: trueditor-api.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://trueditor.vercel.app
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://trueditor.vercel.app
+      - key: DATABASE_URL
+        fromDatabase:
+          name: trueditor-db
+          property: connectionString
+      - key: REDIS_URL
+        sync: false  # Upstash'tan manuel eklenecek
+      - key: ORCID_CLIENT_ID
+        sync: false
+      - key: ORCID_CLIENT_SECRET
+        sync: false
+    healthCheckPath: /api/v1/health/
+
+databases:
+  - name: trueditor-db
+    region: frankfurt
+    plan: free
+    databaseName: trueditor
+    user: trueditor
