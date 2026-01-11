@@ -3,6 +3,8 @@ TruEditor - User Model
 ======================
 ORCID tabanlı özel kullanıcı modeli.
 Email/şifre ile kayıt YOKTUR, sadece ORCID ile giriş yapılır.
+
+Geliştirici: Abdullah Doğan
 """
 
 import uuid
@@ -75,20 +77,32 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     ORCID ID ile kimlik doğrulama yapar.
     Email/şifre ile kayıt YOKTUR.
+    
+    Alanlar:
+    - ORCID bilgileri (zorunlu)
+    - Kişisel bilgiler (ORCID'den + manuel)
+    - İletişim bilgileri
+    - Akademik bilgiler
+    - Roller ve izinler
     """
     
-    # Primary Key
+    # ============================================
+    # PRIMARY KEY
+    # ============================================
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
         editable=False
     )
     
-    # ORCID Bilgileri (ZORUNLU)
+    # ============================================
+    # ORCID BİLGİLERİ (ZORUNLU)
+    # ============================================
     orcid_id = models.CharField(
         _('ORCID ID'),
         max_length=19,  # Format: 0000-0000-0000-0000
         unique=True,
+        db_index=True,
         help_text=_('ORCID tanımlayıcısı (örn: 0000-0002-1825-0097)')
     )
     
@@ -106,6 +120,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_('ORCID token yenileme tokeni')
     )
     
+    orcid_token_expires = models.DateTimeField(
+        _('Token Bitiş Tarihi'),
+        null=True,
+        blank=True,
+        help_text=_('ORCID access token ne zaman sona eriyor')
+    )
+    
     orcid_data = models.JSONField(
         _('ORCID Profil Verileri'),
         default=dict,
@@ -120,51 +141,127 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_('ORCID profili en son ne zaman senkronize edildi')
     )
     
-    # Temel Kullanıcı Bilgileri
+    # ============================================
+    # KİŞİSEL BİLGİLER
+    # ============================================
     email = models.EmailField(
         _('Email Adresi'),
         blank=True,
         null=True,
-        help_text=_('ORCID\'den çekilen email adresi')
+        db_index=True,
+        help_text=_('İletişim email adresi')
     )
     
     full_name = models.CharField(
         _('Ad Soyad'),
         max_length=255,
         blank=True,
-        help_text=_('ORCID\'den çekilen tam ad')
+        help_text=_('Tam ad')
     )
     
     given_name = models.CharField(
         _('Ad'),
         max_length=100,
         blank=True,
-        help_text=_('ORCID\'den çekilen ad')
+        help_text=_('Ad')
     )
     
     family_name = models.CharField(
         _('Soyad'),
         max_length=100,
         blank=True,
-        help_text=_('ORCID\'den çekilen soyad')
+        help_text=_('Soyad')
     )
     
-    # Kurum Bilgileri
+    # ============================================
+    # İLETİŞİM BİLGİLERİ
+    # ============================================
+    phone = models.CharField(
+        _('Telefon'),
+        max_length=20,
+        blank=True,
+        help_text=_('İletişim telefon numarası')
+    )
+    
+    country = models.CharField(
+        _('Ülke'),
+        max_length=100,
+        blank=True,
+        help_text=_('Ülke')
+    )
+    
+    city = models.CharField(
+        _('Şehir'),
+        max_length=100,
+        blank=True,
+        help_text=_('Şehir')
+    )
+    
+    address = models.TextField(
+        _('Adres'),
+        blank=True,
+        help_text=_('Posta adresi')
+    )
+    
+    # ============================================
+    # AKADEMİK BİLGİLER
+    # ============================================
+    title = models.CharField(
+        _('Unvan'),
+        max_length=50,
+        blank=True,
+        choices=[
+            ('', _('Seçiniz')),
+            ('prof_dr', _('Prof. Dr.')),
+            ('doc_dr', _('Doç. Dr.')),
+            ('dr_ogr_uyesi', _('Dr. Öğr. Üyesi')),
+            ('dr', _('Dr.')),
+            ('ogr_gor', _('Öğr. Gör.')),
+            ('ars_gor', _('Arş. Gör.')),
+            ('uzman', _('Uzman')),
+            ('ogrenci', _('Öğrenci')),
+            ('diger', _('Diğer')),
+        ],
+        help_text=_('Akademik unvan')
+    )
+    
     institution = models.CharField(
         _('Kurum'),
         max_length=255,
         blank=True,
-        help_text=_('ORCID\'den çekilen kurum bilgisi')
+        help_text=_('Bağlı olduğu kurum')
     )
     
     department = models.CharField(
-        _('Departman'),
+        _('Departman/Bölüm'),
         max_length=255,
         blank=True,
-        help_text=_('ORCID\'den çekilen departman bilgisi')
+        help_text=_('Departman veya bölüm')
     )
     
-    # Roller ve İzinler
+    expertise_areas = models.JSONField(
+        _('Uzmanlık Alanları'),
+        default=list,
+        blank=True,
+        help_text=_('Uzmanlık alanları listesi')
+    )
+    
+    bio = models.TextField(
+        _('Biyografi'),
+        blank=True,
+        max_length=1000,
+        help_text=_('Kısa biyografi (maks. 1000 karakter)')
+    )
+    
+    website = models.URLField(
+        _('Web Sitesi'),
+        blank=True,
+        help_text=_('Kişisel veya kurumsal web sitesi')
+    )
+    
+    # ============================================
+    # ROLLER VE İZİNLER
+    # ============================================
     is_reviewer = models.BooleanField(
         _('Hakem mi?'),
         default=False,
@@ -177,7 +274,22 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_('Kullanıcı editör olarak görev yapabilir mi?')
     )
     
-    # Django Standart Alanları
+    is_chief_editor = models.BooleanField(
+        _('Baş Editör mü?'),
+        default=False,
+        help_text=_('Kullanıcı baş editör mü?')
+    )
+    
+    reviewer_interests = models.JSONField(
+        _('Hakemlik İlgi Alanları'),
+        default=list,
+        blank=True,
+        help_text=_('Hakemlik yapmak istediği alanlar')
+    )
+    
+    # ============================================
+    # DJANGO STANDART ALANLARI
+    # ============================================
     is_staff = models.BooleanField(
         _('Personel'),
         default=False,
@@ -187,10 +299,25 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(
         _('Aktif'),
         default=True,
+        db_index=True,
         help_text=_('Kullanıcı hesabı aktif mi?')
     )
     
-    # Zaman Damgaları
+    email_verified = models.BooleanField(
+        _('Email Doğrulandı'),
+        default=False,
+        help_text=_('Email adresi doğrulandı mı?')
+    )
+    
+    profile_completed = models.BooleanField(
+        _('Profil Tamamlandı'),
+        default=False,
+        help_text=_('Kullanıcı profil bilgilerini doldurdu mu?')
+    )
+    
+    # ============================================
+    # ZAMAN DAMGALARI
+    # ============================================
     date_joined = models.DateTimeField(
         _('Kayıt Tarihi'),
         default=timezone.now
@@ -212,12 +339,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         auto_now=True
     )
     
-    # Manager
+    # ============================================
+    # MANAGER
+    # ============================================
     objects = UserManager()
     
     # Authentication ayarları
     USERNAME_FIELD = 'orcid_id'
-    REQUIRED_FIELDS = []  # createsuperuser için ek alan yok
+    REQUIRED_FIELDS = []
     
     class Meta:
         verbose_name = _('Kullanıcı')
@@ -227,6 +356,8 @@ class User(AbstractBaseUser, PermissionsMixin):
             models.Index(fields=['orcid_id']),
             models.Index(fields=['email']),
             models.Index(fields=['is_active']),
+            models.Index(fields=['is_reviewer']),
+            models.Index(fields=['is_editor']),
         ]
     
     def __str__(self):
@@ -252,6 +383,29 @@ class User(AbstractBaseUser, PermissionsMixin):
         """ORCID profil URL'ini döndürür."""
         return f"https://orcid.org/{self.orcid_id}"
     
+    @property
+    def display_name(self):
+        """Görüntüleme adını döndürür."""
+        if self.title and self.full_name:
+            return f"{self.get_title_display()} {self.full_name}"
+        return self.get_full_name()
+    
+    def check_profile_completion(self):
+        """
+        Profil tamamlanma durumunu kontrol eder.
+        Zorunlu alanlar dolu mu?
+        """
+        required_fields = ['full_name', 'email', 'institution']
+        for field in required_fields:
+            if not getattr(self, field):
+                return False
+        return True
+    
+    def update_profile_completion(self):
+        """Profil tamamlanma durumunu günceller."""
+        self.profile_completed = self.check_profile_completion()
+        self.save(update_fields=['profile_completed', 'updated_at'])
+    
     def update_from_orcid(self, orcid_data: dict):
         """
         ORCID API'den gelen verilerle kullanıcı profilini günceller.
@@ -273,7 +427,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         
         # Email
         emails = person.get('emails', {}).get('email', [])
-        if emails:
+        if emails and not self.email:
             # Birincil veya doğrulanmış emaili tercih et
             for email in emails:
                 if email.get('primary') or email.get('verified'):
@@ -282,20 +436,43 @@ class User(AbstractBaseUser, PermissionsMixin):
             if not self.email and emails:
                 self.email = emails[0].get('email')
         
+        # Ülke
+        addresses = person.get('addresses', {}).get('address', [])
+        if addresses and not self.country:
+            self.country = addresses[0].get('country', {}).get('value', '')
+        
         # Kurum bilgisi (aktivitelerden)
         activities = orcid_data.get('activities-summary', {})
-        employments = activities.get('employments', {}).get('employment-summary', [])
-        if employments:
-            latest = employments[0]
-            org = latest.get('organization', {})
-            self.institution = org.get('name', '')
-            
-            dept = latest.get('department-name')
-            if dept:
-                self.department = dept
+        employments = activities.get('employments', {}).get('affiliation-group', [])
+        
+        if employments and not self.institution:
+            for group in employments:
+                summaries = group.get('summaries', [])
+                if summaries:
+                    employment = summaries[0].get('employment-summary', {})
+                    org = employment.get('organization', {})
+                    self.institution = org.get('name', '')
+                    
+                    dept = employment.get('department-name')
+                    if dept and not self.department:
+                        self.department = dept
+                    break
+        
+        # Biyografi
+        biography = person.get('biography', {})
+        if biography and not self.bio:
+            self.bio = biography.get('content', '')[:1000]
+        
+        # Web sitesi
+        researcher_urls = person.get('researcher-urls', {}).get('researcher-url', [])
+        if researcher_urls and not self.website:
+            self.website = researcher_urls[0].get('url', {}).get('value', '')
         
         # Ham veriyi sakla
         self.orcid_data = orcid_data
         self.last_orcid_sync = timezone.now()
+        
+        # Profil tamamlanma durumunu güncelle
+        self.profile_completed = self.check_profile_completion()
         
         self.save()
