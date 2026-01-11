@@ -1,0 +1,187 @@
+# ============================================
+# TruEditor - Docker Compose (Development)
+# ============================================
+# Kullanım:
+#   docker-compose up -d          # Tüm servisleri başlat
+#   docker-compose up -d backend  # Sadece backend
+#   docker-compose logs -f        # Log'ları izle
+#   docker-compose down           # Durdur
+#
+# Geliştirici: Abdullah Doğan
+
+services:
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: trueditor-postgres
+    environment:
+      POSTGRES_DB: trueditor
+      POSTGRES_USER: trueditor
+      POSTGRES_PASSWORD: trueditor_dev_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trueditor -d trueditor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trueditor-network
+
+  # ============================================
+  # Redis (Cache + Celery Broker)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: trueditor-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trueditor-network
+
+  # ============================================
+  # Django Backend API
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: trueditor-backend
+    environment:
+      - ENV=development
+      - DEBUG=true
+      - SECRET_KEY=dev-secret-key-not-for-production
+      - DATABASE_URL=postgresql://trueditor:trueditor_dev_password@postgres:5432/trueditor
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000
+      - CELERY_EAGER=false
+    volumes:
+      - ./backend:/app
+      - backend_static:/app/staticfiles
+      - backend_media:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "
+        python manage.py migrate --no-input &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+    networks:
+      - trueditor-network
+
+  # ============================================
+  # Celery Worker
+  # ============================================
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: trueditor-celery-worker
+    environment:
+      - ENV=development
+      - DEBUG=true
+      - SECRET_KEY=dev-secret-key-not-for-production
+      - DATABASE_URL=postgresql://trueditor:trueditor_dev_password@postgres:5432/trueditor
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+      - backend_media:/app/media
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A core worker --loglevel=info --concurrency=2
+    networks:
+      - trueditor-network
+
+  # ============================================
+  # Celery Beat (Scheduler)
+  # ============================================
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: trueditor-celery-beat
+    environment:
+      - ENV=development
+      - DEBUG=true
+      - SECRET_KEY=dev-secret-key-not-for-production
+      - DATABASE_URL=postgresql://trueditor:trueditor_dev_password@postgres:5432/trueditor
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A core beat --loglevel=info
+    networks:
+      - trueditor-network
+
+  # ============================================
+  # MinIO (S3-Compatible Storage - Optional)
+  # ============================================
+  minio:
+    image: minio/minio:latest
+    container_name: trueditor-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"   # API
+      - "9001:9001"   # Console
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - trueditor-network
+    profiles:
+      - storage  # docker-compose --profile storage up
+
+# ============================================
+# Volumes
+# ============================================
+volumes:
+  postgres_data:
+  redis_data:
+  backend_static:
+  backend_media:
+  minio_data:
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  trueditor-network:
+    driver: bridge

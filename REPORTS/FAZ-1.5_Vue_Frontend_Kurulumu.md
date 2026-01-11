@@ -1,8 +1,7 @@
 # Faz 1.5: Vue.js Frontend Kurulumu - Tamamlama Raporu
 
 **Tarih:** 2026-01-10
-**Geliştirici:** Cursor AI
-**Süre:** ~20 dakika
+**Geliştirici:** Abdullah Doğan
 
 ---
 

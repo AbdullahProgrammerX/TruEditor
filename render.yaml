@@ -1,45 +1,84 @@
 # ============================================
 # TruEditor - Render.com Blueprint
 # ============================================
-# Bu dosya Render.com için deployment konfigürasyonunu tanımlar.
+# Platform-agnostic deployment configuration
+# Development/Staging environment
+#
+# Geliştirici: Abdullah Doğan
 
 services:
-  # Django Backend API
+  # ============================================
+  # Django Backend API (Staging)
+  # ============================================
   - type: web
     name: trueditor-api
     runtime: python
-    region: frankfurt  # Türkiye'ye yakın
+    region: frankfurt
     rootDir: backend
     buildCommand: ./build.sh
     startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --worker-class gthread
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.7
+        value: "3.11"
+      - key: ENV
+        value: staging
       - key: DJANGO_SETTINGS_MODULE
-        value: core.settings.production
+        value: core.settings.staging
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: trueditor-api.onrender.com
+        sync: false  # Deploy sonrası güncelle
       - key: CORS_ALLOWED_ORIGINS
-        value: https://trueditor.vercel.app
+        sync: false  # Deploy sonrası güncelle
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://trueditor.vercel.app
+        sync: false  # Deploy sonrası güncelle
       - key: DATABASE_URL
-        fromDatabase:
-          name: trueditor-db
-          property: connectionString
+        sync: false  # Neon'dan al
       - key: REDIS_URL
-        sync: false  # Upstash'tan manuel eklenecek
+        sync: false  # Upstash'tan al
+      - key: CELERY_BROKER_URL
+        sync: false  # REDIS_URL ile aynı
       - key: ORCID_CLIENT_ID
         sync: false
       - key: ORCID_CLIENT_SECRET
         sync: false
+      - key: ORCID_BASE_URL
+        value: https://sandbox.orcid.org
+      - key: ORCID_API_URL
+        value: https://api.sandbox.orcid.org
+      - key: SECURE_SSL_REDIRECT
+        value: "true"
+      - key: LOG_LEVEL
+        value: INFO
     healthCheckPath: /api/v1/health/
+    autoDeploy: true
 
-databases:
-  - name: trueditor-db
+  # ============================================
+  # Celery Worker (Background Tasks)
+  # ============================================
+  - type: worker
+    name: trueditor-worker
+    runtime: python
     region: frankfurt
-    plan: free
-    databaseName: trueditor
-    user: trueditor
+    rootDir: backend
+    buildCommand: pip install -r requirements/production.txt
+    startCommand: celery -A core worker --loglevel=info --concurrency=2
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: ENV
+        value: staging
+      - key: DJANGO_SETTINGS_MODULE
+        value: core.settings.staging
+      - key: SECRET_KEY
+        fromService:
+          name: trueditor-api
+          type: web
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CELERY_BROKER_URL
+        sync: false
+    autoDeploy: true

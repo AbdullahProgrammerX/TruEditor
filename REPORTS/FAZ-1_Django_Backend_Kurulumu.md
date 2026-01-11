@@ -1,8 +1,7 @@
 # Faz 1: Django Backend Kurulumu - Tamamlama Raporu
 
 **Tarih:** 2026-01-10
-**Geliştirici:** Cursor AI
-**Süre:** ~30 dakika
+**Geliştirici:** Abdullah Doğan
 
 ---
 
