@@ -1,9 +1,9 @@
 """
 TruEditor - Common Views
 ========================
-Health check ve diğer ortak view'lar.
+Health check and other common views.
 
-Geliştirici: Abdullah Doğan
+Developer: Abdullah Dogan
 """
 
 import os
@@ -17,11 +17,11 @@ from rest_framework import status
 
 class HealthCheckView(APIView):
     """
-    Sistem sağlık kontrolü endpoint'i.
+    System health check endpoint.
     
     GET /api/v1/health/
     
-    Dönen yanıt:
+    Response:
     {
         "success": true,
         "data": {
@@ -41,8 +41,8 @@ class HealthCheckView(APIView):
     
     def get(self, request):
         """
-        Sistemin çalışır durumda olduğunu doğrular.
-        Database ve cache bağlantılarını kontrol eder.
+        Verify that the system is operational.
+        Checks database and cache connections.
         """
         from django.conf import settings
         
@@ -54,7 +54,7 @@ class HealthCheckView(APIView):
         checks = {}
         overall_status = 'healthy'
         
-        # Database kontrolü
+        # Database check
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
@@ -63,7 +63,7 @@ class HealthCheckView(APIView):
             checks['database'] = f'error: {str(e)}'
             overall_status = 'unhealthy'
         
-        # Redis/Cache kontrolü (opsiyonel)
+        # Redis/Cache check (optional)
         try:
             from django.core.cache import cache
             cache.set('health_check', 'ok', timeout=10)
@@ -72,7 +72,7 @@ class HealthCheckView(APIView):
             else:
                 checks['cache'] = 'error: cache read failed'
         except Exception as e:
-            checks['cache'] = 'not_configured'  # Development'ta normal
+            checks['cache'] = 'not_configured'  # Normal in development
         
         response_data = {
             'success': overall_status == 'healthy',
@@ -94,18 +94,18 @@ class HealthCheckView(APIView):
 class ReadinessCheckView(APIView):
     """
     Kubernetes/Container readiness probe.
-    Servisin trafik almaya hazır olup olmadığını kontrol eder.
+    Checks if the service is ready to accept traffic.
     
-    GET /api/v1/ready/
+    GET /api/v1/health/ready/
     """
     permission_classes = [AllowAny]
     authentication_classes = []
     
     def get(self, request):
         """
-        Servisin hazır olup olmadığını kontrol eder.
+        Check if the service is ready.
         """
-        # Database bağlantısı zorunlu
+        # Database connection is required
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
@@ -121,15 +121,15 @@ class ReadinessCheckView(APIView):
 class LivenessCheckView(APIView):
     """
     Kubernetes/Container liveness probe.
-    Servisin canlı olup olmadığını kontrol eder.
+    Checks if the service is alive.
     
-    GET /api/v1/live/
+    GET /api/v1/health/live/
     """
     permission_classes = [AllowAny]
     authentication_classes = []
     
     def get(self, request):
         """
-        Servisin canlı olduğunu doğrular.
+        Verify that the service is alive.
         """
         return Response({'alive': True}, status=status.HTTP_200_OK)

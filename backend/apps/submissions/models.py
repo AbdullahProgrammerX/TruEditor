@@ -1,10 +1,10 @@
 """
 TruEditor - Submission Models
 =============================
-Makale gönderimleri için veritabanı modelleri.
-FSM (Finite State Machine) ile durum yönetimi.
+Database models for manuscript submissions.
+FSM (Finite State Machine) for state management.
 
-Geliştirici: Abdullah Doğan
+Developer: Abdullah Dogan
 """
 
 import uuid
@@ -18,42 +18,42 @@ from django_fsm import FSMField, transition
 
 class Submission(models.Model):
     """
-    Makale Gönderimi Modeli.
+    Manuscript Submission Model.
     
-    Bir makale gönderiminin tüm yaşam döngüsünü yönetir:
+    Manages the entire lifecycle of a manuscript submission:
     - draft → submitted → under_review → revision_required → accepted/rejected
     
-    İlişkiler:
-    - User (submitter): Gönderimi yapan kullanıcı
-    - Author: Yazarlar (sıralı liste)
-    - ManuscriptFile: Yüklenen dosyalar
+    Relations:
+    - User (submitter): User who submitted the manuscript
+    - Author: Authors (ordered list)
+    - ManuscriptFile: Uploaded files
     """
     
     # ============================================
-    # DURUM SEÇENEKLERİ
+    # STATUS CHOICES
     # ============================================
     class Status(models.TextChoices):
-        DRAFT = 'draft', _('Taslak')
-        SUBMITTED = 'submitted', _('Gönderildi')
-        UNDER_REVIEW = 'under_review', _('İncelemede')
-        REVISION_REQUIRED = 'revision_required', _('Revizyon Gerekli')
-        REVISION_SUBMITTED = 'revision_submitted', _('Revizyon Gönderildi')
-        ACCEPTED = 'accepted', _('Kabul Edildi')
-        REJECTED = 'rejected', _('Reddedildi')
-        WITHDRAWN = 'withdrawn', _('Geri Çekildi')
-        PUBLISHED = 'published', _('Yayınlandı')
+        DRAFT = 'draft', _('Draft')
+        SUBMITTED = 'submitted', _('Submitted')
+        UNDER_REVIEW = 'under_review', _('Under Review')
+        REVISION_REQUIRED = 'revision_required', _('Revision Required')
+        REVISION_SUBMITTED = 'revision_submitted', _('Revision Submitted')
+        ACCEPTED = 'accepted', _('Accepted')
+        REJECTED = 'rejected', _('Rejected')
+        WITHDRAWN = 'withdrawn', _('Withdrawn')
+        PUBLISHED = 'published', _('Published')
     
     # ============================================
-    # MAKALE TÜRLERİ
+    # ARTICLE TYPES
     # ============================================
     class ArticleType(models.TextChoices):
-        RESEARCH = 'research', _('Araştırma Makalesi')
-        REVIEW = 'review', _('Derleme')
-        CASE_REPORT = 'case_report', _('Olgu Sunumu')
-        SHORT_COMM = 'short_communication', _('Kısa Bildiri')
-        LETTER = 'letter', _('Editöre Mektup')
-        EDITORIAL = 'editorial', _('Editöryal')
-        OTHER = 'other', _('Diğer')
+        RESEARCH = 'research', _('Research Article')
+        REVIEW = 'review', _('Review Article')
+        CASE_REPORT = 'case_report', _('Case Report')
+        SHORT_COMM = 'short_communication', _('Short Communication')
+        LETTER = 'letter', _('Letter to the Editor')
+        EDITORIAL = 'editorial', _('Editorial')
+        OTHER = 'other', _('Other')
     
     # ============================================
     # PRIMARY KEY
@@ -65,174 +65,174 @@ class Submission(models.Model):
     )
     
     # ============================================
-    # GÖNDERİM BİLGİLERİ
+    # SUBMISSION INFORMATION
     # ============================================
     manuscript_id = models.CharField(
-        _('Makale Numarası'),
+        _('Manuscript ID'),
         max_length=20,
         unique=True,
         blank=True,
         null=True,
         db_index=True,
-        help_text=_('Otomatik oluşturulan makale numarası (örn: TRU-2026-0001)')
+        help_text=_('Auto-generated manuscript number (e.g., TRU-2026-0001)')
     )
     
     submitter = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name='submissions',
-        verbose_name=_('Gönderen'),
-        help_text=_('Makaleyi sisteme gönderen kullanıcı')
+        verbose_name=_('Submitter'),
+        help_text=_('User who submitted the manuscript')
     )
     
     # ============================================
-    # DURUM (FSM)
+    # STATUS (FSM)
     # ============================================
     status = FSMField(
-        _('Durum'),
+        _('Status'),
         default=Status.DRAFT,
         choices=Status.choices,
         db_index=True,
-        protected=True,  # Sadece transition'larla değiştirilebilir
-        help_text=_('Makalenin mevcut durumu')
+        protected=True,  # Can only be changed via transitions
+        help_text=_('Current status of the manuscript')
     )
     
     # ============================================
-    # MAKALE BİLGİLERİ
+    # MANUSCRIPT INFORMATION
     # ============================================
     title = models.CharField(
-        _('Başlık'),
+        _('Title'),
         max_length=500,
-        help_text=_('Makalenin başlığı')
+        help_text=_('Title of the manuscript')
     )
     
     title_en = models.CharField(
-        _('İngilizce Başlık'),
+        _('English Title'),
         max_length=500,
         blank=True,
-        help_text=_('Makalenin İngilizce başlığı (opsiyonel)')
+        help_text=_('English title of the manuscript (optional)')
     )
     
     abstract = models.TextField(
-        _('Özet'),
+        _('Abstract'),
         max_length=5000,
-        help_text=_('Makalenin özeti (maks. 5000 karakter)')
+        help_text=_('Abstract of the manuscript (max 5000 characters)')
     )
     
     abstract_en = models.TextField(
-        _('İngilizce Özet'),
+        _('English Abstract'),
         max_length=5000,
         blank=True,
-        help_text=_('İngilizce özet (opsiyonel)')
+        help_text=_('English abstract (optional)')
     )
     
     keywords = models.JSONField(
-        _('Anahtar Kelimeler'),
+        _('Keywords'),
         default=list,
-        help_text=_('Anahtar kelimeler listesi')
+        help_text=_('List of keywords')
     )
     
     keywords_en = models.JSONField(
-        _('İngilizce Anahtar Kelimeler'),
+        _('English Keywords'),
         default=list,
         blank=True,
-        help_text=_('İngilizce anahtar kelimeler')
+        help_text=_('English keywords')
     )
     
     article_type = models.CharField(
-        _('Makale Türü'),
+        _('Article Type'),
         max_length=30,
         choices=ArticleType.choices,
         default=ArticleType.RESEARCH,
-        help_text=_('Makalenin türü')
+        help_text=_('Type of the article')
     )
     
     language = models.CharField(
-        _('Dil'),
+        _('Language'),
         max_length=5,
-        default='tr',
+        default='en',
         choices=[
-            ('tr', _('Türkçe')),
-            ('en', _('İngilizce')),
+            ('en', _('English')),
+            ('tr', _('Turkish')),
         ],
-        help_text=_('Makalenin yazıldığı dil')
+        help_text=_('Language of the manuscript')
     )
     
     # ============================================
-    # KAPAK MEKTUBU VE ETİK
+    # COVER LETTER AND ETHICS
     # ============================================
     cover_letter = models.TextField(
-        _('Kapak Mektubu'),
+        _('Cover Letter'),
         blank=True,
-        help_text=_('Editöre kapak mektubu')
+        help_text=_('Cover letter to the editor')
     )
     
     ethics_statement = models.TextField(
-        _('Etik Beyanı'),
+        _('Ethics Statement'),
         blank=True,
-        help_text=_('Etik kurul onayı ve beyanı')
+        help_text=_('Ethics approval and statement')
     )
     
     ethics_approval_number = models.CharField(
-        _('Etik Kurul Onay Numarası'),
+        _('Ethics Approval Number'),
         max_length=100,
         blank=True,
-        help_text=_('Etik kurul onay numarası (varsa)')
+        help_text=_('Ethics committee approval number (if applicable)')
     )
     
     conflict_of_interest = models.TextField(
-        _('Çıkar Çatışması Beyanı'),
+        _('Conflict of Interest Statement'),
         blank=True,
-        help_text=_('Çıkar çatışması beyanı')
+        help_text=_('Conflict of interest declaration')
     )
     
     funding_statement = models.TextField(
-        _('Finansman Beyanı'),
+        _('Funding Statement'),
         blank=True,
-        help_text=_('Araştırma finansmanı bilgisi')
+        help_text=_('Research funding information')
     )
     
     # ============================================
-    # WIZARD İLERLEMESİ
+    # WIZARD PROGRESS
     # ============================================
     wizard_step = models.PositiveSmallIntegerField(
-        _('Wizard Adımı'),
+        _('Wizard Step'),
         default=1,
         validators=[MinValueValidator(1), MaxValueValidator(6)],
-        help_text=_('Gönderim wizard\'ında şu anki adım (1-6)')
+        help_text=_('Current step in the submission wizard (1-6)')
     )
     
     wizard_data = models.JSONField(
-        _('Wizard Verileri'),
+        _('Wizard Data'),
         default=dict,
         blank=True,
-        help_text=_('Wizard adımlarından toplanan geçici veriler')
+        help_text=_('Temporary data collected from wizard steps')
     )
     
     # ============================================
-    # REVİZYON BİLGİLERİ
+    # REVISION INFORMATION
     # ============================================
     revision_number = models.PositiveSmallIntegerField(
-        _('Revizyon Numarası'),
+        _('Revision Number'),
         default=0,
-        help_text=_('Kaçıncı revizyon')
+        help_text=_('Current revision number')
     )
     
     revision_notes = models.TextField(
-        _('Revizyon Notları'),
+        _('Revision Notes'),
         blank=True,
-        help_text=_('Editör revizyon talep notları')
+        help_text=_('Editor revision request notes')
     )
     
     revision_deadline = models.DateTimeField(
-        _('Revizyon Son Tarihi'),
+        _('Revision Deadline'),
         null=True,
         blank=True,
-        help_text=_('Revizyon teslim tarihi')
+        help_text=_('Deadline for revision submission')
     )
     
     # ============================================
-    # EDİTÖR ATAMASI
+    # EDITOR ASSIGNMENT
     # ============================================
     assigned_editor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -240,73 +240,73 @@ class Submission(models.Model):
         null=True,
         blank=True,
         related_name='editor_submissions',
-        verbose_name=_('Atanan Editör'),
-        help_text=_('Makaleyi değerlendiren editör')
+        verbose_name=_('Assigned Editor'),
+        help_text=_('Editor handling this manuscript')
     )
     
     editor_notes = models.TextField(
-        _('Editör Notları'),
+        _('Editor Notes'),
         blank=True,
-        help_text=_('Editörün dahili notları')
+        help_text=_('Internal notes from the editor')
     )
     
     editor_decision = models.CharField(
-        _('Editör Kararı'),
+        _('Editor Decision'),
         max_length=50,
         blank=True,
         choices=[
-            ('accept', _('Kabul')),
-            ('minor_revision', _('Küçük Revizyon')),
-            ('major_revision', _('Büyük Revizyon')),
-            ('reject', _('Red')),
+            ('accept', _('Accept')),
+            ('minor_revision', _('Minor Revision')),
+            ('major_revision', _('Major Revision')),
+            ('reject', _('Reject')),
         ],
-        help_text=_('Editörün nihai kararı')
+        help_text=_('Final decision by the editor')
     )
     
     editor_decision_date = models.DateTimeField(
-        _('Karar Tarihi'),
+        _('Decision Date'),
         null=True,
         blank=True,
-        help_text=_('Editör kararının verildiği tarih')
+        help_text=_('Date when the decision was made')
     )
     
     # ============================================
-    # ZAMAN DAMGALARI
+    # TIMESTAMPS
     # ============================================
     created_at = models.DateTimeField(
-        _('Oluşturulma Tarihi'),
+        _('Created At'),
         auto_now_add=True
     )
     
     updated_at = models.DateTimeField(
-        _('Güncellenme Tarihi'),
+        _('Updated At'),
         auto_now=True
     )
     
     submitted_at = models.DateTimeField(
-        _('Gönderim Tarihi'),
+        _('Submitted At'),
         null=True,
         blank=True,
-        help_text=_('Makalenin ilk gönderildiği tarih')
+        help_text=_('Date when the manuscript was first submitted')
     )
     
     accepted_at = models.DateTimeField(
-        _('Kabul Tarihi'),
+        _('Accepted At'),
         null=True,
         blank=True,
-        help_text=_('Makalenin kabul edildiği tarih')
+        help_text=_('Date when the manuscript was accepted')
     )
     
     published_at = models.DateTimeField(
-        _('Yayın Tarihi'),
+        _('Published At'),
         null=True,
         blank=True,
-        help_text=_('Makalenin yayınlandığı tarih')
+        help_text=_('Date when the manuscript was published')
     )
     
     class Meta:
-        verbose_name = _('Gönderim')
-        verbose_name_plural = _('Gönderimler')
+        verbose_name = _('Submission')
+        verbose_name_plural = _('Submissions')
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['manuscript_id']),
@@ -321,20 +321,20 @@ class Submission(models.Model):
         return f"{self.manuscript_id or 'DRAFT'}: {self.title[:50]}"
     
     def save(self, *args, **kwargs):
-        """Kaydetmeden önce manuscript_id oluştur."""
+        """Generate manuscript_id before saving if submitted."""
         if not self.manuscript_id and self.status != self.Status.DRAFT:
             self.manuscript_id = self.generate_manuscript_id()
         super().save(*args, **kwargs)
     
     def generate_manuscript_id(self):
         """
-        Benzersiz makale numarası oluşturur.
+        Generate a unique manuscript ID.
         Format: TRU-YYYY-NNNN
         """
         year = timezone.now().year
         prefix = f"TRU-{year}-"
         
-        # Bu yıla ait son numarayı bul
+        # Find the last number for this year
         last_submission = Submission.objects.filter(
             manuscript_id__startswith=prefix
         ).order_by('-manuscript_id').first()
@@ -351,14 +351,14 @@ class Submission(models.Model):
         return f"{prefix}{new_number:04d}"
     
     # ============================================
-    # FSM DURUM GEÇİŞLERİ
+    # FSM STATE TRANSITIONS
     # ============================================
     
     @transition(field=status, source=Status.DRAFT, target=Status.SUBMITTED)
     def submit(self):
         """
-        Taslağı gönder.
-        Validasyonlar transition öncesi yapılmalı.
+        Submit the draft.
+        Validations should be done before the transition.
         """
         self.submitted_at = timezone.now()
         self.manuscript_id = self.generate_manuscript_id()
@@ -366,10 +366,10 @@ class Submission(models.Model):
     @transition(field=status, source=Status.SUBMITTED, target=Status.UNDER_REVIEW)
     def start_review(self, editor):
         """
-        İnceleme sürecini başlat.
+        Start the review process.
         
         Args:
-            editor: Atanan editör
+            editor: Assigned editor
         """
         self.assigned_editor = editor
     
@@ -380,11 +380,11 @@ class Submission(models.Model):
     )
     def request_revision(self, notes, deadline_days=30):
         """
-        Revizyon talep et.
+        Request revision.
         
         Args:
-            notes: Revizyon notları
-            deadline_days: Revizyon için gün sayısı
+            notes: Revision notes
+            deadline_days: Number of days for revision
         """
         self.revision_notes = notes
         self.revision_deadline = timezone.now() + timezone.timedelta(days=deadline_days)
@@ -392,7 +392,7 @@ class Submission(models.Model):
     
     @transition(field=status, source=Status.REVISION_REQUIRED, target=Status.REVISION_SUBMITTED)
     def submit_revision(self):
-        """Revizyonu gönder."""
+        """Submit the revision."""
         pass
     
     @transition(
@@ -402,10 +402,10 @@ class Submission(models.Model):
     )
     def accept(self, decision_notes=''):
         """
-        Makaleyi kabul et.
+        Accept the manuscript.
         
         Args:
-            decision_notes: Karar notları
+            decision_notes: Decision notes
         """
         self.editor_decision = 'accept'
         self.editor_notes = decision_notes
@@ -419,10 +419,10 @@ class Submission(models.Model):
     )
     def reject(self, decision_notes=''):
         """
-        Makaleyi reddet.
+        Reject the manuscript.
         
         Args:
-            decision_notes: Karar notları
+            decision_notes: Decision notes
         """
         self.editor_decision = 'reject'
         self.editor_notes = decision_notes
@@ -434,26 +434,26 @@ class Submission(models.Model):
         target=Status.WITHDRAWN
     )
     def withdraw(self):
-        """Makaleyi geri çek (yazar tarafından)."""
+        """Withdraw the manuscript (by author)."""
         pass
     
     @transition(field=status, source=Status.ACCEPTED, target=Status.PUBLISHED)
     def publish(self):
-        """Makaleyi yayınla."""
+        """Publish the manuscript."""
         self.published_at = timezone.now()
     
     # ============================================
-    # YARDIMCI METODLAR
+    # HELPER METHODS
     # ============================================
     
     @property
     def is_editable(self):
-        """Makale düzenlenebilir mi?"""
+        """Check if the manuscript can be edited."""
         return self.status in [self.Status.DRAFT, self.Status.REVISION_REQUIRED]
     
     @property
     def can_be_withdrawn(self):
-        """Makale geri çekilebilir mi?"""
+        """Check if the manuscript can be withdrawn."""
         return self.status in [
             self.Status.DRAFT,
             self.Status.SUBMITTED,
@@ -462,33 +462,33 @@ class Submission(models.Model):
     
     @property
     def author_count(self):
-        """Yazar sayısı."""
+        """Return the number of authors."""
         return self.authors.count()
     
     @property
     def file_count(self):
-        """Dosya sayısı."""
+        """Return the number of files."""
         return self.files.count()
     
     def get_corresponding_author(self):
-        """Sorumlu yazarı döndür."""
+        """Return the corresponding author."""
         return self.authors.filter(is_corresponding=True).first()
     
     def get_status_history(self):
-        """Durum geçmişini döndür."""
+        """Return the status history."""
         return self.status_history.all().order_by('-created_at')
 
 
 class Author(models.Model):
     """
-    Yazar Modeli.
+    Author Model.
     
-    Bir gönderime ait yazarları yönetir.
-    Yazarlar sisteme kayıtlı kullanıcılar olabilir veya harici kişiler olabilir.
+    Manages authors for a submission.
+    Authors can be registered users or external contributors.
     
-    İlişkiler:
-    - Submission: Ait olduğu gönderim
-    - User (opsiyonel): Sistemde kayıtlı kullanıcı
+    Relations:
+    - Submission: Parent submission
+    - User (optional): Registered user in the system
     """
     
     # ============================================
@@ -501,14 +501,14 @@ class Author(models.Model):
     )
     
     # ============================================
-    # İLİŞKİLER
+    # RELATIONS
     # ============================================
     submission = models.ForeignKey(
         Submission,
         on_delete=models.CASCADE,
         related_name='authors',
-        verbose_name=_('Gönderim'),
-        help_text=_('Bu yazarın ait olduğu gönderim')
+        verbose_name=_('Submission'),
+        help_text=_('Submission this author belongs to')
     )
     
     user = models.ForeignKey(
@@ -517,104 +517,104 @@ class Author(models.Model):
         null=True,
         blank=True,
         related_name='authorships',
-        verbose_name=_('Kullanıcı'),
-        help_text=_('Sistemde kayıtlı kullanıcı (varsa)')
+        verbose_name=_('User'),
+        help_text=_('Registered user in the system (if any)')
     )
     
     # ============================================
-    # YAZAR BİLGİLERİ
+    # AUTHOR INFORMATION
     # ============================================
     orcid_id = models.CharField(
         _('ORCID ID'),
         max_length=19,
         blank=True,
-        help_text=_('Yazarın ORCID ID\'si')
+        help_text=_('Author\'s ORCID ID')
     )
     
     given_name = models.CharField(
-        _('Ad'),
+        _('Given Name'),
         max_length=100,
-        help_text=_('Yazarın adı')
+        help_text=_('Author\'s first name')
     )
     
     family_name = models.CharField(
-        _('Soyad'),
+        _('Family Name'),
         max_length=100,
-        help_text=_('Yazarın soyadı')
+        help_text=_('Author\'s last name')
     )
     
     email = models.EmailField(
         _('Email'),
-        help_text=_('Yazarın email adresi')
+        help_text=_('Author\'s email address')
     )
     
     # ============================================
-    # KURUM BİLGİLERİ
+    # AFFILIATION INFORMATION
     # ============================================
     institution = models.CharField(
-        _('Kurum'),
+        _('Institution'),
         max_length=255,
-        help_text=_('Yazarın bağlı olduğu kurum')
+        help_text=_('Author\'s affiliated institution')
     )
     
     department = models.CharField(
-        _('Departman'),
+        _('Department'),
         max_length=255,
         blank=True,
-        help_text=_('Departman veya bölüm')
+        help_text=_('Department or division')
     )
     
     country = models.CharField(
-        _('Ülke'),
+        _('Country'),
         max_length=100,
         blank=True,
-        help_text=_('Kurumun bulunduğu ülke')
+        help_text=_('Country of the institution')
     )
     
     city = models.CharField(
-        _('Şehir'),
+        _('City'),
         max_length=100,
         blank=True,
-        help_text=_('Kurumun bulunduğu şehir')
+        help_text=_('City of the institution')
     )
     
     # ============================================
-    # ROL VE SIRA
+    # ROLE AND ORDER
     # ============================================
     order = models.PositiveSmallIntegerField(
-        _('Sıra'),
+        _('Order'),
         default=1,
-        help_text=_('Yazar listesindeki sıra (1 = birinci yazar)')
+        help_text=_('Order in the author list (1 = first author)')
     )
     
     is_corresponding = models.BooleanField(
-        _('Sorumlu Yazar'),
+        _('Corresponding Author'),
         default=False,
-        help_text=_('Bu yazar sorumlu (corresponding) yazar mı?')
+        help_text=_('Is this the corresponding author?')
     )
     
     contribution = models.TextField(
-        _('Katkı'),
+        _('Contribution'),
         blank=True,
-        help_text=_('Yazarın makaleye katkısı (CRediT taxonomy)')
+        help_text=_('Author\'s contribution to the manuscript (CRediT taxonomy)')
     )
     
     # ============================================
-    # ZAMAN DAMGALARI
+    # TIMESTAMPS
     # ============================================
     created_at = models.DateTimeField(
-        _('Oluşturulma Tarihi'),
+        _('Created At'),
         auto_now_add=True
     )
     
     updated_at = models.DateTimeField(
-        _('Güncellenme Tarihi'),
+        _('Updated At'),
         auto_now=True
     )
     
     class Meta:
-        verbose_name = _('Yazar')
-        verbose_name_plural = _('Yazarlar')
+        verbose_name = _('Author')
+        verbose_name_plural = _('Authors')
         ordering = ['order']
         unique_together = [['submission', 'order']]
         indexes = [
@@ -624,17 +624,17 @@ class Author(models.Model):
         ]
     
     def __str__(self):
-        role = " (Sorumlu Yazar)" if self.is_corresponding else ""
+        role = " (Corresponding)" if self.is_corresponding else ""
         return f"{self.order}. {self.given_name} {self.family_name}{role}"
     
     @property
     def full_name(self):
-        """Tam adı döndür."""
+        """Return the full name."""
         return f"{self.given_name} {self.family_name}"
     
     @property
     def affiliation(self):
-        """Kurum bilgisini formatla."""
+        """Format the affiliation string."""
         parts = [self.department, self.institution]
         if self.city:
             parts.append(self.city)
@@ -643,14 +643,14 @@ class Author(models.Model):
         return ", ".join(filter(None, parts))
     
     def save(self, *args, **kwargs):
-        """Kaydetmeden önce validasyonlar."""
-        # Eğer bağlı kullanıcı varsa, bilgileri senkronize et
+        """Perform validations before saving."""
+        # Sync ORCID ID from linked user
         if self.user and not self.orcid_id:
             self.orcid_id = self.user.orcid_id
         
         super().save(*args, **kwargs)
         
-        # Sorumlu yazar değiştiğinde diğerlerini güncelle
+        # Ensure only one corresponding author
         if self.is_corresponding:
             Author.objects.filter(
                 submission=self.submission,
@@ -660,8 +660,8 @@ class Author(models.Model):
 
 class SubmissionStatusHistory(models.Model):
     """
-    Gönderim Durum Geçmişi.
-    Her durum değişikliği kaydedilir.
+    Submission Status History.
+    Records every status change for audit purposes.
     """
     
     id = models.UUIDField(
@@ -674,17 +674,17 @@ class SubmissionStatusHistory(models.Model):
         Submission,
         on_delete=models.CASCADE,
         related_name='status_history',
-        verbose_name=_('Gönderim')
+        verbose_name=_('Submission')
     )
     
     from_status = models.CharField(
-        _('Önceki Durum'),
+        _('From Status'),
         max_length=30,
         choices=Submission.Status.choices
     )
     
     to_status = models.CharField(
-        _('Yeni Durum'),
+        _('To Status'),
         max_length=30,
         choices=Submission.Status.choices
     )
@@ -693,22 +693,22 @@ class SubmissionStatusHistory(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name=_('Değiştiren')
+        verbose_name=_('Changed By')
     )
     
     notes = models.TextField(
-        _('Notlar'),
+        _('Notes'),
         blank=True
     )
     
     created_at = models.DateTimeField(
-        _('Tarih'),
+        _('Created At'),
         auto_now_add=True
     )
     
     class Meta:
-        verbose_name = _('Durum Geçmişi')
-        verbose_name_plural = _('Durum Geçmişleri')
+        verbose_name = _('Status History')
+        verbose_name_plural = _('Status Histories')
         ordering = ['-created_at']
     
     def __str__(self):

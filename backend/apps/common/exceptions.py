@@ -1,7 +1,9 @@
 """
-TruEditor - Özel Exception Handler
-==================================
-Tüm API hatalarını standart formatta döner.
+TruEditor - Custom Exception Handler
+====================================
+Returns all API errors in a standardized format.
+
+Developer: Abdullah Dogan
 """
 
 from rest_framework.views import exception_handler
@@ -11,32 +13,32 @@ from rest_framework import status
 
 def custom_exception_handler(exc, context):
     """
-    Özel exception handler.
+    Custom exception handler.
     
-    Tüm hataları aşağıdaki formatta döner:
+    Returns all errors in the following format:
     {
         "success": false,
         "error": {
             "code": "ERROR_CODE",
-            "message": "Hata mesajı",
-            "details": [...] // opsiyonel
+            "message": "Error message",
+            "details": [...] // optional
         }
     }
     """
-    # Önce DRF'nin varsayılan handler'ını çağır
+    # First, call DRF's default handler
     response = exception_handler(exc, context)
     
     if response is not None:
-        # Hata kodunu belirle
+        # Determine error code
         error_code = get_error_code(exc, response.status_code)
         
-        # Hata mesajını al
+        # Get error message
         error_message = get_error_message(response.data)
         
-        # Detayları al (varsa)
+        # Get details (if any)
         error_details = get_error_details(response.data)
         
-        # Standart hata formatı
+        # Standard error format
         custom_response = {
             'success': False,
             'error': {
@@ -45,7 +47,7 @@ def custom_exception_handler(exc, context):
             }
         }
         
-        # Detayları ekle (varsa)
+        # Add details if available
         if error_details:
             custom_response['error']['details'] = error_details
         
@@ -56,7 +58,7 @@ def custom_exception_handler(exc, context):
 
 def get_error_code(exc, status_code):
     """
-    HTTP status koduna göre hata kodu döner.
+    Return error code based on HTTP status code.
     """
     error_codes = {
         400: 'BAD_REQUEST',
@@ -75,24 +77,24 @@ def get_error_code(exc, status_code):
 
 def get_error_message(data):
     """
-    Hata verisinden mesaj çıkarır.
+    Extract message from error data.
     """
     if isinstance(data, dict):
-        # 'detail' anahtarı varsa kullan
+        # Use 'detail' key if available
         if 'detail' in data:
             return str(data['detail'])
         
-        # 'message' anahtarı varsa kullan
+        # Use 'message' key if available
         if 'message' in data:
             return str(data['message'])
         
-        # 'non_field_errors' varsa kullan
+        # Use 'non_field_errors' if available
         if 'non_field_errors' in data:
             errors = data['non_field_errors']
             if isinstance(errors, list) and errors:
                 return str(errors[0])
         
-        # İlk hatayı döndür
+        # Return first error
         for key, value in data.items():
             if isinstance(value, list) and value:
                 return f"{key}: {value[0]}"
@@ -105,17 +107,17 @@ def get_error_message(data):
     elif isinstance(data, str):
         return data
     
-    return 'Bir hata oluştu'
+    return 'An error occurred'
 
 
 def get_error_details(data):
     """
-    Validasyon hatalarının detaylarını çıkarır.
+    Extract validation error details.
     """
     if not isinstance(data, dict):
         return None
     
-    # 'detail' veya 'message' varsa detay yok
+    # No details if 'detail' or 'message' exists
     if 'detail' in data or 'message' in data:
         return None
     
@@ -141,14 +143,14 @@ def get_error_details(data):
 
 
 # ============================================
-# ÖZEL EXCEPTION SINIFLARI
+# CUSTOM EXCEPTION CLASSES
 # ============================================
 
 class TruEditorException(Exception):
     """
-    TruEditor temel exception sınıfı.
+    TruEditor base exception class.
     """
-    default_message = 'Bir hata oluştu'
+    default_message = 'An error occurred'
     default_code = 'TRUEDITOR_ERROR'
     
     def __init__(self, message=None, code=None):
@@ -159,31 +161,55 @@ class TruEditorException(Exception):
 
 class ORCIDAuthenticationError(TruEditorException):
     """
-    ORCID kimlik doğrulama hatası.
+    ORCID authentication error.
     """
-    default_message = 'ORCID kimlik doğrulama başarısız'
+    default_message = 'ORCID authentication failed'
     default_code = 'ORCID_AUTH_ERROR'
 
 
 class FileUploadError(TruEditorException):
     """
-    Dosya yükleme hatası.
+    File upload error.
     """
-    default_message = 'Dosya yüklenirken bir hata oluştu'
+    default_message = 'An error occurred while uploading the file'
     default_code = 'FILE_UPLOAD_ERROR'
 
 
 class PDFGenerationError(TruEditorException):
     """
-    PDF oluşturma hatası.
+    PDF generation error.
     """
-    default_message = 'PDF oluşturulurken bir hata oluştu'
+    default_message = 'An error occurred while generating the PDF'
     default_code = 'PDF_GENERATION_ERROR'
 
 
 class InvalidStateTransitionError(TruEditorException):
     """
-    Geçersiz durum geçişi hatası.
+    Invalid state transition error.
     """
-    default_message = 'Bu işlem mevcut durumda yapılamaz'
+    default_message = 'This action cannot be performed in the current state'
     default_code = 'INVALID_STATE_TRANSITION'
+
+
+class SubmissionValidationError(TruEditorException):
+    """
+    Submission validation error.
+    """
+    default_message = 'Submission validation failed'
+    default_code = 'SUBMISSION_VALIDATION_ERROR'
+
+
+class AuthorLimitExceededError(TruEditorException):
+    """
+    Author limit exceeded error.
+    """
+    default_message = 'Maximum number of authors exceeded'
+    default_code = 'AUTHOR_LIMIT_EXCEEDED'
+
+
+class FileSizeLimitExceededError(TruEditorException):
+    """
+    File size limit exceeded error.
+    """
+    default_message = 'File size exceeds the maximum allowed limit'
+    default_code = 'FILE_SIZE_LIMIT_EXCEEDED'

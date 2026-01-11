@@ -1,10 +1,10 @@
 """
 TruEditor - File Models
 =======================
-Dosya yönetimi için veritabanı modelleri.
-Makale dosyaları (ana metin, kapak mektubu, ek dosyalar, vb.)
+Database models for file management.
+Manuscript files (main text, cover letter, supplementary files, etc.)
 
-Geliştirici: Abdullah Doğan
+Developer: Abdullah Dogan
 """
 
 import os
@@ -18,7 +18,7 @@ from django.core.validators import FileExtensionValidator
 
 def manuscript_file_path(instance, filename):
     """
-    Dosya yükleme yolunu belirler.
+    Determine the upload path for files.
     Format: submissions/{submission_id}/{file_type}/{uuid}_{filename}
     """
     ext = os.path.splitext(filename)[1]
@@ -31,33 +31,33 @@ def manuscript_file_path(instance, filename):
 
 class ManuscriptFile(models.Model):
     """
-    Makale Dosya Modeli.
+    Manuscript File Model.
     
-    Her gönderime ait dosyaları yönetir:
-    - Ana metin (main_text)
-    - Kapak mektubu (cover_letter)
-    - Tablolar (tables)
-    - Şekiller (figures)
-    - Ek dosyalar (supplementary)
-    - Revizyon dosyaları (revision)
+    Manages files for each submission:
+    - Main text (main_text)
+    - Cover letter (cover_letter)
+    - Tables (tables)
+    - Figures (figures)
+    - Supplementary files (supplementary)
+    - Revision files (revision)
     """
     
     # ============================================
-    # DOSYA TÜRLERİ
+    # FILE TYPES
     # ============================================
     class FileType(models.TextChoices):
-        MAIN_TEXT = 'main_text', _('Ana Metin')
-        COVER_LETTER = 'cover_letter', _('Kapak Mektubu')
-        TITLE_PAGE = 'title_page', _('Başlık Sayfası')
-        ABSTRACT = 'abstract', _('Özet')
-        TABLES = 'tables', _('Tablolar')
-        FIGURES = 'figures', _('Şekiller')
-        SUPPLEMENTARY = 'supplementary', _('Ek Dosyalar')
-        ETHICS_APPROVAL = 'ethics_approval', _('Etik Onay Belgesi')
-        COPYRIGHT = 'copyright', _('Telif Hakkı Formu')
-        REVISION = 'revision', _('Revizyon Dosyası')
-        REVISION_NOTES = 'revision_notes', _('Revizyon Açıklamaları')
-        OTHER = 'other', _('Diğer')
+        MAIN_TEXT = 'main_text', _('Main Text')
+        COVER_LETTER = 'cover_letter', _('Cover Letter')
+        TITLE_PAGE = 'title_page', _('Title Page')
+        ABSTRACT = 'abstract', _('Abstract')
+        TABLES = 'tables', _('Tables')
+        FIGURES = 'figures', _('Figures')
+        SUPPLEMENTARY = 'supplementary', _('Supplementary Files')
+        ETHICS_APPROVAL = 'ethics_approval', _('Ethics Approval Document')
+        COPYRIGHT = 'copyright', _('Copyright Form')
+        REVISION = 'revision', _('Revision File')
+        REVISION_NOTES = 'revision_notes', _('Revision Notes')
+        OTHER = 'other', _('Other')
     
     # ============================================
     # PRIMARY KEY
@@ -69,16 +69,16 @@ class ManuscriptFile(models.Model):
     )
     
     # ============================================
-    # İLİŞKİLER
+    # RELATIONS
     # ============================================
     submission = models.ForeignKey(
         'submissions.Submission',
         on_delete=models.CASCADE,
         related_name='files',
-        verbose_name=_('Gönderim'),
+        verbose_name=_('Submission'),
         null=True,
         blank=True,
-        help_text=_('Bu dosyanın ait olduğu gönderim')
+        help_text=_('Submission this file belongs to')
     )
     
     uploaded_by = models.ForeignKey(
@@ -86,81 +86,81 @@ class ManuscriptFile(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name='uploaded_files',
-        verbose_name=_('Yükleyen'),
-        help_text=_('Dosyayı yükleyen kullanıcı')
+        verbose_name=_('Uploaded By'),
+        help_text=_('User who uploaded the file')
     )
     
     # ============================================
-    # DOSYA BİLGİLERİ
+    # FILE INFORMATION
     # ============================================
     file = models.FileField(
-        _('Dosya'),
+        _('File'),
         upload_to=manuscript_file_path,
         validators=[
             FileExtensionValidator(
                 allowed_extensions=['doc', 'docx', 'pdf', 'jpg', 'jpeg', 'png', 'tiff', 'tif', 'xlsx', 'xls']
             )
         ],
-        help_text=_('İzin verilen formatlar: DOC, DOCX, PDF, JPG, PNG, TIFF, XLS, XLSX')
+        help_text=_('Allowed formats: DOC, DOCX, PDF, JPG, PNG, TIFF, XLS, XLSX')
     )
     
     file_type = models.CharField(
-        _('Dosya Türü'),
+        _('File Type'),
         max_length=30,
         choices=FileType.choices,
         default=FileType.OTHER,
         db_index=True,
-        help_text=_('Dosyanın türü')
+        help_text=_('Type of the file')
     )
     
     original_filename = models.CharField(
-        _('Orijinal Dosya Adı'),
+        _('Original Filename'),
         max_length=255,
-        help_text=_('Yüklenen dosyanın orijinal adı')
+        help_text=_('Original name of the uploaded file')
     )
     
     file_size = models.PositiveIntegerField(
-        _('Dosya Boyutu'),
+        _('File Size'),
         default=0,
-        help_text=_('Dosya boyutu (byte)')
+        help_text=_('File size in bytes')
     )
     
     mime_type = models.CharField(
-        _('MIME Tipi'),
+        _('MIME Type'),
         max_length=100,
         blank=True,
-        help_text=_('Dosyanın MIME tipi')
+        help_text=_('MIME type of the file')
     )
     
     # ============================================
-    # META BİLGİLER
+    # METADATA
     # ============================================
     description = models.CharField(
-        _('Açıklama'),
+        _('Description'),
         max_length=500,
         blank=True,
-        help_text=_('Dosya hakkında kısa açıklama')
+        help_text=_('Brief description of the file')
     )
     
     caption = models.TextField(
-        _('Altyazı'),
+        _('Caption'),
         blank=True,
-        help_text=_('Şekil/tablo altyazısı')
+        help_text=_('Figure/table caption')
     )
     
     order = models.PositiveSmallIntegerField(
-        _('Sıra'),
+        _('Order'),
         default=0,
-        help_text=_('Dosyaların görüntülenme sırası')
+        help_text=_('Display order of the files')
     )
     
     # ============================================
-    # REVİZYON TAKİBİ
+    # REVISION TRACKING
     # ============================================
     revision_number = models.PositiveSmallIntegerField(
-        _('Revizyon Numarası'),
+        _('Revision Number'),
         default=0,
-        help_text=_('Bu dosya hangi revizyona ait')
+        help_text=_('Which revision this file belongs to')
     )
     
     replaces = models.ForeignKey(
@@ -169,63 +169,63 @@ class ManuscriptFile(models.Model):
         null=True,
         blank=True,
         related_name='replaced_by',
-        verbose_name=_('Değiştirdiği Dosya'),
-        help_text=_('Bu dosyanın yerine geçtiği önceki dosya')
+        verbose_name=_('Replaces'),
+        help_text=_('Previous file that this file replaces')
     )
     
     # ============================================
-    # DURUM
+    # STATUS
     # ============================================
     is_active = models.BooleanField(
-        _('Aktif'),
+        _('Active'),
         default=True,
-        help_text=_('Dosya aktif mi? (Silinen dosyalar için False)')
+        help_text=_('Is the file active? (False for deleted files)')
     )
     
     is_primary = models.BooleanField(
-        _('Birincil'),
+        _('Primary'),
         default=False,
-        help_text=_('Bu türdeki birincil dosya mı?')
+        help_text=_('Is this the primary file of its type?')
     )
     
     # ============================================
-    # GÜVENLİK
+    # SECURITY
     # ============================================
     checksum = models.CharField(
         _('Checksum'),
         max_length=64,
         blank=True,
-        help_text=_('SHA-256 dosya checksum\'u')
+        help_text=_('SHA-256 file checksum')
     )
     
     virus_scanned = models.BooleanField(
-        _('Virüs Tarandı'),
+        _('Virus Scanned'),
         default=False,
-        help_text=_('Dosya virüs taramasından geçti mi?')
+        help_text=_('Has the file been scanned for viruses?')
     )
     
     virus_scan_date = models.DateTimeField(
-        _('Virüs Tarama Tarihi'),
+        _('Virus Scan Date'),
         null=True,
         blank=True
     )
     
     # ============================================
-    # ZAMAN DAMGALARI
+    # TIMESTAMPS
     # ============================================
     created_at = models.DateTimeField(
-        _('Yükleme Tarihi'),
+        _('Uploaded At'),
         auto_now_add=True
     )
     
     updated_at = models.DateTimeField(
-        _('Güncellenme Tarihi'),
+        _('Updated At'),
         auto_now=True
     )
     
     class Meta:
-        verbose_name = _('Makale Dosyası')
-        verbose_name_plural = _('Makale Dosyaları')
+        verbose_name = _('Manuscript File')
+        verbose_name_plural = _('Manuscript Files')
         ordering = ['file_type', 'order', 'created_at']
         indexes = [
             models.Index(fields=['submission', 'file_type']),
@@ -237,13 +237,13 @@ class ManuscriptFile(models.Model):
         return f"{self.original_filename} ({self.get_file_type_display()})"
     
     def save(self, *args, **kwargs):
-        """Kaydetmeden önce dosya bilgilerini güncelle."""
+        """Update file information before saving."""
         if self.file:
-            # Orijinal dosya adı
+            # Original filename
             if not self.original_filename:
                 self.original_filename = os.path.basename(self.file.name)
             
-            # Dosya boyutu
+            # File size
             if hasattr(self.file, 'size'):
                 self.file_size = self.file.size
         
@@ -251,29 +251,29 @@ class ManuscriptFile(models.Model):
     
     def delete(self, *args, **kwargs):
         """
-        Soft delete - dosyayı deaktif et.
-        Gerçek silme için hard_delete kullan.
+        Soft delete - deactivate the file.
+        Use hard_delete for permanent deletion.
         """
         self.is_active = False
         self.save(update_fields=['is_active', 'updated_at'])
     
     def hard_delete(self, *args, **kwargs):
-        """Dosyayı kalıcı olarak sil."""
-        # S3'ten de sil
+        """Permanently delete the file."""
+        # Delete from S3 as well
         if self.file:
             self.file.delete(save=False)
         super().delete(*args, **kwargs)
     
     @property
     def file_extension(self):
-        """Dosya uzantısını döndür."""
+        """Return the file extension."""
         if self.original_filename:
             return os.path.splitext(self.original_filename)[1].lower()
         return ''
     
     @property
     def file_size_human(self):
-        """İnsan okunabilir dosya boyutu."""
+        """Return human-readable file size."""
         size = self.file_size
         for unit in ['B', 'KB', 'MB', 'GB']:
             if size < 1024:
@@ -283,27 +283,27 @@ class ManuscriptFile(models.Model):
     
     @property
     def is_image(self):
-        """Dosya bir görsel mi?"""
+        """Check if the file is an image."""
         image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.tif', '.bmp']
         return self.file_extension in image_extensions
     
     @property
     def is_document(self):
-        """Dosya bir döküman mı?"""
+        """Check if the file is a document."""
         doc_extensions = ['.doc', '.docx', '.pdf', '.odt', '.rtf']
         return self.file_extension in doc_extensions
     
     def get_download_url(self, expiration=900):
         """
-        Presigned download URL oluştur.
+        Generate a presigned download URL.
         
         Args:
-            expiration: URL geçerlilik süresi (saniye)
+            expiration: URL validity period in seconds
         
         Returns:
             str: Download URL
         """
-        # S3 kullanılıyorsa presigned URL
+        # Use presigned URL for S3
         if hasattr(self.file.storage, 'url'):
             try:
                 return self.file.storage.url(self.file.name, expire=expiration)
@@ -316,8 +316,8 @@ class ManuscriptFile(models.Model):
 
 class FileDownloadLog(models.Model):
     """
-    Dosya İndirme Logları.
-    Güvenlik ve denetim için.
+    File Download Logs.
+    For security and audit purposes.
     """
     
     id = models.UUIDField(
@@ -330,18 +330,18 @@ class FileDownloadLog(models.Model):
         ManuscriptFile,
         on_delete=models.CASCADE,
         related_name='download_logs',
-        verbose_name=_('Dosya')
+        verbose_name=_('File')
     )
     
     downloaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name=_('İndiren')
+        verbose_name=_('Downloaded By')
     )
     
     ip_address = models.GenericIPAddressField(
-        _('IP Adresi'),
+        _('IP Address'),
         null=True,
         blank=True
     )
@@ -352,13 +352,13 @@ class FileDownloadLog(models.Model):
     )
     
     created_at = models.DateTimeField(
-        _('İndirme Tarihi'),
+        _('Downloaded At'),
         auto_now_add=True
     )
     
     class Meta:
-        verbose_name = _('İndirme Logu')
-        verbose_name_plural = _('İndirme Logları')
+        verbose_name = _('Download Log')
+        verbose_name_plural = _('Download Logs')
         ordering = ['-created_at']
     
     def __str__(self):

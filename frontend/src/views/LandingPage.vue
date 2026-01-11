@@ -2,8 +2,10 @@
 /**
  * TruEditor - Landing Page
  * ========================
- * Modern, profesyonel ve animasyonlu landing page.
- * Akademik dergi yönetim sistemi için tasarlandı.
+ * Modern, professional, and animated landing page.
+ * Designed for an academic journal management system.
+ * 
+ * Developer: Abdullah Dogan
  */
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -48,58 +50,58 @@ const features = [
     icon: `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
     </svg>`,
-    title: 'ORCID Entegrasyonu',
-    description: 'Tek tıkla güvenli giriş. Şifre hatırlama derdi yok, veri girişi %80 azalır.',
+    title: 'ORCID Integration',
+    description: 'One-click secure login. No password hassles, 80% less data entry required.',
     color: 'from-emerald-500 to-teal-600'
   },
   {
     icon: `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
     </svg>`,
-    title: 'Akıllı Gönderim Sihirbazı',
-    description: 'Adım adım rehberlik ile kolay makale gönderimi. Hiçbir adımı kaçırmazsınız.',
+    title: 'Smart Submission Wizard',
+    description: 'Step-by-step guided manuscript submission. Never miss a required field.',
     color: 'from-blue-500 to-indigo-600'
   },
   {
     icon: `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
     </svg>`,
-    title: 'Sürükle-Bırak Dosya',
-    description: 'Manuel sıralama yok. Dosyalarınızı sürükleyip bırakarak kolayca düzenleyin.',
+    title: 'Drag & Drop Files',
+    description: 'No manual sorting. Organize your files with simple drag and drop.',
     color: 'from-violet-500 to-purple-600'
   },
   {
     icon: `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
     </svg>`,
-    title: 'Otomatik Kayıt',
-    description: 'Verileriniz anlık olarak kaydedilir. Sayfa kapansa bile veri kaybı olmaz.',
+    title: 'Auto-Save',
+    description: 'Your data is saved instantly. No data loss even if the page closes.',
     color: 'from-amber-500 to-orange-600'
   },
   {
     icon: `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
     </svg>`,
-    title: 'Asenkron PDF',
-    description: 'PDF oluşturulurken beklemek yok. Arka planda hazırlanır, bildirim alırsınız.',
+    title: 'Async PDF Generation',
+    description: 'No waiting for PDF creation. Generated in the background with notifications.',
     color: 'from-rose-500 to-pink-600'
   },
   {
     icon: `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
     </svg>`,
-    title: 'Gerçek Zamanlı Takip',
-    description: 'Gönderimlerinizin her aşamasını anlık takip edin. Her zaman bilgilendirilirsiniz.',
+    title: 'Real-Time Tracking',
+    description: 'Track every stage of your submissions instantly. Always stay informed.',
     color: 'from-cyan-500 to-blue-600'
   },
 ]
 
 // Stats data
 const stats = [
-  { value: '500+', label: 'Akademisyen', suffix: '' },
-  { value: '2000+', label: 'Makale', suffix: '' },
+  { value: '500+', label: 'Researchers', suffix: '' },
+  { value: '2000+', label: 'Manuscripts', suffix: '' },
   { value: '99.9', label: 'Uptime', suffix: '%' },
-  { value: '< 3', label: 'Saniye PDF', suffix: 'sn' },
+  { value: '< 3', label: 'sec PDF', suffix: 's' },
 ]
 </script>
 
@@ -149,10 +151,10 @@ const stats = [
             :class="isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'"
           >
             <a href="#features" class="text-white/70 hover:text-white transition-colors hidden md:block">
-              Özellikler
+              Features
             </a>
             <a href="#about" class="text-white/70 hover:text-white transition-colors hidden md:block">
-              Hakkında
+              About
             </a>
             <button
               @click="goToLogin"
@@ -161,7 +163,7 @@ const stats = [
               <svg class="w-5 h-5 text-[#a6ce39]" viewBox="0 0 256 256" fill="currentColor">
                 <path d="M128 0C57.307 0 0 57.307 0 128s57.307 128 128 128 128-57.307 128-128S198.693 0 128 0zm-14.837 191.167h-27.22V95.667h27.22v95.5zm-13.61-108.5c-8.721 0-15.79-7.308-15.79-16.326 0-9.017 7.069-16.326 15.79-16.326 8.721 0 15.79 7.309 15.79 16.326 0 9.018-7.069 16.326-15.79 16.326zm111.28 108.5h-27.219v-46.5c0-11.084-.199-25.334-15.438-25.334-15.459 0-17.834 12.084-17.834 24.542v47.292h-27.196V95.667h26.109v13.042h.366c3.635-6.892 12.518-14.167 25.76-14.167 27.554 0 32.652 18.125 32.652 41.708v54.917z"/>
               </svg>
-              <span>ORCID ile Giriş</span>
+              <span>Sign in with ORCID</span>
             </button>
           </div>
         </div>
@@ -182,7 +184,7 @@ const stats = [
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            Akademik Yayıncılıkta Yeni Nesil
+            Next Generation Academic Publishing
           </div>
 
           <!-- Headline -->
@@ -190,8 +192,8 @@ const stats = [
             class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 transition-all duration-700 ease-out delay-200"
             :class="isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
           >
-            Makale Gönderimi
-            <span class="block mt-2 text-gradient">Artık Çok Kolay</span>
+            Manuscript Submission
+            <span class="block mt-2 text-gradient">Made Simple</span>
           </h1>
 
           <!-- Subheadline -->
@@ -199,9 +201,9 @@ const stats = [
             class="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed transition-all duration-700 ease-out delay-300"
             :class="isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
           >
-            ORCID entegrasyonlu, modern ve kullanıcı dostu akademik dergi yönetim sistemi. 
-            <span class="text-white/90 font-medium">Karmaşık formlar</span> ve 
-            <span class="text-white/90 font-medium">uzun bekleme süreleri</span> artık geçmişte kaldı.
+            ORCID-integrated, modern, and user-friendly academic journal management system. 
+            <span class="text-white/90 font-medium">Complex forms</span> and 
+            <span class="text-white/90 font-medium">long waiting times</span> are a thing of the past.
           </p>
 
           <!-- CTA Buttons -->
@@ -216,7 +218,7 @@ const stats = [
               <svg class="w-6 h-6" viewBox="0 0 256 256" fill="currentColor">
                 <path d="M128 0C57.307 0 0 57.307 0 128s57.307 128 128 128 128-57.307 128-128S198.693 0 128 0zm-14.837 191.167h-27.22V95.667h27.22v95.5zm-13.61-108.5c-8.721 0-15.79-7.308-15.79-16.326 0-9.017 7.069-16.326 15.79-16.326 8.721 0 15.79 7.309 15.79 16.326 0 9.018-7.069 16.326-15.79 16.326zm111.28 108.5h-27.219v-46.5c0-11.084-.199-25.334-15.438-25.334-15.459 0-17.834 12.084-17.834 24.542v47.292h-27.196V95.667h26.109v13.042h.366c3.635-6.892 12.518-14.167 25.76-14.167 27.554 0 32.652 18.125 32.652 41.708v54.917z"/>
               </svg>
-              ORCID ile Hemen Başla
+              Get Started with ORCID
               <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
               </svg>
@@ -229,7 +231,7 @@ const stats = [
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              Özellikleri Keşfet
+              Explore Features
             </a>
           </div>
 
@@ -256,14 +258,14 @@ const stats = [
               class="text-3xl md:text-4xl font-bold text-white mb-4 transition-all duration-700 ease-out"
               :class="showFeatures ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
             >
-              Neden TruEditor?
+              Why TruEditor?
             </h2>
             <p
               class="text-white/60 max-w-2xl mx-auto transition-all duration-700 ease-out delay-100"
               :class="showFeatures ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
             >
-              Geleneksel dergi yönetim sistemlerinin tüm sorunlarını çözdük. 
-              Modern teknoloji ile akademik yayıncılığı yeniden tanımlıyoruz.
+              We've solved all the problems of traditional journal management systems. 
+              Redefining academic publishing with modern technology.
             </p>
           </div>
 
@@ -297,11 +299,11 @@ const stats = [
       <section id="about" class="relative py-24">
         <div class="max-w-4xl mx-auto px-6 text-center">
           <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-            Akademik Yayıncılığı <span class="text-gradient">Dönüştürmeye</span> Hazır mısınız?
+            Ready to <span class="text-gradient">Transform</span> Academic Publishing?
           </h2>
           <p class="text-white/60 mb-10 max-w-2xl mx-auto">
-            TruEditor ile makale gönderimi artık dakikalar içinde tamamlanıyor. 
-            Hemen ORCID hesabınızla giriş yapın ve farkı deneyimleyin.
+            With TruEditor, manuscript submission is now completed in minutes. 
+            Sign in with your ORCID account and experience the difference.
           </p>
           <button
             @click="goToLogin"
@@ -310,7 +312,7 @@ const stats = [
             <svg class="w-6 h-6 text-[#a6ce39]" viewBox="0 0 256 256" fill="currentColor">
               <path d="M128 0C57.307 0 0 57.307 0 128s57.307 128 128 128 128-57.307 128-128S198.693 0 128 0zm-14.837 191.167h-27.22V95.667h27.22v95.5zm-13.61-108.5c-8.721 0-15.79-7.308-15.79-16.326 0-9.017 7.069-16.326 15.79-16.326 8.721 0 15.79 7.309 15.79 16.326 0 9.018-7.069 16.326-15.79 16.326zm111.28 108.5h-27.219v-46.5c0-11.084-.199-25.334-15.438-25.334-15.459 0-17.834 12.084-17.834 24.542v47.292h-27.196V95.667h26.109v13.042h.366c3.635-6.892 12.518-14.167 25.76-14.167 27.554 0 32.652 18.125 32.652 41.708v54.917z"/>
             </svg>
-            Ücretsiz Başlayın
+            Start for Free
           </button>
         </div>
       </section>
@@ -327,11 +329,11 @@ const stats = [
             <span class="font-medium">TruEditor</span>
           </div>
           <p class="text-white/40 text-sm">
-            © 2026 TruEditor. Tüm hakları saklıdır. Abdullah Doğan tarafından geliştirildi.
+            © 2026 TruEditor. All rights reserved. Developed by Abdullah Dogan.
           </p>
           <div class="flex items-center gap-4 text-white/40 text-sm">
-            <a href="#" class="hover:text-white transition-colors">Gizlilik</a>
-            <a href="#" class="hover:text-white transition-colors">Kullanım Şartları</a>
+            <a href="#" class="hover:text-white transition-colors">Privacy</a>
+            <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
           </div>
         </div>
       </div>
