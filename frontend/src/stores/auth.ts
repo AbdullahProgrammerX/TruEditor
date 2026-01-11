@@ -1,7 +1,7 @@
 /**
  * TruEditor - Auth Store (Pinia)
  * ===============================
- * ORCID tabanlı kimlik doğrulama state yönetimi.
+ * ORCID-based authentication state management.
  */
 
 import { defineStore } from 'pinia'
@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
   // Actions
   
   /**
-   * ORCID login URL'ini al
+   * Get ORCID login URL
    */
   async function getORCIDLoginUrl(): Promise<string> {
     isLoading.value = true
@@ -35,7 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.get('/auth/orcid/login/')
       return response.data.data.authorization_url
     } catch (err: any) {
-      error.value = err.response?.data?.error?.message || 'ORCID bağlantısı kurulamadı'
+      error.value = err.response?.data?.error?.message || 'Could not connect to ORCID'
       throw err
     } finally {
       isLoading.value = false
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * ORCID callback işlemi - OAuth code ile token al
+   * Handle ORCID callback - exchange OAuth code for token
    */
   async function handleORCIDCallback(code: string): Promise<void> {
     isLoading.value = true
@@ -53,15 +53,15 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.post('/auth/orcid/callback/', { code })
       const data = response.data.data
 
-      // Token ve kullanıcı bilgilerini kaydet
+      // Save token and user info
       accessToken.value = data.access_token
       user.value = data.user
 
-      // API instance'a token'ı ekle
+      // Add token to API instance
       api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`
 
     } catch (err: any) {
-      error.value = err.response?.data?.error?.message || 'Giriş başarısız'
+      error.value = err.response?.data?.error?.message || 'Login failed'
       throw err
     } finally {
       isLoading.value = false
@@ -69,7 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * Çıkış yap
+   * Logout
    */
   async function logout(): Promise<void> {
     isLoading.value = true
@@ -77,9 +77,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await api.post('/auth/logout/')
     } catch {
-      // Logout hatası önemli değil, yine de temizle
+      // Logout error doesn't matter, still clear state
     } finally {
-      // State'i temizle
+      // Clear state
       user.value = null
       accessToken.value = null
       delete api.defaults.headers.common['Authorization']
@@ -88,7 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * Profil bilgilerini getir
+   * Fetch profile information
    */
   async function fetchProfile(): Promise<void> {
     if (!accessToken.value) return
@@ -100,9 +100,9 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.get('/auth/profile/')
       user.value = response.data.data
     } catch (err: any) {
-      error.value = err.response?.data?.error?.message || 'Profil yüklenemedi'
+      error.value = err.response?.data?.error?.message || 'Could not load profile'
       
-      // Token geçersizse çıkış yap
+      // If token is invalid, logout
       if (err.response?.status === 401) {
         await logout()
       }
@@ -112,7 +112,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * Token'ı yenile
+   * Refresh token
    */
   async function refreshToken(): Promise<boolean> {
     try {
@@ -127,7 +127,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * ORCID profilini senkronize et
+   * Sync ORCID profile
    */
   async function syncORCIDProfile(): Promise<void> {
     isLoading.value = true
@@ -137,7 +137,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.post('/auth/orcid/sync/')
       user.value = response.data.data
     } catch (err: any) {
-      error.value = err.response?.data?.error?.message || 'Senkronizasyon başarısız'
+      error.value = err.response?.data?.error?.message || 'Sync failed'
       throw err
     } finally {
       isLoading.value = false
@@ -145,7 +145,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * Uygulama başlatıldığında token'ı kontrol et
+   * Initialize auth on app start
    */
   function initAuth(): void {
     if (accessToken.value) {

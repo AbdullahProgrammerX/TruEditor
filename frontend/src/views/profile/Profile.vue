@@ -2,6 +2,7 @@
 /**
  * TruEditor - User Profile Page
  * ==============================
+ * Displays and manages user profile information.
  */
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -19,7 +20,7 @@ const authStore = useAuthStore()
           <button @click="router.push('/dashboard')" class="btn-ghost">
             ← Dashboard
           </button>
-          <h1 class="text-lg font-semibold text-gray-800">Profil</h1>
+          <h1 class="text-lg font-semibold text-gray-800">Profile</h1>
           <div class="w-20"></div>
         </div>
       </div>
@@ -48,23 +49,23 @@ const authStore = useAuthStore()
         <div class="space-y-4">
           <div>
             <label class="label">Email</label>
-            <p class="text-gray-800">{{ authStore.user?.email || 'Belirtilmemiş' }}</p>
+            <p class="text-gray-800">{{ authStore.user?.email || 'Not specified' }}</p>
           </div>
           
           <div>
-            <label class="label">Kurum</label>
-            <p class="text-gray-800">{{ authStore.user?.institution || 'Belirtilmemiş' }}</p>
+            <label class="label">Institution</label>
+            <p class="text-gray-800">{{ authStore.user?.institution || 'Not specified' }}</p>
           </div>
           
           <div>
-            <label class="label">Departman</label>
-            <p class="text-gray-800">{{ authStore.user?.department || 'Belirtilmemiş' }}</p>
+            <label class="label">Department</label>
+            <p class="text-gray-800">{{ authStore.user?.department || 'Not specified' }}</p>
           </div>
         </div>
 
         <div class="mt-8 pt-8 border-t">
           <button class="btn-outline">
-            ORCID Profilini Senkronize Et
+            Sync ORCID Profile
           </button>
         </div>
       </div>

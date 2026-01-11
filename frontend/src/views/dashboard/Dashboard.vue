@@ -2,7 +2,7 @@
 /**
  * TruEditor - Author Dashboard
  * ============================
- * Yazarın gönderimlerini ve durumlarını gösterir.
+ * Displays author's submissions and their statuses.
  */
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -24,27 +24,27 @@ const stats = ref({
 const recentSubmissions = ref([
   {
     id: 1,
-    title: 'Yapay Zeka Destekli Akademik Metin Analizi',
+    title: 'AI-Assisted Academic Text Analysis',
     status: 'draft',
-    statusText: 'Taslak',
+    statusText: 'Draft',
     updatedAt: '2026-01-10',
-    type: 'Araştırma Makalesi',
+    type: 'Research Article',
   },
   {
     id: 2,
-    title: 'Makine Öğrenmesi ile Doğal Dil İşleme',
+    title: 'Natural Language Processing with Machine Learning',
     status: 'submitted',
-    statusText: 'Gönderildi',
+    statusText: 'Submitted',
     updatedAt: '2026-01-08',
-    type: 'Derleme',
+    type: 'Review',
   },
   {
     id: 3,
-    title: 'Derin Öğrenme Yaklaşımları: Kapsamlı Bir İnceleme',
+    title: 'Deep Learning Approaches: A Comprehensive Survey',
     status: 'under_review',
-    statusText: 'İncelemede',
+    statusText: 'Under Review',
     updatedAt: '2026-01-05',
-    type: 'Araştırma Makalesi',
+    type: 'Research Article',
   },
 ])
 
@@ -111,7 +111,7 @@ function getStatusColor(status: string) {
               @click="logout"
               class="btn-ghost text-sm"
             >
-              Çıkış
+              Logout
             </button>
           </div>
         </div>
@@ -126,10 +126,10 @@ function getStatusColor(status: string) {
         :class="isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'"
       >
         <h1 class="text-3xl font-bold text-gray-800 mb-2">
-          Hoş geldiniz, {{ authStore.fullName?.split(' ')[0] || 'Yazar' }}!
+          Welcome, {{ authStore.fullName?.split(' ')[0] || 'Author' }}!
         </h1>
         <p class="text-gray-600">
-          Gönderimlerinizi buradan takip edebilir ve yeni makale gönderebilirsiniz.
+          Track your submissions and submit new manuscripts here.
         </p>
       </div>
 
@@ -140,19 +140,19 @@ function getStatusColor(status: string) {
       >
         <div class="card text-center hover:border-gray-200 border border-transparent">
           <div class="text-3xl font-bold text-gray-800 mb-1">{{ stats.draft }}</div>
-          <div class="text-sm text-gray-500">Taslak</div>
+          <div class="text-sm text-gray-500">Drafts</div>
         </div>
         <div class="card text-center hover:border-blue-200 border border-transparent">
           <div class="text-3xl font-bold text-blue-600 mb-1">{{ stats.submitted }}</div>
-          <div class="text-sm text-gray-500">Gönderildi</div>
+          <div class="text-sm text-gray-500">Submitted</div>
         </div>
         <div class="card text-center hover:border-yellow-200 border border-transparent">
           <div class="text-3xl font-bold text-yellow-600 mb-1">{{ stats.underReview }}</div>
-          <div class="text-sm text-gray-500">İncelemede</div>
+          <div class="text-sm text-gray-500">Under Review</div>
         </div>
         <div class="card text-center hover:border-green-200 border border-transparent">
           <div class="text-3xl font-bold text-green-600 mb-1">{{ stats.accepted }}</div>
-          <div class="text-sm text-gray-500">Kabul Edildi</div>
+          <div class="text-sm text-gray-500">Accepted</div>
         </div>
       </div>
 
@@ -166,7 +166,7 @@ function getStatusColor(status: string) {
           class="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
         >
           <span class="mr-2">+</span>
-          Yeni Gönderim Başlat
+          Start New Submission
         </button>
       </div>
 
@@ -175,7 +175,7 @@ function getStatusColor(status: string) {
         class="transform transition-all duration-700 delay-300"
         :class="isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'"
       >
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Son Gönderimler</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Submissions</h2>
         
         <div class="bg-white rounded-xl shadow-card overflow-hidden">
           <div class="divide-y divide-gray-100">
@@ -218,10 +218,10 @@ function getStatusColor(status: string) {
           class="text-center py-12"
         >
           <div class="text-5xl mb-4">📝</div>
-          <h3 class="text-lg font-medium text-gray-800 mb-2">Henüz gönderiminiz yok</h3>
-          <p class="text-gray-600 mb-4">İlk makalenizi göndermek için başlayın</p>
+          <h3 class="text-lg font-medium text-gray-800 mb-2">No submissions yet</h3>
+          <p class="text-gray-600 mb-4">Start by submitting your first manuscript</p>
           <button @click="startNewSubmission" class="btn-primary">
-            Yeni Gönderim Başlat
+            Start New Submission
           </button>
         </div>
       </div>

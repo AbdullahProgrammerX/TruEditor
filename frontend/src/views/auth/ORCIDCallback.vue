@@ -2,6 +2,7 @@
 /**
  * TruEditor - ORCID OAuth Callback Handler
  * =========================================
+ * Handles the OAuth callback from ORCID authentication.
  */
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -19,13 +20,13 @@ onMounted(async () => {
   const errorParam = route.query.error as string
 
   if (errorParam) {
-    error.value = 'ORCID yetkilendirmesi iptal edildi'
+    error.value = 'ORCID authorization was cancelled'
     isProcessing.value = false
     return
   }
 
   if (!code) {
-    error.value = 'Geçersiz yetkilendirme kodu'
+    error.value = 'Invalid authorization code'
     isProcessing.value = false
     return
   }
@@ -37,7 +38,7 @@ onMounted(async () => {
     const redirect = route.query.redirect as string || '/dashboard'
     router.replace(redirect)
   } catch (err: any) {
-    error.value = err.response?.data?.error?.message || 'Giriş işlemi başarısız'
+    error.value = err.response?.data?.error?.message || 'Login failed'
     isProcessing.value = false
   }
 })
@@ -55,8 +56,8 @@ function retryLogin() {
         <div class="mb-8">
           <div class="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
-        <h2 class="text-xl font-semibold text-gray-800 mb-2">Giriş yapılıyor...</h2>
-        <p class="text-gray-600">ORCID hesabınız doğrulanıyor</p>
+        <h2 class="text-xl font-semibold text-gray-800 mb-2">Signing in...</h2>
+        <p class="text-gray-600">Verifying your ORCID account</p>
       </template>
 
       <!-- Error state -->
@@ -66,10 +67,10 @@ function retryLogin() {
             <span class="text-3xl">❌</span>
           </div>
         </div>
-        <h2 class="text-xl font-semibold text-gray-800 mb-2">Giriş Başarısız</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-2">Login Failed</h2>
         <p class="text-gray-600 mb-6">{{ error }}</p>
         <button @click="retryLogin" class="btn-primary">
-          Tekrar Dene
+          Try Again
         </button>
       </template>
     </div>

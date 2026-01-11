@@ -2,7 +2,7 @@
 /**
  * TruEditor - Submission Detail Page
  * ====================================
- * (Placeholder - Faz 5'te detaylandırılacak)
+ * (Placeholder - Will be detailed in Phase 5)
  */
 import { useRoute, useRouter } from 'vue-router'
 
@@ -21,7 +21,7 @@ const submissionId = route.params.id
           <button @click="router.push('/dashboard')" class="btn-ghost">
             ← Dashboard
           </button>
-          <h1 class="text-lg font-semibold text-gray-800">Gönderim Detayı</h1>
+          <h1 class="text-lg font-semibold text-gray-800">Submission Details</h1>
           <div class="w-20"></div>
         </div>
       </div>
@@ -30,8 +30,8 @@ const submissionId = route.params.id
     <main class="max-w-4xl mx-auto px-6 py-8">
       <div class="card text-center py-12">
         <div class="text-5xl mb-4">📄</div>
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Gönderim #{{ submissionId }}</h2>
-        <p class="text-gray-600">Bu sayfa Faz 5'te geliştirilecek.</p>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Submission #{{ submissionId }}</h2>
+        <p class="text-gray-600">This page will be developed in Phase 5.</p>
       </div>
     </main>
   </div>

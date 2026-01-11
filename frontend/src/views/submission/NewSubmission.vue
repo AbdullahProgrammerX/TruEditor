@@ -2,10 +2,10 @@
 /**
  * TruEditor - New Submission Wizard
  * ==================================
- * 6 adımlı makale gönderim sihirbazı.
- * (Placeholder - Faz 5'te detaylandırılacak)
+ * 6-step manuscript submission wizard.
+ * (Placeholder - Will be detailed in Phase 5)
  */
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -13,13 +13,18 @@ const currentStep = ref(1)
 const totalSteps = 6
 
 const steps = [
-  { id: 1, title: 'Makale Tipi', icon: '📋' },
-  { id: 2, title: 'Dosya Yükleme', icon: '📁' },
-  { id: 3, title: 'Makale Bilgileri', icon: '📝' },
-  { id: 4, title: 'Yazarlar', icon: '👥' },
-  { id: 5, title: 'Hakem Önerileri', icon: '🔍' },
-  { id: 6, title: 'Onay', icon: '✓' },
+  { id: 1, title: 'Article Type', icon: '📋' },
+  { id: 2, title: 'File Upload', icon: '📁' },
+  { id: 3, title: 'Article Details', icon: '📝' },
+  { id: 4, title: 'Authors', icon: '👥' },
+  { id: 5, title: 'Reviewer Suggestions', icon: '🔍' },
+  { id: 6, title: 'Confirmation', icon: '✓' },
 ]
+
+// Safe computed property to get current step data
+const currentStepData = computed(() => {
+  return steps[currentStep.value - 1] ?? { id: 0, title: '', icon: '' }
+})
 
 function goBack() {
   if (currentStep.value > 1) {
@@ -37,7 +42,7 @@ function goNext() {
 
 function submit() {
   // Submit logic will be implemented in Phase 5
-  (window as any).toast('success', 'Gönderim başarılı! (Demo)')
+  ;(window as any).toast?.('success', 'Submission successful! (Demo)')
   router.push('/dashboard')
 }
 </script>
@@ -49,9 +54,9 @@ function submit() {
       <div class="max-w-4xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <button @click="goBack" class="btn-ghost">
-            ← Geri
+            ← Back
           </button>
-          <h1 class="text-lg font-semibold text-gray-800">Yeni Makale Gönderimi</h1>
+          <h1 class="text-lg font-semibold text-gray-800">New Manuscript Submission</h1>
           <div class="w-20"></div>
         </div>
       </div>
@@ -102,12 +107,12 @@ function submit() {
     <main class="max-w-4xl mx-auto px-6 py-8">
       <div class="card animate-fade-in">
         <h2 class="text-2xl font-bold text-gray-800 mb-2">
-          {{ steps[currentStep - 1].icon }} {{ steps[currentStep - 1].title }}
+          {{ currentStepData.icon }} {{ currentStepData.title }}
         </h2>
         
         <div class="py-12 text-center text-gray-500">
-          <p class="text-lg mb-4">Bu adım Faz 5'te geliştirilecek.</p>
-          <p class="text-sm">Adım {{ currentStep }} / {{ totalSteps }}</p>
+          <p class="text-lg mb-4">This step will be developed in Phase 5.</p>
+          <p class="text-sm">Step {{ currentStep }} / {{ totalSteps }}</p>
         </div>
       </div>
 
@@ -117,7 +122,7 @@ function submit() {
           @click="goBack"
           class="btn-outline"
         >
-          ← Önceki
+          ← Previous
         </button>
         
         <button 
@@ -125,7 +130,7 @@ function submit() {
           @click="goNext"
           class="btn-primary"
         >
-          Sonraki →
+          Next →
         </button>
         
         <button 
@@ -133,7 +138,7 @@ function submit() {
           @click="submit"
           class="btn-primary bg-accent-500 hover:bg-accent-600"
         >
-          ✓ Gönder
+          ✓ Submit
         </button>
       </div>
     </main>
