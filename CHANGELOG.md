@@ -1,101 +1,139 @@
 # Changelog
 
-Bu dosya, TruEditor projesindeki tüm önemli değişiklikleri içerir.
+All notable changes to the TruEditor project will be documented in this file.
 
-Format [Keep a Changelog](https://keepachangelog.com/tr/1.0.0/) standardına,
-versiyon numaraları [Semantic Versioning](https://semver.org/lang/tr/) standardına uygundur.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Eklenen (Added)
-- Proje temel yapılandırma dosyaları oluşturuldu
-  - `.cursorrules` - Cursor AI geliştirme kuralları
-  - `README.md` - Proje dokümantasyonu
-  - `CHANGELOG.md` - Değişiklik günlüğü
-  - `.gitignore` - Git ignore kuralları
-  - `.env.example` - Ortam değişkenleri şablonu
+### Added
+- Phase 4: Deployment to Production
+  - Frontend deployed to Vercel (https://trueditor.vercel.app)
+  - Backend deployed to Render.com (https://trueditor-api.onrender.com)
+  - Neon PostgreSQL serverless database connected
+  - Upstash Redis serverless cache connected
+  - Health check endpoints verified
+  
+- Phase 3: Database Models
+  - CustomUser model with ORCID integration
+  - Submission model with FSM state management
+  - ManuscriptFile model with file metadata
+  - Author model with CRediT taxonomy support
+  - SubmissionStatusHistory for audit trail
 
-### Değiştirilen (Changed)
-- (Henüz yok)
+- Phase 2: Production-Ready Architecture
+  - Environment separation (development, staging, production)
+  - Docker multi-stage build configuration
+  - Docker Compose for local development
+  - CI/CD pipeline with GitHub Actions
+  - Health check endpoints (liveness/readiness)
+  - Stateless backend design
+  - Platform-agnostic configuration
 
-### Kaldırılan (Removed)
-- (Henüz yok)
+- Phase 1.5: Vue.js Frontend Setup
+  - Vue 3 with Composition API and TypeScript
+  - Pinia state management with persistence
+  - TailwindCSS v4 for styling
+  - Vue Router with authentication guards
+  - Axios HTTP client with interceptors
+  - Modern landing page with animations
+  - ORCID login button component
 
-### Düzeltilen (Fixed)
-- (Henüz yok)
+- Phase 1: Django Backend Setup
+  - Django 5.x with Django REST Framework
+  - Modular settings (base, development, staging, production)
+  - Custom exception handler for consistent API responses
+  - Celery integration for async tasks
+  - JWT authentication configuration
 
-### Güvenlik (Security)
-- (Henüz yok)
+- Phase 0: Project Foundation
+  - `.cursorrules` - Cursor AI development guidelines
+  - `README.md` - Project documentation
+  - `CHANGELOG.md` - Change log
+  - `.gitignore` - Git ignore rules
+  - `env.example` - Environment variables template
+
+### Changed
+- All UI text converted from Turkish to English
+- All code comments and docstrings converted to English
+- Commit messages now in English (reports remain in Turkish)
+
+### Fixed
+- TypeScript path alias configuration in tsconfig.app.json
+- Unused router variable in LoginPage.vue
+- Potential undefined access in NewSubmission.vue
+- Docker package name for newer Debian (libgdk-pixbuf-2.0-0)
 
 ---
 
-## Versiyon Geçmişi
+## Version History
 
-### [1.0.0] - Planlanan
-#### Eklenen
-- Author Module (Yazar Modülü)
-  - ORCID ile zorunlu kimlik doğrulama
-  - Makale gönderim sihirbazı (6 adım)
-  - Sürükle-bırak dosya yükleme
-  - Otomatik kayıt (autosave)
-  - PDF oluşturma (Celery + WeasyPrint)
-  - Gönderim takibi
+### [1.0.0] - Planned
+#### To Be Added
+- Author Module
+  - Mandatory ORCID authentication
+  - 6-step manuscript submission wizard
+  - Drag-and-drop file upload
+  - Auto-save functionality
+  - PDF generation (Celery + WeasyPrint)
+  - Submission tracking
   
-- Backend Altyapısı
+- Backend Infrastructure
   - Django 5.x + DRF
-  - PostgreSQL veritabanı
-  - Redis cache ve message broker
-  - Celery asenkron görevler
-  - AWS S3 dosya depolama
+  - PostgreSQL database
+  - Redis cache and message broker
+  - Celery async tasks
+  - AWS S3 file storage
   
-- Frontend Arayüzü
+- Frontend Interface
   - Vue.js 3 + TypeScript
   - Pinia state management
   - TailwindCSS styling
-  - Modern animasyonlar
-  - Responsive tasarım
+  - Modern animations
+  - Responsive design
   
-- Marka Kimliği
-  - TruEditor logosu
+- Brand Identity
+  - TruEditor logo
   - Landing page
-  - Renk paleti ve tipografi
+  - Color palette and typography
 
 ---
 
-## Gelecek Sürümler (Planlanan)
+## Future Versions (Planned)
 
 ### [1.1.0] - Reviewer Module
-- Hakem davet sistemi
-- İnceleme formları
-- Değerlendirme raporları
-- Hakem dashboard'u
+- Reviewer invitation system
+- Review forms
+- Evaluation reports
+- Reviewer dashboard
 
 ### [1.2.0] - Editor Module
-- Editör ataması
-- Karar verme arayüzü
-- İş akışı yönetimi
-- Editör dashboard'u
+- Editor assignment
+- Decision-making interface
+- Workflow management
+- Editor dashboard
 
 ### [1.3.0] - Admin Module
-- Kullanıcı yönetimi
-- Sistem ayarları
-- Gelişmiş raporlama
-- Analitik dashboard
+- User management
+- System settings
+- Advanced reporting
+- Analytics dashboard
 
-### [2.0.0] - Gelişmiş Özellikler
-- Çoklu dil desteği
+### [2.0.0] - Advanced Features
+- Multi-language support
 - Dark mode
-- Mobil uygulama (PWA)
-- Gelişmiş bildirim sistemi
-- Entegrasyon API'leri
+- Mobile application (PWA)
+- Advanced notification system
+- Integration APIs
 
 ---
 
-## Katkıda Bulunanlar
+## Contributors
 
-- Proje sahibi ve ana geliştirici: [İsim]
+- Project Owner and Lead Developer: Abdullah Doğan
 
 ---
 
-[Unreleased]: https://github.com/username/trueditor/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/username/trueditor/releases/tag/v1.0.0
+[Unreleased]: https://github.com/AbdullahProgrammerX/TruEditor/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/AbdullahProgrammerX/TruEditor/releases/tag/v1.0.0
