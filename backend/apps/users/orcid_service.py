@@ -326,6 +326,7 @@ class ORCIDService:
             created = False
         except User.DoesNotExist:
             user = User(orcid_id=token_response.orcid_id)
+            user.set_unusable_password()  # ORCID users don't have passwords
             created = True
         
         # Update tokens
@@ -371,8 +372,7 @@ class ORCIDService:
                 user.website = profile.website
         
         # Store raw ORCID data
-        if profile.raw_data:
-            user.orcid_data = profile.raw_data
+        user.orcid_data = profile.raw_data or {}
         
         user.last_orcid_sync = timezone.now()
         user.last_login = timezone.now()
