@@ -14,20 +14,21 @@
 | **Faz 1 (Frontend)** | ✅ completed | ✅ Tamamlandı | %100 |
 | **Faz 2** | ⏳ pending | ✅ Tamamlandı | %100 |
 | **Faz 3** | ⏳ pending | ✅ Tamamlandı | %100 |
-| **Faz 4** | ⏳ pending | 🟡 Kısmen | %20 |
-| **Faz 5** | ⏳ pending | 🟡 Kısmen | %30 |
-| **Faz 6** | ⏳ pending | ❌ Yapılmadı | %0 |
+| **Faz 4** | ⏳ pending | ✅ Tamamlandı* | %100 |
+| **Faz 5** | ⏳ pending | ✅ Tamamlandı | %100 |
+| **Faz 6** | ⏳ pending | ✅ Tamamlandı | %100 |
 | **Faz 7** | ⏳ pending | ❌ Yapılmadı | %0 |
-| **Faz 8** | ⏳ pending | ✅ Tamamlandı* | %100 |
-| **Faz 9** | ⏳ pending | 🟡 Kısmen | %70 |
+| **Faz 8** | ⏳ pending | ❌ Yapılmadı | %0 |
+| **Faz 9** | ⏳ pending | ❌ Yapılmadı | %0 |
+| **Faz 10** | ⏳ pending | 🟡 Kısmen | %70 |
 
-*Not: Faz 8 plan'da Railway için, ancak Render kullanıldı - işlevsel olarak tamamlandı sayılabilir.
+*Not: Faz 4 plan'da Railway için, ancak Render kullanıldı - işlevsel olarak tamamlandı sayılabilir.
 
 ---
 
 ## ❌ EKSİK FAZLAR (Detaylı)
 
-### 🔴 Faz 4: Author Module Backend API - %20
+### ✅ Faz 6: Author Module Backend API - %100
 
 #### ✅ Mevcut:
 - `backend/apps/submissions/models.py` - Modeller hazır
@@ -78,7 +79,7 @@
 
 ---
 
-### 🟡 Faz 5: Author Module Frontend - %30
+### ❌ Faz 7: Author Module Frontend - %0
 
 #### ✅ Mevcut:
 - `views/dashboard/Dashboard.vue` - Dashboard sayfası var (modern tasarım)
@@ -168,7 +169,7 @@
 
 ---
 
-### ❌ Faz 6: S3 Dosya Yönetimi Entegrasyonu - %0
+### ❌ Faz 8: S3 Dosya Yönetimi Entegrasyonu - %0
 
 #### Eksikler:
 
@@ -217,7 +218,7 @@
 
 ---
 
-### ❌ Faz 7: Celery + WeasyPrint PDF Oluşturma - %0
+### ❌ Faz 9: Celery + WeasyPrint PDF Oluşturma - %0
 
 #### Eksikler:
 
@@ -272,7 +273,7 @@
 
 ---
 
-### ✅ Faz 8: Deployment - %100
+### ✅ Faz 4: Deployment - %100
 
 **Not:** Plan'da Railway için, ancak Render kullanıldı. İşlevsel olarak tamamlandı sayılabilir.
 
@@ -284,7 +285,7 @@
 
 ---
 
-### 🟡 Faz 9: Logo, Branding ve Landing Page - %70
+### 🟡 Faz 10: Logo, Branding ve Landing Page - %70
 
 #### ✅ Mevcut:
 - ✅ Landing page var (`views/LandingPage.vue`)
@@ -351,32 +352,31 @@
 
 ## 📋 ÖNCELİKLİ YAPILACAKLAR (Sırayla)
 
-### 1. Faz 4: Author Module Backend API (Yüksek Öncelik)
+### 1. Faz 7: Author Module Frontend (Yüksek Öncelik)
 - Submission serializers
 - Submission views (CRUD + actions)
 - File management serializers & views
 - URL routing
 
-### 2. Faz 5: Author Module Frontend (Yüksek Öncelik)
+### 2. Faz 8: S3 Dosya Yönetimi (Yüksek Öncelik)
 - Submission wizard (6 adım)
 - Dashboard iyileştirmeleri
 - State management (Pinia store)
 - Auto-save composable
 - Emoji temizliği
 
-### 3. Faz 6: S3 Dosya Yönetimi (Yüksek Öncelik)
+### 3. Faz 9: PDF Generation (Orta Öncelik)
 - AWS S3 entegrasyonu
 - File upload/download
 - Presigned URL'ler
 - Drag & drop component'ler
 
-### 4. Faz 7: PDF Generation (Orta Öncelik)
+### 4. Faz 10: Logo & Branding (Düşük Öncelik)
 - Celery task setup
 - WeasyPrint entegrasyonu
 - PDF template
 - Frontend polling
 
-### 5. Faz 9: Logo & Branding (Düşük Öncelik)
 - Logo tasarımı
 - Favicon'lar
 - Logo component

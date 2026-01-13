@@ -1,4 +1,6 @@
-# Faz 4: Author Module Backend API - Test Raporu
+# Faz 6: Author Module Backend API - Test Raporu
+
+**Ana Rapor:** `FAZ-6_Author_Module_Backend_API.md`
 
 **Tarih:** 13 Ocak 2026  
 **Durum:** ✅ Deploy Edildi - Canlıda Test Bekleniyor
@@ -130,7 +132,7 @@ Authorization: Bearer {access_token}
 ```
 **Beklenen:** 200 OK, file listesi
 
-#### 11. Files - Upload (Placeholder - S3 entegrasyonu Phase 6'da)
+#### 11. Files - Upload (Placeholder - S3 entegrasyonu Faz 8'de)
 ```bash
 POST /api/v1/files/?submission_id={submission_id}
 Authorization: Bearer {access_token}
@@ -139,7 +141,7 @@ Content-Type: multipart/form-data
 file: [binary]
 file_type: "main_text"
 ```
-**Not:** S3 entegrasyonu Phase 6'da yapılacak, şu an local storage kullanılıyor.
+**Not:** S3 entegrasyonu Faz 8'de yapılacak, şu an local storage kullanılıyor.
 
 ---
 
@@ -220,9 +222,9 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
 ## 🚨 Bilinen Sınırlamalar
 
-1. **File Upload**: S3 entegrasyonu Phase 6'da yapılacak, şu an local storage
-2. **PDF Generation**: Phase 7'de Celery + WeasyPrint ile implement edilecek
-3. **Task Status**: Phase 7'de implement edilecek
+1. **File Upload**: S3 entegrasyonu Faz 8'de yapılacak, şu an local storage
+2. **PDF Generation**: Faz 9'da Celery + WeasyPrint ile implement edilecek
+3. **Task Status**: Faz 9'da implement edilecek
 
 ---
 
@@ -274,7 +276,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 #### Hatalar
 - ✅ **Kritik hata yok**
 - ⚠️ **Bilinen durumlar:**
-  1. Submissions sayfası henüz oluşturulmamış (404) - Faz 5'te implement edilecek
+  1. Submissions sayfası henüz oluşturulmamış (404) - Faz 7'de implement edilecek
   2. Authenticated endpoint'ler için token gerekiyor - Manuel test edilmeli
 
 **Test Detayları:**
@@ -317,7 +319,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 - File upload
 
 **❌ Bilinen Eksikler:**
-- Submissions list sayfası (Faz 5'te implement edilecek)
+- Submissions list sayfası (Faz 7'de implement edilecek)
 
 ---
 
@@ -325,8 +327,8 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
 
 1. **Canlıda Test**: Yukarıdaki test senaryolarını canlıda çalıştırın
 2. **Hata Düzeltme**: Bulunan hataları düzeltin
-3. **Faz 5**: Frontend wizard implementasyonu
-4. **Faz 6**: S3 dosya yönetimi entegrasyonu
+3. **Faz 7**: Frontend wizard implementasyonu
+4. **Faz 8**: S3 dosya yönetimi entegrasyonu
 
 ---
 

@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Phase 4: Author Module Backend API - Test Raporu (`REPORTS/FAZ-4_TEST_RAPORU.md`)
-- Phase 4: Author Module Backend API
+- Phase 6: Author Module Backend API - Test Raporu (`REPORTS/FAZ-6_Author_Module_Backend_API_TEST.md`)
+- Phase 6: Author Module Backend API
   - Submission serializers (List, Detail, Create, Update)
   - Author serializers and management endpoints
   - File serializers (Upload, Reorder, Presigned URL)
@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Status filtering in submission list
   - Query optimization with select_related and prefetch_related
 - Phase 5: ORCID Integration & UI Redesign
+- Phase 4: Deployment to Production
   - ORCID OAuth2 production integration
   - ORCIDService class for OAuth flow management
   - Login/Callback/Sync API endpoints
@@ -31,13 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Gradient backgrounds and animations
   - Database migration fixes for Render free tier
 
-- Phase 4: Deployment to Production
-  - Frontend deployed to Vercel (https://trueditor.vercel.app)
-  - Backend deployed to Render.com (https://trueditor-api.onrender.com)
-  - Neon PostgreSQL serverless database connected
-  - Upstash Redis serverless cache connected
-  - Health check endpoints verified
-  
 - Phase 3: Database Models
   - CustomUser model with ORCID integration
   - Submission model with FSM state management

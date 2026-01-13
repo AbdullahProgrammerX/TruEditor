@@ -101,6 +101,10 @@
 ---
 
 ### ✅ Faz 5: ORCID Entegrasyonu & UI Güncellemesi
+
+**Rapor:** `REPORTS/FAZ-5_ORCID_Entegrasyonu_ve_UI_Guncellemesi.md`
+
+### ✅ Faz 5: ORCID Entegrasyonu & UI Güncellemesi
 - ✅ ORCID OAuth2 production entegrasyonu
 - ✅ ORCIDService class (OAuth flow)
 - ✅ Login/Callback/Sync API endpoints
@@ -113,9 +117,25 @@
 
 ---
 
+### ✅ Faz 6: Author Module Backend API
+- ✅ Submission serializers (List, Detail, Create, Update)
+- ✅ Author serializers ve management endpoints
+- ✅ File serializers (Upload, Reorder, Presigned URL)
+- ✅ SubmissionViewSet with CRUD operations
+- ✅ ManuscriptFileViewSet with file management
+- ✅ Custom permissions (IsOwnerOrReadOnly, CanEditSubmission, CanDeleteSubmission)
+- ✅ FSM transition support (DRAFT → SUBMITTED)
+- ✅ Author management endpoints
+- ✅ Status filtering ve query optimization
+
+**Rapor:** `REPORTS/FAZ-6_Author_Module_Backend_API.md`  
+**Test Raporu:** `REPORTS/FAZ-6_Author_Module_Backend_API_TEST.md`
+
+---
+
 ## 🟡 DEVAM EDEN MODÜLLER
 
-### 🟡 Author Module (Yazar Modülü) - %30
+### 🟡 Author Module (Yazar Modülü) - %60
 
 #### ✅ Tamamlanan Kısımlar:
 - ✅ ORCID ile giriş (zorunlu)
@@ -123,23 +143,31 @@
 - ✅ Profil tamamlama wizard (3 adım)
 - ✅ Dashboard sayfası
 - ✅ Profil görüntüleme/düzenleme
+- ✅ **Backend API (Faz 6):**
+  - ✅ Submission CRUD endpoints
+  - ✅ Author management endpoints
+  - ✅ File management endpoints
+  - ✅ Custom permissions
+  - ✅ FSM transitions
 
 #### ⏳ Yapılacaklar:
-- ⏳ 6 adımlı makale gönderim wizard'ı
-- ⏳ Drag & drop dosya yükleme
-- ⏳ Auto-save functionality
-- ⏳ PDF generation (Celery + WeasyPrint)
-- ⏳ Submission tracking
-- ⏳ Draft kaydetme/geri yükleme
-- ⏳ Dosya sıralama (drag & drop)
-- ⏳ Meta veri çıkarımı (Word'den)
+- ⏳ 6 adımlı makale gönderim wizard'ı (Frontend - Faz 7)
+- ⏳ Drag & drop dosya yükleme (Frontend - Faz 7)
+- ⏳ Auto-save functionality (Frontend - Faz 7)
+- ⏳ AWS S3 entegrasyonu (Faz 8)
+- ⏳ PDF generation (Celery + WeasyPrint - Faz 9)
+- ⏳ Submission tracking (Frontend - Faz 7)
+- ⏳ Draft kaydetme/geri yükleme (Frontend - Faz 7)
+- ⏳ Dosya sıralama (drag & drop - Frontend - Faz 7)
+- ⏳ Meta veri çıkarımı (Word'den - Faz 7)
 
 **Mevcut Dosyalar:**
 - `frontend/src/views/submission/NewSubmission.vue` (skeleton)
 - `frontend/src/views/submission/SubmissionDetail.vue` (skeleton)
-- `backend/apps/submissions/models.py` (tamamlandı)
-- `backend/apps/submissions/views.py` (boş)
-- `backend/apps/submissions/serializers.py` (yok)
+- `backend/apps/submissions/models.py` ✅
+- `backend/apps/submissions/views.py` ✅
+- `backend/apps/submissions/serializers.py` ✅
+- `backend/apps/submissions/permissions.py` ✅
 
 ---
 
@@ -252,46 +280,52 @@ views/
 
 ## 📋 ÖNCELİKLİ YAPILACAKLAR
 
-### 1. Author Module - Submission Wizard (Yüksek Öncelik)
+### 1. Faz 7: Author Module Frontend (Yüksek Öncelik)
 - [ ] 6 adımlı wizard implementasyonu
 - [ ] Form validasyonu (VeeValidate + Zod)
 - [ ] Auto-save mekanizması
 - [ ] Draft kaydetme/geri yükleme
-
-### 2. File Upload System (Yüksek Öncelik)
 - [ ] Drag & drop component
-- [ ] AWS S3 entegrasyonu
 - [ ] File validation (type, size)
 - [ ] File preview
 - [ ] File ordering (drag & drop)
+- [ ] Submission list sayfası
+- [ ] Submission detail sayfası
 
-### 3. PDF Generation (Orta Öncelik)
+### 2. Faz 8: S3 File Upload System (Yüksek Öncelik)
+- [ ] AWS S3 entegrasyonu
+- [ ] Presigned URL generation
+- [ ] File upload backend integration
+- [ ] File delete from S3
+- [ ] File reorder backend integration
+
+### 3. Faz 9: PDF Generation (Orta Öncelik)
 - [ ] Celery task setup
 - [ ] WeasyPrint entegrasyonu
 - [ ] PDF template oluşturma
 - [ ] Async PDF generation
+- [ ] Task status polling
 - [ ] Notification sistemi
 
-### 4. Submission Tracking (Orta Öncelik)
-- [ ] Submission list API
-- [ ] Status tracking
-- [ ] Timeline view
-- [ ] Submission detail page
+### 4. Faz 10: Logo & Branding (Düşük Öncelik)
+- [ ] Logo tasarımı (SVG)
+- [ ] Favicon'lar
+- [ ] Logo component
 
 ---
 
 ## 🎯 SONRAKI ADIMLAR
 
 ### Kısa Vadeli (1-2 Hafta)
-1. ✅ ORCID entegrasyonu tamamlandı
-2. ✅ UI redesign tamamlandı
-3. 🎯 **Submission wizard implementasyonu**
-4. 🎯 **File upload sistemi**
-5. 🎯 **Auto-save functionality**
+1. ✅ ORCID entegrasyonu tamamlandı (Faz 5)
+2. ✅ UI redesign tamamlandı (Faz 5)
+3. ✅ Backend API tamamlandı (Faz 6)
+4. 🎯 **Faz 7: Submission wizard implementasyonu**
+5. 🎯 **Faz 8: S3 file upload sistemi**
 
 ### Orta Vadeli (2-4 Hafta)
-1. PDF generation sistemi
-2. Submission tracking
+1. Faz 9: PDF generation sistemi
+2. Faz 10: Logo & Branding
 3. Notification sistemi
 4. Author Module tamamlama
 
@@ -308,10 +342,10 @@ views/
 | Metrik | Değer |
 |--------|-------|
 | **Toplam Commit** | ~50+ |
-| **Rapor Sayısı** | 6 |
+| **Rapor Sayısı** | 8 (6 ana + 2 test) |
 | **Backend Apps** | 5 |
 | **Frontend Views** | 9 |
-| **API Endpoints** | ~10 |
+| **API Endpoints** | ~25+ |
 | **Database Tables** | ~8 |
 | **Migration Dosyaları** | ~15 |
 
@@ -331,9 +365,10 @@ views/
 - ✅ Authentication sistemi tam çalışıyor
 - ✅ UI/UX modern ve responsive
 - ✅ Deployment başarılı
-- 🟡 Submission flow henüz implement edilmedi
-- ⏳ File upload sistemi yok
-- ⏳ PDF generation yok
+- ✅ Backend API tamamlandı (Faz 6)
+- 🟡 Submission wizard frontend henüz implement edilmedi (Faz 7)
+- ⏳ S3 file upload sistemi yok (Faz 8)
+- ⏳ PDF generation yok (Faz 9)
 
 ---
 

@@ -1,4 +1,4 @@
-# Faz 4: Author Module Backend API - Tamamlandı
+# Faz 6: Author Module Backend API - Tamamlandı
 
 **Tarih:** 13 Ocak 2026  
 **Durum:** ✅ Tamamlandı
@@ -7,7 +7,7 @@
 
 ## 📋 Özet
 
-Faz 4 kapsamında Author Module için backend API'leri tamamlandı. Submission (makale gönderimi) ve File (dosya yönetimi) için tam CRUD operasyonları, custom permissions, FSM state transitions ve author yönetimi implementasyonu yapıldı.
+Faz 6 kapsamında Author Module için backend API'leri tamamlandı. Submission (makale gönderimi) ve File (dosya yönetimi) için tam CRUD operasyonları, custom permissions, FSM state transitions ve author yönetimi implementasyonu yapıldı.
 
 ---
 
@@ -185,11 +185,11 @@ IsAuthenticated → IsOwnerOrReadOnly → CanEditSubmission → CanDeleteSubmiss
 
 ---
 
-## 🚧 Phase 7'ye Ertelenen Özellikler
+## 🚧 Faz 9'a Ertelenen Özellikler
 
 1. **PDF Generation**: `build_pdf` action şu an placeholder
 2. **Task Status**: `task_status` action şu an placeholder
-3. **S3 Integration**: File upload şu an local storage (Phase 6'da implement edilecek)
+3. **S3 Integration**: File upload şu an local storage (Faz 8'de implement edilecek)
 
 ---
 
@@ -222,14 +222,14 @@ IsAuthenticated → IsOwnerOrReadOnly → CanEditSubmission → CanDeleteSubmiss
 
 ## 🔄 Sonraki Adımlar
 
-1. **Faz 5**: Author Module Frontend
+1. **Faz 7**: Author Module Frontend
    - Submission wizard (6 adım)
    - Dashboard iyileştirmeleri
    - Auto-save sistemi
-2. **Faz 6**: S3 Dosya Yönetimi
+2. **Faz 8**: S3 Dosya Yönetimi
    - AWS S3 entegrasyonu
    - Presigned URL'ler
-3. **Faz 7**: PDF Generation
+3. **Faz 9**: PDF Generation
    - Celery tasks
    - WeasyPrint entegrasyonu
 
