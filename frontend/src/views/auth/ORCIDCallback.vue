@@ -34,9 +34,15 @@ onMounted(async () => {
   try {
     await authStore.handleORCIDCallback(code)
     
-    // Redirect to intended page or dashboard
-    const redirect = route.query.redirect as string || '/dashboard'
-    router.replace(redirect)
+    // Check if profile is complete
+    if (!authStore.profileCompleted) {
+      // New user or incomplete profile - go to onboarding
+      router.replace('/complete-profile')
+    } else {
+      // Profile complete - go to intended page or dashboard
+      const redirect = route.query.redirect as string || '/dashboard'
+      router.replace(redirect)
+    }
   } catch (err: any) {
     error.value = err.response?.data?.error?.message || 'Login failed'
     isProcessing.value = false
