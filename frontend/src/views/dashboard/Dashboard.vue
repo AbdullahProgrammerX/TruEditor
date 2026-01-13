@@ -51,31 +51,6 @@ const recentSubmissions = ref([
   },
 ])
 
-// Quick actions
-const quickActions = [
-  {
-    icon: 'document-add',
-    title: 'New Submission',
-    description: 'Start a new manuscript',
-    action: () => router.push('/submissions/new'),
-    color: 'from-blue-500 to-blue-600',
-  },
-  {
-    icon: 'folder',
-    title: 'My Submissions',
-    description: 'View all submissions',
-    action: () => router.push('/submissions'),
-    color: 'from-purple-500 to-purple-600',
-  },
-  {
-    icon: 'user',
-    title: 'Profile',
-    description: 'Edit your profile',
-    action: () => router.push('/profile'),
-    color: 'from-emerald-500 to-emerald-600',
-  },
-]
-
 const totalSubmissions = computed(() => 
   stats.value.draft + stats.value.submitted + stats.value.underReview + stats.value.accepted
 )
@@ -100,15 +75,18 @@ function logout() {
 }
 
 // Status badge styles
-function getStatusStyles(status: string) {
-  const styles: Record<string, { bg: string; text: string; dot: string }> = {
-    draft: { bg: 'bg-gray-100', text: 'text-gray-700', dot: 'bg-gray-400' },
+type StatusStyle = { bg: string; text: string; dot: string }
+
+function getStatusStyles(status: string): StatusStyle {
+  const defaultStyle: StatusStyle = { bg: 'bg-gray-100', text: 'text-gray-700', dot: 'bg-gray-400' }
+  const styles: Record<string, StatusStyle> = {
+    draft: defaultStyle,
     submitted: { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
     under_review: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
     accepted: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
     rejected: { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
   }
-  return styles[status] || styles.draft
+  return styles[status] || defaultStyle
 }
 
 // Greeting based on time
