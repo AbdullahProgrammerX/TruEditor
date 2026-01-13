@@ -12,12 +12,10 @@ Endpoint'ler:
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-
-# Views daha sonra oluşturulacak
-# from .views import ManuscriptFileViewSet
+from .views import ManuscriptFileViewSet
 
 router = DefaultRouter()
-# router.register('', ManuscriptFileViewSet, basename='file')
+router.register('', ManuscriptFileViewSet, basename='file')
 
 urlpatterns = [
     path('', include(router.urls)),

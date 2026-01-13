@@ -18,12 +18,10 @@ Endpoint'ler:
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-
-# Views daha sonra oluşturulacak
-# from .views import SubmissionViewSet
+from .views import SubmissionViewSet
 
 router = DefaultRouter()
-# router.register('', SubmissionViewSet, basename='submission')
+router.register('', SubmissionViewSet, basename='submission')
 
 urlpatterns = [
     path('', include(router.urls)),
