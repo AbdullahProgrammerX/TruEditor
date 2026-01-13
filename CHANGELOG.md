@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Phase 4: Author Module Backend API
+  - Submission serializers (List, Detail, Create, Update)
+  - Author serializers and management endpoints
+  - File serializers (Upload, Reorder, Presigned URL)
+  - SubmissionViewSet with CRUD operations
+  - ManuscriptFileViewSet with file management
+  - Custom permissions (IsOwnerOrReadOnly, CanEditSubmission, CanDeleteSubmission)
+  - FSM transition support for submission workflow
+  - Author management endpoints (list, create, update, delete)
+  - File reorder functionality
+  - Presigned URL generation for secure downloads
+  - Status filtering in submission list
+  - Query optimization with select_related and prefetch_related
 - Phase 5: ORCID Integration & UI Redesign
   - ORCID OAuth2 production integration
   - ORCIDService class for OAuth flow management
