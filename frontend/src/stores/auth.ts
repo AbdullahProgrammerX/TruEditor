@@ -7,7 +7,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '@/services/api'
-import type { User } from '@/types/user'
+import type { User, UserProfileUpdate } from '@/types/user'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -20,7 +20,8 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!accessToken.value && !!user.value)
   const fullName = computed(() => user.value?.full_name || user.value?.orcid_id || '')
   const orcidId = computed(() => user.value?.orcid_id || '')
-  const orcidUrl = computed(() => user.value ? `https://orcid.org/${user.value.orcid_id}` : '')
+  const orcidUrl = computed(() => user.value?.orcid_url || '')
+  const profileCompleted = computed(() => user.value?.profile_completed || false)
 
   // Actions
   
@@ -127,6 +128,24 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
+   * Update user profile
+   */
+  async function updateProfile(profileData: UserProfileUpdate): Promise<void> {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await api.patch('/auth/profile/', profileData)
+      user.value = response.data.data
+    } catch (err: any) {
+      error.value = err.response?.data?.error?.message || 'Failed to update profile'
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
    * Sync ORCID profile
    */
   async function syncORCIDProfile(): Promise<void> {
@@ -166,12 +185,14 @@ export const useAuthStore = defineStore('auth', () => {
     fullName,
     orcidId,
     orcidUrl,
+    profileCompleted,
     
     // Actions
     getORCIDLoginUrl,
     handleORCIDCallback,
     logout,
     fetchProfile,
+    updateProfile,
     refreshToken,
     syncORCIDProfile,
     initAuth,
