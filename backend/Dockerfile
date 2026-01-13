@@ -85,5 +85,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE ${PORT}
 
-# Default command (gunicorn)
-CMD ["sh", "-c", "gunicorn core.wsgi:application --bind 0.0.0.0:${PORT} --workers 2 --threads 4 --worker-class gthread --worker-tmp-dir /dev/shm --access-logfile - --error-logfile -"]
+# Run migrations and start gunicorn
+CMD ["sh", "-c", "python manage.py migrate --no-input && gunicorn core.wsgi:application --bind 0.0.0.0:${PORT} --workers 2 --threads 4 --worker-class gthread --worker-tmp-dir /dev/shm --access-logfile - --error-logfile -"]
