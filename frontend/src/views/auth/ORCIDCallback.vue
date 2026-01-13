@@ -70,7 +70,9 @@ function retryLogin() {
       <template v-else-if="error">
         <div class="mb-8">
           <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-            <span class="text-3xl">❌</span>
+            <svg class="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </div>
         </div>
         <h2 class="text-xl font-semibold text-gray-800 mb-2">Login Failed</h2>

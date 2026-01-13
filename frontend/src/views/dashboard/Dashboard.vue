@@ -231,7 +231,7 @@ const greeting = computed(() => {
         :class="isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'"
       >
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">
-          {{ greeting }}, {{ authStore.fullName?.split(' ')[0] || 'Author' }}! 👋
+          {{ greeting }}, {{ authStore.fullName?.split(' ')[0] || 'Author' }}
         </h1>
         <p class="text-gray-500 text-sm sm:text-base">
           Here's what's happening with your submissions.

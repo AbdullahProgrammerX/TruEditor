@@ -13,17 +13,17 @@ const currentStep = ref(1)
 const totalSteps = 6
 
 const steps = [
-  { id: 1, title: 'Article Type', icon: '📋' },
-  { id: 2, title: 'File Upload', icon: '📁' },
-  { id: 3, title: 'Article Details', icon: '📝' },
-  { id: 4, title: 'Authors', icon: '👥' },
-  { id: 5, title: 'Reviewer Suggestions', icon: '🔍' },
-  { id: 6, title: 'Confirmation', icon: '✓' },
+  { id: 1, title: 'Article Type', icon: 'document' },
+  { id: 2, title: 'File Upload', icon: 'folder' },
+  { id: 3, title: 'Article Details', icon: 'pencil' },
+  { id: 4, title: 'Authors', icon: 'users' },
+  { id: 5, title: 'Reviewer Suggestions', icon: 'magnifying-glass' },
+  { id: 6, title: 'Confirmation', icon: 'check-circle' },
 ]
 
 // Safe computed property to get current step data
 const currentStepData = computed(() => {
-  return steps[currentStep.value - 1] ?? { id: 0, title: '', icon: '' }
+  return steps[currentStep.value - 1] ?? { id: 0, title: '', icon: 'document' }
 })
 
 function goBack() {
@@ -80,8 +80,10 @@ function submit() {
                 'bg-gray-100 text-gray-400'
               ]"
             >
-              <span v-if="step.id < currentStep">✓</span>
-              <span v-else>{{ step.icon }}</span>
+              <svg v-if="step.id < currentStep" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span v-else class="text-xs font-semibold">{{ step.id }}</span>
             </div>
             
             <!-- Step title (hidden on mobile) -->
@@ -107,7 +109,7 @@ function submit() {
     <main class="max-w-4xl mx-auto px-6 py-8">
       <div class="card animate-fade-in">
         <h2 class="text-2xl font-bold text-gray-800 mb-2">
-          {{ currentStepData.icon }} {{ currentStepData.title }}
+          {{ currentStepData.title }}
         </h2>
         
         <div class="py-12 text-center text-gray-500">
@@ -136,9 +138,12 @@ function submit() {
         <button 
           v-else
           @click="submit"
-          class="btn-primary bg-accent-500 hover:bg-accent-600"
+          class="btn-primary bg-accent-500 hover:bg-accent-600 flex items-center gap-2"
         >
-          ✓ Submit
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          Submit
         </button>
       </div>
     </main>
