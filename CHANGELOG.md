@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Phase 4: Author Module Backend API - Test Raporu (`REPORTS/FAZ-4_TEST_RAPORU.md`)
 - Phase 4: Author Module Backend API
   - Submission serializers (List, Detail, Create, Update)
   - Author serializers and management endpoints
