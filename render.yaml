@@ -16,7 +16,7 @@ services:
     region: frankfurt
     rootDir: backend
     buildCommand: ./build.sh
-    startCommand: gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --worker-class gthread
+    startCommand: python manage.py migrate --no-input && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --worker-class gthread
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
