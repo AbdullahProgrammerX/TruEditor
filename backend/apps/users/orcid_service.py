@@ -115,7 +115,7 @@ class ORCIDService:
         params = {
             'client_id': self.config.client_id,
             'response_type': 'code',
-            'scope': '/authenticate openid',  # Public API only supports /authenticate
+            'scope': '/authenticate',  # Public API only supports /authenticate
             'redirect_uri': self.config.redirect_uri,
             'state': state,
         }
