@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Phase 5: ORCID Integration & UI Redesign
+  - ORCID OAuth2 production integration
+  - ORCIDService class for OAuth flow management
+  - Login/Callback/Sync API endpoints
+  - Modern UI redesign for all pages
+  - Responsive mobile-first design
+  - Gradient backgrounds and animations
+  - Database migration fixes for Render free tier
+
 - Phase 4: Deployment to Production
   - Frontend deployed to Vercel (https://trueditor.vercel.app)
   - Backend deployed to Render.com (https://trueditor-api.onrender.com)
