@@ -290,7 +290,7 @@ class ORCIDCallbackView(APIView):
             return error_response(
                 message=_('An unexpected error occurred during authentication'),
                 code='AUTHENTICATION_ERROR',
-                details={'error': str(e)} if settings.DEBUG else None,
+                details={'error': str(e), 'type': type(e).__name__},  # Always show error for debugging
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
