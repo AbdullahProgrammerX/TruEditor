@@ -115,7 +115,7 @@ class ORCIDService:
         params = {
             'client_id': self.config.client_id,
             'response_type': 'code',
-            'scope': '/authenticate /read-limited',
+            'scope': '/authenticate openid',  # Public API only supports /authenticate
             'redirect_uri': self.config.redirect_uri,
             'state': state,
         }
@@ -215,6 +215,10 @@ class ORCIDService:
         """
         Fetch user profile from ORCID API.
         
+        Note: With Public API (/authenticate scope only), we can only get
+        limited public information. Full profile data requires Member API
+        with /read-limited scope.
+        
         Args:
             orcid_id: User's ORCID iD
             access_token: Valid access token
@@ -222,31 +226,32 @@ class ORCIDService:
         Returns:
             ORCIDProfile with user data
         """
-        profile_url = f"{self.config.api_url}/v3.0/{orcid_id}/record"
+        # Try to fetch public record (works with Public API)
+        profile_url = f"{self.config.api_url}/v3.0/{orcid_id}/person"
         
         headers = {
             'Accept': 'application/json',
             'Authorization': f'Bearer {access_token}',
         }
         
-        response = requests.get(profile_url, headers=headers, timeout=30)
-        
-        if response.status_code != 200:
+        try:
+            response = requests.get(profile_url, headers=headers, timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                return self._parse_person_data(orcid_id, data)
+            else:
+                # Public API might not allow this, return minimal profile
+                return ORCIDProfile(orcid_id=orcid_id)
+                
+        except Exception:
             # Return minimal profile if API call fails
             return ORCIDProfile(orcid_id=orcid_id)
-        
-        data = response.json()
-        
-        # Parse profile data
-        return self._parse_profile(orcid_id, data)
     
-    def _parse_profile(self, orcid_id: str, data: dict) -> ORCIDProfile:
-        """Parse ORCID API response into ORCIDProfile."""
-        person = data.get('person', {})
-        activities = data.get('activities-summary', {})
-        
+    def _parse_person_data(self, orcid_id: str, data: dict) -> ORCIDProfile:
+        """Parse ORCID person endpoint response."""
         # Name
-        name_data = person.get('name', {})
+        name_data = data.get('name', {})
         given_name = None
         family_name = None
         
@@ -259,47 +264,32 @@ class ORCIDService:
             if family_names:
                 family_name = family_names.get('value')
         
-        # Email (primary or first available)
+        # Email (if public)
         email = None
-        emails_data = person.get('emails', {}).get('email', [])
+        emails_data = data.get('emails', {}).get('email', [])
         for email_entry in emails_data:
-            if email_entry.get('primary') or email_entry.get('verified'):
+            if email_entry.get('verified'):
                 email = email_entry.get('email')
                 break
         if not email and emails_data:
             email = emails_data[0].get('email')
         
-        # Country
+        # Country (if public)
         country = None
-        addresses = person.get('addresses', {}).get('address', [])
+        addresses = data.get('addresses', {}).get('address', [])
         if addresses:
             country_data = addresses[0].get('country', {})
             country = country_data.get('value') if country_data else None
         
-        # Institution & Department (from employments)
-        institution = None
-        department = None
-        employments = activities.get('employments', {}).get('affiliation-group', [])
-        
-        for group in employments:
-            summaries = group.get('summaries', [])
-            if summaries:
-                employment = summaries[0].get('employment-summary', {})
-                org = employment.get('organization', {})
-                if org:
-                    institution = org.get('name')
-                    department = employment.get('department-name')
-                    break
-        
-        # Biography
+        # Biography (if public)
         bio = None
-        biography = person.get('biography', {})
+        biography = data.get('biography', {})
         if biography:
-            bio = biography.get('content', '')[:1000]  # Limit to 1000 chars
+            bio = biography.get('content', '')[:1000]
         
-        # Website
+        # Website (if public)
         website = None
-        researcher_urls = person.get('researcher-urls', {}).get('researcher-url', [])
+        researcher_urls = data.get('researcher-urls', {}).get('researcher-url', [])
         if researcher_urls:
             url_data = researcher_urls[0].get('url', {})
             website = url_data.get('value') if url_data else None
@@ -310,8 +300,6 @@ class ORCIDService:
             family_name=family_name,
             email=email,
             country=country,
-            institution=institution,
-            department=department,
             bio=bio,
             website=website,
             raw_data=data,
