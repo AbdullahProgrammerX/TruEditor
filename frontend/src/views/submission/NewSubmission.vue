@@ -3,48 +3,263 @@
  * TruEditor - New Submission Wizard
  * ==================================
  * 6-step manuscript submission wizard.
- * (Placeholder - Will be detailed in Phase 5)
+ * Integrates all wizard step components with auto-save.
  */
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
+import { useSubmissionStore } from '@/stores/submission'
+import StepArticleType from '@/components/submission/wizard/StepArticleType.vue'
+import StepFileUpload from '@/components/submission/wizard/StepFileUpload.vue'
+import StepArticleInfo from '@/components/submission/wizard/StepArticleInfo.vue'
+import StepAuthors from '@/components/submission/wizard/StepAuthors.vue'
+import StepAdditionalInfo from '@/components/submission/wizard/StepAdditionalInfo.vue'
+import StepReviewSubmit from '@/components/submission/wizard/StepReviewSubmit.vue'
+import type { ArticleType, Language, AuthorInput, SuggestedReviewer, OpposedReviewer } from '@/types/submission'
 
 const router = useRouter()
+const submissionStore = useSubmissionStore()
+
+// Wizard state
 const currentStep = ref(1)
 const totalSteps = 6
+const isSaving = ref(false)
+const lastSavedAt = ref<string | null>(null)
+
+// Form data
+const articleType = ref<ArticleType | undefined>(undefined)
+const title = ref('')
+const titleEn = ref('')
+const abstract = ref('')
+const abstractEn = ref('')
+const keywords = ref<string[]>([])
+const keywordsEn = ref<string[]>([])
+const language = ref<Language>('en')
+const authors = ref<AuthorInput[]>([])
+const coverLetter = ref('')
+const ethicsStatement = ref('')
+const ethicsApprovalNumber = ref('')
+const conflictOfInterest = ref('')
+const fundingStatement = ref('')
+const suggestedReviewers = ref<SuggestedReviewer[]>([])
+const opposedReviewers = ref<OpposedReviewer[]>([])
+const editorComments = ref('')
+
+// Auto-save timer
+let autosaveTimer: ReturnType<typeof setInterval> | null = null
 
 const steps = [
-  { id: 1, title: 'Article Type', icon: 'document' },
-  { id: 2, title: 'File Upload', icon: 'folder' },
-  { id: 3, title: 'Article Details', icon: 'pencil' },
-  { id: 4, title: 'Authors', icon: 'users' },
-  { id: 5, title: 'Reviewer Suggestions', icon: 'magnifying-glass' },
-  { id: 6, title: 'Confirmation', icon: 'check-circle' },
+  { id: 1, title: 'Article Type', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+  { id: 2, title: 'Files', icon: 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12' },
+  { id: 3, title: 'Article Info', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
+  { id: 4, title: 'Authors', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+  { id: 5, title: 'Additional', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+  { id: 6, title: 'Review', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
 ]
 
-// Safe computed property to get current step data
-const currentStepData = computed(() => {
-  return steps[currentStep.value - 1] ?? { id: 0, title: '', icon: 'document' }
+// Computed
+const progressPercentage = computed(() => ((currentStep.value - 1) / (totalSteps - 1)) * 100)
+
+const canGoNext = computed(() => {
+  switch (currentStep.value) {
+    case 1:
+      return !!articleType.value
+    case 2:
+      return true // Files are optional for draft
+    case 3:
+      return title.value.trim().length > 0 && 
+             abstract.value.trim().length > 0 && 
+             keywords.value.length >= 3
+    case 4:
+      return authors.value.length > 0 && authors.value.some(a => a.is_corresponding)
+    case 5:
+      return true // Additional info is optional
+    case 6:
+      return true
+    default:
+      return false
+  }
 })
 
-function goBack() {
+const isDirty = computed(() => {
+  return articleType.value !== undefined ||
+         title.value !== '' ||
+         abstract.value !== '' ||
+         authors.value.length > 0
+})
+
+/**
+ * Go to previous step
+ */
+function goBack(): void {
   if (currentStep.value > 1) {
     currentStep.value--
   } else {
-    router.push('/dashboard')
+    if (isDirty.value) {
+      if (confirm('You have unsaved changes. Are you sure you want to leave?')) {
+        router.push('/dashboard')
+      }
+    } else {
+      router.push('/dashboard')
+    }
   }
 }
 
-function goNext() {
-  if (currentStep.value < totalSteps) {
+/**
+ * Go to next step
+ */
+function goNext(): void {
+  if (currentStep.value < totalSteps && canGoNext.value) {
     currentStep.value++
+    saveProgress()
   }
 }
 
-function submit() {
-  // Submit logic will be implemented in Phase 5
-  ;(window as any).toast?.('success', 'Submission successful! (Demo)')
-  router.push('/dashboard')
+/**
+ * Go to specific step
+ */
+function goToStep(step: number): void {
+  if (step <= currentStep.value || step === currentStep.value + 1) {
+    currentStep.value = step
+  }
 }
+
+/**
+ * Save progress (auto-save)
+ */
+async function saveProgress(): Promise<void> {
+  if (isSaving.value) return
+  
+  isSaving.value = true
+  
+  try {
+    // If no submission exists, create one
+    if (!submissionStore.currentSubmission) {
+      await submissionStore.createSubmission({
+        title: title.value || 'Untitled',
+        article_type: articleType.value,
+        wizard_step: currentStep.value,
+        wizard_data: getWizardData(),
+      })
+    } else {
+      // Update existing
+      await submissionStore.updateSubmission(submissionStore.currentSubmission.id, {
+        title: title.value,
+        title_en: titleEn.value,
+        abstract: abstract.value,
+        abstract_en: abstractEn.value,
+        keywords: keywords.value,
+        keywords_en: keywordsEn.value,
+        article_type: articleType.value,
+        language: language.value,
+        cover_letter: coverLetter.value,
+        ethics_statement: ethicsStatement.value,
+        ethics_approval_number: ethicsApprovalNumber.value,
+        conflict_of_interest: conflictOfInterest.value,
+        funding_statement: fundingStatement.value,
+        wizard_step: currentStep.value,
+        wizard_data: getWizardData(),
+      })
+    }
+    
+    lastSavedAt.value = new Date().toISOString()
+  } catch (error) {
+    console.error('Auto-save failed:', error)
+  } finally {
+    isSaving.value = false
+  }
+}
+
+/**
+ * Get wizard data object
+ */
+function getWizardData() {
+  return {
+    article_type: articleType.value,
+    title: title.value,
+    title_en: titleEn.value,
+    abstract: abstract.value,
+    abstract_en: abstractEn.value,
+    keywords: keywords.value,
+    keywords_en: keywordsEn.value,
+    authors: authors.value,
+    cover_letter: coverLetter.value,
+    ethics_statement: ethicsStatement.value,
+    ethics_approval_number: ethicsApprovalNumber.value,
+    conflict_of_interest: conflictOfInterest.value,
+    funding_statement: fundingStatement.value,
+    suggested_reviewers: suggestedReviewers.value,
+    opposed_reviewers: opposedReviewers.value,
+    editor_comments: editorComments.value,
+    last_saved_at: new Date().toISOString(),
+  }
+}
+
+/**
+ * Handle final submission
+ */
+async function handleSubmit(): Promise<void> {
+  if (!submissionStore.currentSubmission) {
+    await saveProgress()
+  }
+  
+  try {
+    // First save all data
+    await saveProgress()
+    
+    // Add authors to submission
+    for (const author of authors.value) {
+      await submissionStore.addAuthor(submissionStore.currentSubmission!.id, author)
+    }
+    
+    // Submit for review
+    await submissionStore.submitForReview(submissionStore.currentSubmission!.id)
+    
+    // Show success and redirect
+    ;(window as any).toast?.('success', 'Manuscript submitted successfully!')
+    router.push('/dashboard')
+  } catch (error: any) {
+    ;(window as any).toast?.('error', error.message || 'Submission failed')
+  }
+}
+
+/**
+ * Format last saved time
+ */
+function formatLastSaved(): string {
+  if (!lastSavedAt.value) return ''
+  const date = new Date(lastSavedAt.value)
+  return date.toLocaleTimeString()
+}
+
+// Lifecycle
+onMounted(() => {
+  // Start auto-save timer (every 30 seconds)
+  autosaveTimer = setInterval(() => {
+    if (isDirty.value) {
+      saveProgress()
+    }
+  }, 30000)
+})
+
+onBeforeUnmount(() => {
+  if (autosaveTimer) {
+    clearInterval(autosaveTimer)
+  }
+})
+
+// Route guard for unsaved changes
+onBeforeRouteLeave((_to, _from, next) => {
+  if (isDirty.value && !submissionStore.currentSubmission) {
+    if (confirm('You have unsaved changes. Are you sure you want to leave?')) {
+      next()
+    } else {
+      next(false)
+    }
+  } else {
+    next()
+  }
+})
 </script>
 
 <template>
@@ -53,99 +268,179 @@ function submit() {
     <header class="bg-white shadow-sm sticky top-0 z-40">
       <div class="max-w-4xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
-          <button @click="goBack" class="btn-ghost">
-            ← Back
+          <button @click="goBack" class="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
           </button>
           <h1 class="text-lg font-semibold text-gray-800">New Manuscript Submission</h1>
-          <div class="w-20"></div>
+          <div class="flex items-center gap-2 text-sm text-gray-500">
+            <span v-if="isSaving" class="flex items-center gap-1">
+              <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Saving...
+            </span>
+            <span v-else-if="lastSavedAt" class="text-green-600">
+              Saved {{ formatLastSaved() }}
+            </span>
+          </div>
         </div>
       </div>
     </header>
 
-    <!-- Progress Stepper -->
+    <!-- Progress Bar -->
     <div class="bg-white border-b">
-      <div class="max-w-4xl mx-auto px-6 py-4">
-        <div class="flex items-center justify-between">
+      <div class="max-w-4xl mx-auto px-6">
+        <!-- Progress Line -->
+        <div class="h-1 bg-gray-100 rounded-full overflow-hidden">
           <div 
-            v-for="(step, index) in steps" 
+            class="h-full bg-primary-500 transition-all duration-500 ease-out"
+            :style="{ width: `${progressPercentage}%` }"
+          />
+        </div>
+        
+        <!-- Step Indicators -->
+        <div class="py-4 flex items-center justify-between">
+          <button
+            v-for="step in steps"
             :key="step.id"
-            class="flex items-center"
+            @click="goToStep(step.id)"
+            :disabled="step.id > currentStep + 1"
+            class="flex flex-col items-center gap-1 group"
+            :class="{ 'cursor-not-allowed': step.id > currentStep + 1 }"
           >
-            <!-- Step circle -->
             <div 
               class="flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-all"
               :class="[
                 step.id < currentStep ? 'bg-accent-500 text-white' : 
-                step.id === currentStep ? 'bg-primary-500 text-white' : 
-                'bg-gray-100 text-gray-400'
+                step.id === currentStep ? 'bg-primary-500 text-white ring-4 ring-primary-100' : 
+                'bg-gray-100 text-gray-400 group-hover:bg-gray-200'
               ]"
             >
               <svg v-if="step.id < currentStep" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
-              <span v-else class="text-xs font-semibold">{{ step.id }}</span>
+              <span v-else>{{ step.id }}</span>
             </div>
-            
-            <!-- Step title (hidden on mobile) -->
             <span 
-              class="ml-2 text-sm font-medium hidden lg:block"
+              class="text-xs font-medium hidden sm:block"
               :class="step.id <= currentStep ? 'text-gray-800' : 'text-gray-400'"
             >
               {{ step.title }}
             </span>
-            
-            <!-- Connector line -->
-            <div 
-              v-if="index < steps.length - 1"
-              class="w-8 lg:w-16 h-0.5 mx-2 lg:mx-4"
-              :class="step.id < currentStep ? 'bg-accent-500' : 'bg-gray-200'"
-            ></div>
-          </div>
+          </button>
         </div>
       </div>
     </div>
 
     <!-- Step Content -->
     <main class="max-w-4xl mx-auto px-6 py-8">
-      <div class="card animate-fade-in">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">
-          {{ currentStepData.title }}
-        </h2>
-        
-        <div class="py-12 text-center text-gray-500">
-          <p class="text-lg mb-4">This step will be developed in Phase 5.</p>
-          <p class="text-sm">Step {{ currentStep }} / {{ totalSteps }}</p>
-        </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+        <!-- Step 1: Article Type -->
+        <Transition name="fade" mode="out-in">
+          <StepArticleType 
+            v-if="currentStep === 1"
+            v-model="articleType"
+          />
+          
+          <!-- Step 2: File Upload -->
+          <StepFileUpload 
+            v-else-if="currentStep === 2"
+          />
+          
+          <!-- Step 3: Article Info -->
+          <StepArticleInfo 
+            v-else-if="currentStep === 3"
+            v-model:title="title"
+            v-model:titleEn="titleEn"
+            v-model:abstract="abstract"
+            v-model:abstractEn="abstractEn"
+            v-model:keywords="keywords"
+            v-model:keywordsEn="keywordsEn"
+            v-model:language="language"
+          />
+          
+          <!-- Step 4: Authors -->
+          <StepAuthors 
+            v-else-if="currentStep === 4"
+            v-model:authors="authors"
+          />
+          
+          <!-- Step 5: Additional Info -->
+          <StepAdditionalInfo 
+            v-else-if="currentStep === 5"
+            v-model:coverLetter="coverLetter"
+            v-model:ethicsStatement="ethicsStatement"
+            v-model:ethicsApprovalNumber="ethicsApprovalNumber"
+            v-model:conflictOfInterest="conflictOfInterest"
+            v-model:fundingStatement="fundingStatement"
+            v-model:suggestedReviewers="suggestedReviewers"
+            v-model:opposedReviewers="opposedReviewers"
+            v-model:editorComments="editorComments"
+          />
+          
+          <!-- Step 6: Review & Submit -->
+          <StepReviewSubmit 
+            v-else-if="currentStep === 6"
+            :articleType="articleType"
+            :title="title"
+            :abstract="abstract"
+            :keywords="keywords"
+            :authors="authors"
+            :coverLetter="coverLetter"
+            :ethicsStatement="ethicsStatement"
+            :conflictOfInterest="conflictOfInterest"
+            :fundingStatement="fundingStatement"
+            @submit="handleSubmit"
+            @goToStep="goToStep"
+          />
+        </Transition>
       </div>
 
       <!-- Navigation Buttons -->
       <div class="flex justify-between mt-6">
         <button 
           @click="goBack"
-          class="btn-outline"
+          class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2"
         >
-          ← Previous
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          {{ currentStep === 1 ? 'Cancel' : 'Previous' }}
         </button>
         
         <button 
           v-if="currentStep < totalSteps"
           @click="goNext"
-          class="btn-primary"
+          :disabled="!canGoNext"
+          class="px-6 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
         >
-          Next →
-        </button>
-        
-        <button 
-          v-else
-          @click="submit"
-          class="btn-primary bg-accent-500 hover:bg-accent-600 flex items-center gap-2"
-        >
+          Next
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
-          Submit
         </button>
       </div>
     </main>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.fade-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+</style>

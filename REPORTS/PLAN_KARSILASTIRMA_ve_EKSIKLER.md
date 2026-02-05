@@ -17,7 +17,7 @@
 | **Faz 4** | ⏳ pending | ✅ Tamamlandı* | %100 |
 | **Faz 5** | ⏳ pending | ✅ Tamamlandı | %100 |
 | **Faz 6** | ⏳ pending | ✅ Tamamlandı | %100 |
-| **Faz 7** | ⏳ pending | ❌ Yapılmadı | %0 |
+| **Faz 7** | ⏳ pending | ✅ Tamamlandı | %100 |
 | **Faz 8** | ⏳ pending | ❌ Yapılmadı | %0 |
 | **Faz 9** | ⏳ pending | ❌ Yapılmadı | %0 |
 | **Faz 10** | ⏳ pending | 🟡 Kısmen | %70 |
@@ -79,93 +79,17 @@
 
 ---
 
-### ❌ Faz 7: Author Module Frontend - %0
+### ✅ Faz 7: Author Module Frontend - %100
 
-#### ✅ Mevcut:
-- `views/dashboard/Dashboard.vue` - Dashboard sayfası var (modern tasarım)
-- `views/submission/NewSubmission.vue` - Skeleton var (placeholder)
-- `views/submission/SubmissionDetail.vue` - Skeleton var
+**Rapor:** `FAZ-7_Author_Module_Frontend.md`
 
-#### ❌ Eksikler:
-
-**1. Dashboard İyileştirmeleri**
-- [ ] `components/submission/SubmissionTable.vue` - Submission listesi component'i
-  - [ ] Skeleton loading
-  - [ ] Kolonlar: ID, Başlık, Durum, Tarih, İşlemler
-  - [ ] Staggered fade-in animasyonları
-  - [ ] Durum badge'leri (renkli, pill şeklinde)
-  - [ ] İşlemler dropdown menu (animasyonlu açılma)
-  - [ ] Pagination (animasyonlu geçiş)
-  - [ ] Status filtresi (dropdown, animasyonlu)
-  - [ ] Boş durum: Lottie animasyonu
-- [ ] `components/common/AnimatedCounter.vue` - Sayıların yukarı doğru sayma animasyonu
-- [ ] `components/common/SkeletonLoader.vue` - Kart ve tablo skeleton'ları, shimmer efekti
-- [ ] `stores/submission.ts` - Submission state management:
-  - [ ] State: `submissions[]`, `currentSubmission`, `isLoading`, `error`
-  - [ ] Actions: `fetchSubmissions`, `fetchSubmission`, `createSubmission`, `updateSubmission`, `deleteSubmission`
-  - [ ] Filters: `byStatus`
-  - [ ] Getters: `draftCount`, `submittedCount`, `revisionCount`, `acceptedCount`
-
-**2. Submission Wizard (6 Adım) - `views/submission/SubmissionWizard.vue`**
-- [ ] Stepper component (üst kısımda ilerleme göstergesi)
-- [ ] **Adım 1: `components/submission/wizard/StepArticleType.vue`**
-  - [ ] Radio button grubu ile makale tipi seçimi
-  - [ ] Her tip için kısa açıklama
-  - [ ] Seçim yapılmadan ilerleme engeli
-- [ ] **Adım 2: `components/submission/wizard/StepFileUpload.vue`**
-  - [ ] Drag-and-drop alan (vuedraggable)
-  - [ ] Dosya tipi seçimi (Ana Belge, Kapak Mektubu, Şekil, Tablo, Ek)
-  - [ ] Yükleme progress bar
-  - [ ] Dosya listesi (sürükle-bırak ile sıralama)
-  - [ ] Dosya silme
-  - [ ] Desteklenen formatlar bilgisi
-- [ ] **Adım 3: `components/submission/wizard/StepArticleInfo.vue`**
-  - [ ] Başlık input (required)
-  - [ ] Özet textarea (karakter sayacı ile, max 500)
-  - [ ] Anahtar kelimeler (tag input, min 3, max 6)
-  - [ ] Word dosyasından otomatik çıkarılan verileri göster (varsa)
-  - [ ] 'Dosyadan Çek' butonu
-- [ ] **Adım 4: `components/submission/wizard/StepAuthors.vue`**
-  - [ ] Yazar listesi (sıra numarası ile)
-  - [ ] Yazar ekleme modal:
-    - [ ] Ad, Soyad, Email, Kurum, ORCID
-    - [ ] 'Sorumlu Yazar mı?' checkbox
-  - [ ] Sürükle-bırak ile sıra değiştirme
-  - [ ] Yazar düzenleme ve silme
-  - [ ] En az 1 sorumlu yazar zorunlu
-- [ ] **Adım 5: `components/submission/wizard/StepAdditionalInfo.vue`**
-  - [ ] Hakem önerileri (opsiyonel) - Ad, Email, Kurum (3 adete kadar)
-  - [ ] Hakem itirazı (opsiyonel)
-  - [ ] Editöre not (textarea)
-  - [ ] Çıkar çatışması beyanı (checkbox)
-- [ ] **Adım 6: `components/submission/wizard/StepReviewSubmit.vue`**
-  - [ ] Tüm girilen bilgilerin özeti
-  - [ ] Dosya listesi önizleme
-  - [ ] Yazar listesi
-  - [ ] 'PDF Oluştur' butonu
-  - [ ] PDF hazır olduğunda:
-    - [ ] PDF önizleme (iframe veya yeni sekmede)
-    - [ ] 'Onayla ve Gönder' butonu
-    - [ ] 'Düzenle' butonu
-
-**3. Wizard State Management**
-- [ ] `stores/submission.ts` - Wizard state:
-  - [ ] `currentStep`, `totalSteps`
-  - [ ] `formData` (tüm adım verileri)
-  - [ ] `isDirty` (kaydedilmemiş değişiklik var mı)
-  - [ ] `autosave` (30 saniyede bir backend'e PUT)
-- [ ] `composables/useAutosave.ts`:
-  - [ ] Debounced autosave logic
-  - [ ] Kayıt durumu göstergesi (Kaydediliyor... / Kaydedildi)
-
-**4. Navigation**
-- [ ] İleri/Geri butonları
-- [ ] Adım atlama (tamamlanmış adımlara)
-- [ ] Sayfa kapatma uyarısı (isDirty ise)
-
-**5. Emoji Temizliği**
-- [ ] `NewSubmission.vue` - Emoji'ler kaldırılmalı (plan'a göre ciddiyet bozuyor)
-- [ ] Tüm sayfalarda emoji kontrolü
+#### Tamamlanan:
+- Submission store (Pinia), TypeScript tipleri, SubmissionTable, SkeletonLoader, AnimatedCounter, StatusBadge
+- 6 adımlı wizard: StepArticleType, StepFileUpload (placeholder), StepArticleInfo, StepAuthors, StepAdditionalInfo, StepReviewSubmit
+- NewSubmission.vue: ilerleme çubuğu, otomatik kayıt (30 sn), route guard
+- Dashboard: store entegrasyonu, SubmissionTable ile liste
+- useAutosave composable
+- Dosya yükleme gerçek API'ye Faz 8'de bağlanacak; PDF oluşturma Faz 9'da
 
 ---
 
@@ -352,31 +276,21 @@
 
 ## 📋 ÖNCELİKLİ YAPILACAKLAR (Sırayla)
 
-### 1. Faz 7: Author Module Frontend (Yüksek Öncelik)
-- Submission serializers
-- Submission views (CRUD + actions)
-- File management serializers & views
-- URL routing
+*(Faz 7 tamamlandı – bkz. FAZ-7_Author_Module_Frontend.md)*
 
-### 2. Faz 8: S3 Dosya Yönetimi (Yüksek Öncelik)
-- Submission wizard (6 adım)
-- Dashboard iyileştirmeleri
-- State management (Pinia store)
-- Auto-save composable
-- Emoji temizliği
-
-### 3. Faz 9: PDF Generation (Orta Öncelik)
+### 1. Faz 8: S3 Dosya Yönetimi (Yüksek Öncelik)
 - AWS S3 entegrasyonu
-- File upload/download
-- Presigned URL'ler
+- File upload/download, presigned URL'ler
+- StepFileUpload gerçek API'ye bağlama
 - Drag & drop component'ler
 
-### 4. Faz 10: Logo & Branding (Düşük Öncelik)
+### 2. Faz 9: PDF Generation (Orta Öncelik)
 - Celery task setup
 - WeasyPrint entegrasyonu
 - PDF template
-- Frontend polling
+- Frontend polling (build_pdf, task_status)
 
+### 3. Faz 10: Logo & Branding (Düşük Öncelik)
 - Logo tasarımı
 - Favicon'lar
 - Logo component
@@ -394,4 +308,4 @@
 
 ---
 
-**Son Güncelleme:** 13 Ocak 2026, 20:30
+**Son Güncelleme:** 23 Ocak 2026

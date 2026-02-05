@@ -1,6 +1,6 @@
 # TruEditor - Faz Numaraları Rehberi
 
-**Son Güncelleme:** 13 Ocak 2026
+**Son Güncelleme:** 23 Ocak 2026
 
 ---
 
@@ -18,15 +18,15 @@
 | **Faz 4** | Deployment (Canlıya Alma) | ✅ | `FAZ-4_Deployment_Canliya_Alma.md` |
 | **Faz 5** | ORCID Entegrasyonu & UI Güncellemesi | ✅ | `FAZ-5_ORCID_Entegrasyonu_ve_UI_Guncellemesi.md` |
 | **Faz 6** | Author Module Backend API | ✅ | `FAZ-6_Author_Module_Backend_API.md`<br>`FAZ-6_Author_Module_Backend_API_TEST.md` |
+| **Faz 7** | Author Module Frontend (Wizard) | ✅ | `FAZ-7_Author_Module_Frontend.md` |
 
 ### ⏳ Planlanan Fazlar
 
-| Faz | İsim | Durum | Öncelik |
-|-----|------|-------|---------|
-| **Faz 7** | Author Module Frontend (Wizard) | ⏳ | Yüksek |
-| **Faz 8** | S3 Dosya Yönetimi | ⏳ | Yüksek |
-| **Faz 9** | PDF Generation (Celery + WeasyPrint) | ⏳ | Orta |
-| **Faz 10** | Logo & Branding | ⏳ | Düşük |
+| Faz | İsim | Öncelik |
+|-----|------|---------|
+| **Faz 8** | S3 Dosya Yönetimi | Yüksek |
+| **Faz 9** | PDF Generation (Celery + WeasyPrint) | Orta |
+| **Faz 10** | Logo & Branding | Düşük |
 
 ---
 
@@ -65,4 +65,4 @@
 
 ---
 
-**Son Güncelleme:** 13 Ocak 2026, 22:00
+**Son Güncelleme:** 23 Ocak 2026
