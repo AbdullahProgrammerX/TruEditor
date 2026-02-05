@@ -70,6 +70,18 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
+   * Clear auth state only (no API call). Use when token is invalid/expired
+   * to avoid redirect loops (e.g. from 401 interceptor).
+   */
+  function clearAuth(): void {
+    user.value = null
+    accessToken.value = null
+    delete api.defaults.headers.common['Authorization']
+    isLoading.value = false
+    error.value = null
+  }
+
+  /**
    * Logout
    */
   async function logout(): Promise<void> {
@@ -80,11 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch {
       // Logout error doesn't matter, still clear state
     } finally {
-      // Clear state
-      user.value = null
-      accessToken.value = null
-      delete api.defaults.headers.common['Authorization']
-      isLoading.value = false
+      clearAuth()
     }
   }
 
@@ -102,11 +110,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = response.data.data
     } catch (err: any) {
       error.value = err.response?.data?.error?.message || 'Could not load profile'
-      
-      // If token is invalid, logout
-      if (err.response?.status === 401) {
-        await logout()
-      }
+      // 401 is handled by api interceptor (clearAuth + redirect); avoid calling logout() to prevent extra API call
     } finally {
       isLoading.value = false
     }
@@ -188,6 +192,7 @@ export const useAuthStore = defineStore('auth', () => {
     profileCompleted,
     
     // Actions
+    clearAuth,
     getORCIDLoginUrl,
     handleORCIDCallback,
     logout,

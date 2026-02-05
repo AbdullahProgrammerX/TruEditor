@@ -8,6 +8,12 @@ import axios, { type AxiosInstance, type AxiosError } from 'axios'
 // API base URL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'
 
+/** Called when 401 + refresh fails; set from main.ts to clear auth and navigate to login (avoids full reload). */
+let onUnauthorized: (() => void) | null = null
+export function setOnUnauthorized(handler: () => void): void {
+  onUnauthorized = handler
+}
+
 // Create axios instance
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -65,8 +71,12 @@ api.interceptors.response.use(
         // Retry original request
         return api(originalRequest)
       } catch (refreshError) {
-        // Refresh failed, redirect to login
-        window.location.href = '/login'
+        // Refresh failed: clear auth and go to login via router (no full reload to avoid loop)
+        if (onUnauthorized) {
+          onUnauthorized()
+        } else {
+          window.location.href = '/login'
+        }
         return Promise.reject(refreshError)
       }
     }

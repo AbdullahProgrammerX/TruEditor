@@ -10,6 +10,8 @@ import { MotionPlugin } from '@vueuse/motion'
 
 import App from './App.vue'
 import router from './router'
+import { setOnUnauthorized } from './services/api'
+import { useAuthStore } from './stores/auth'
 
 // Global styles
 import './style.css'
@@ -24,6 +26,13 @@ app.use(pinia)
 
 // Router
 app.use(router)
+
+// 401 handler: clear auth and navigate to login without full reload (avoids login/dashboard loop)
+const authStore = useAuthStore()
+setOnUnauthorized(() => {
+  authStore.clearAuth()
+  router.push('/login')
+})
 
 // Motion Plugin - Animations
 app.use(MotionPlugin)
