@@ -196,6 +196,7 @@ export interface ManuscriptFile {
   is_primary: boolean
   is_image: boolean
   is_document: boolean
+  download_url: string | null
   created_at: string
   updated_at: string
 }

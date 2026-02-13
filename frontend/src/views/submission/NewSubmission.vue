@@ -60,6 +60,23 @@ const steps = [
 // Computed
 const progressPercentage = computed(() => ((currentStep.value - 1) / (totalSteps - 1)) * 100)
 
+/**
+ * Ensure a draft submission exists (needed before file upload)
+ */
+async function ensureDraftExists(): Promise<void> {
+  if (submissionStore.currentSubmission) return
+  
+  await submissionStore.createSubmission({
+    title: title.value || 'Untitled',
+    article_type: articleType.value,
+    wizard_step: currentStep.value,
+    wizard_data: getWizardData(),
+  })
+  lastSavedAt.value = new Date().toISOString()
+}
+
+const submissionId = computed(() => submissionStore.currentSubmission?.id)
+
 const canGoNext = computed(() => {
   switch (currentStep.value) {
     case 1:
@@ -108,8 +125,12 @@ function goBack(): void {
 /**
  * Go to next step
  */
-function goNext(): void {
+async function goNext(): Promise<void> {
   if (currentStep.value < totalSteps && canGoNext.value) {
+    // Auto-create draft when moving to file upload step
+    if (currentStep.value === 1) {
+      await ensureDraftExists()
+    }
     currentStep.value++
     saveProgress()
   }
@@ -349,6 +370,7 @@ onBeforeRouteLeave((_to, _from, next) => {
           <!-- Step 2: File Upload -->
           <StepFileUpload 
             v-else-if="currentStep === 2"
+            :submissionId="submissionId"
           />
           
           <!-- Step 3: Article Info -->
