@@ -143,8 +143,9 @@ export function useFileUpload(submissionId: () => string | undefined) {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (progressEvent) => {
           const idx = uploadingFiles.value.findIndex(f => f.id === trackingId)
-          if (idx !== -1 && progressEvent.total) {
-            uploadingFiles.value[idx].progress = Math.round(
+          const item = idx !== -1 ? uploadingFiles.value[idx] : undefined
+          if (item && progressEvent.total) {
+            item.progress = Math.round(
               (progressEvent.loaded / progressEvent.total) * 100
             )
           }
@@ -153,10 +154,11 @@ export function useFileUpload(submissionId: () => string | undefined) {
 
       // Mark as completed
       const idx = uploadingFiles.value.findIndex(f => f.id === trackingId)
-      if (idx !== -1) {
-        uploadingFiles.value[idx].status = 'completed'
-        uploadingFiles.value[idx].progress = 100
-        uploadingFiles.value[idx].serverFile = response.data.data
+      const completedItem = idx !== -1 ? uploadingFiles.value[idx] : undefined
+      if (completedItem) {
+        completedItem.status = 'completed'
+        completedItem.progress = 100
+        completedItem.serverFile = response.data.data
       }
 
       // Add to server files list
@@ -170,9 +172,10 @@ export function useFileUpload(submissionId: () => string | undefined) {
       }, 1500)
     } catch (err: any) {
       const idx = uploadingFiles.value.findIndex(f => f.id === trackingId)
-      if (idx !== -1) {
-        uploadingFiles.value[idx].status = 'error'
-        uploadingFiles.value[idx].errorMessage =
+      const errorItem = idx !== -1 ? uploadingFiles.value[idx] : undefined
+      if (errorItem) {
+        errorItem.status = 'error'
+        errorItem.errorMessage =
           err.response?.data?.error?.message || 'Upload failed. Please try again.'
       }
     }

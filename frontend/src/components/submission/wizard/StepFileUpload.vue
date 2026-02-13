@@ -26,7 +26,6 @@ const {
   uploadingFiles,
   serverFiles,
   isLoadingFiles,
-  isUploading,
   formatFileSize,
   fetchFiles,
   uploadFile,
