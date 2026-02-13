@@ -15,7 +15,8 @@ import StepArticleInfo from '@/components/submission/wizard/StepArticleInfo.vue'
 import StepAuthors from '@/components/submission/wizard/StepAuthors.vue'
 import StepAdditionalInfo from '@/components/submission/wizard/StepAdditionalInfo.vue'
 import StepReviewSubmit from '@/components/submission/wizard/StepReviewSubmit.vue'
-import type { ArticleType, Language, AuthorInput, SuggestedReviewer, OpposedReviewer } from '@/types/submission'
+import { api } from '@/services/api'
+import type { ArticleType, Language, AuthorInput, ManuscriptFile, SuggestedReviewer, OpposedReviewer } from '@/types/submission'
 
 const router = useRouter()
 const submissionStore = useSubmissionStore()
@@ -44,6 +45,31 @@ const fundingStatement = ref('')
 const suggestedReviewers = ref<SuggestedReviewer[]>([])
 const opposedReviewers = ref<OpposedReviewer[]>([])
 const editorComments = ref('')
+
+// Uploaded files (tracked at parent level so they persist across steps)
+const uploadedFiles = ref<ManuscriptFile[]>([])
+
+/**
+ * Fetch files from server for the current submission
+ */
+async function fetchSubmissionFiles(): Promise<void> {
+  const sid = submissionStore.currentSubmission?.id
+  if (!sid) return
+  
+  try {
+    const response = await api.get(`/files/?submission_id=${sid}`)
+    uploadedFiles.value = response.data.data || []
+  } catch (err) {
+    console.error('Failed to fetch files:', err)
+  }
+}
+
+/**
+ * Handle files changed from StepFileUpload
+ */
+function onFilesChanged(files: ManuscriptFile[]): void {
+  uploadedFiles.value = files
+}
 
 // Auto-save timer
 let autosaveTimer: ReturnType<typeof setInterval> | null = null
@@ -132,6 +158,10 @@ async function goNext(): Promise<void> {
       await ensureDraftExists()
     }
     currentStep.value++
+    // Fetch files from server when entering review step
+    if (currentStep.value === 6) {
+      await fetchSubmissionFiles()
+    }
     saveProgress()
   }
 }
@@ -142,6 +172,10 @@ async function goNext(): Promise<void> {
 function goToStep(step: number): void {
   if (step <= currentStep.value || step === currentStep.value + 1) {
     currentStep.value = step
+    // Fetch files from server when entering review step
+    if (step === 6) {
+      fetchSubmissionFiles()
+    }
   }
 }
 
@@ -220,21 +254,30 @@ function getWizardData() {
  * Handle final submission
  */
 async function handleSubmit(): Promise<void> {
-  if (!submissionStore.currentSubmission) {
-    await saveProgress()
-  }
-  
   try {
-    // First save all data
+    // Ensure submission exists
+    if (!submissionStore.currentSubmission) {
+      await saveProgress()
+    }
+    
+    // Double check after save
+    if (!submissionStore.currentSubmission) {
+      ;(window as any).toast?.('error', 'Could not create submission. Please try again.')
+      return
+    }
+    
+    const sid = submissionStore.currentSubmission.id
+    
+    // Save all data first
     await saveProgress()
     
     // Add authors to submission
     for (const author of authors.value) {
-      await submissionStore.addAuthor(submissionStore.currentSubmission!.id, author)
+      await submissionStore.addAuthor(sid, author)
     }
     
     // Submit for review
-    await submissionStore.submitForReview(submissionStore.currentSubmission!.id)
+    await submissionStore.submitForReview(sid)
     
     // Show success and redirect
     ;(window as any).toast?.('success', 'Manuscript submitted successfully!')
@@ -371,6 +414,7 @@ onBeforeRouteLeave((_to, _from, next) => {
           <StepFileUpload 
             v-else-if="currentStep === 2"
             :submissionId="submissionId"
+            @filesChanged="onFilesChanged"
           />
           
           <!-- Step 3: Article Info -->
@@ -412,6 +456,7 @@ onBeforeRouteLeave((_to, _from, next) => {
             :abstract="abstract"
             :keywords="keywords"
             :authors="authors"
+            :files="uploadedFiles"
             :coverLetter="coverLetter"
             :ethicsStatement="ethicsStatement"
             :conflictOfInterest="conflictOfInterest"
