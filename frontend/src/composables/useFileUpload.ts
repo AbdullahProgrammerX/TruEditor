@@ -102,7 +102,15 @@ export function useFileUpload(submissionId: () => string | undefined) {
   async function uploadFile(file: File, fileType: FileType): Promise<void> {
     const sid = submissionId()
     if (!sid) {
-      console.error('No submission ID available for file upload')
+      uploadingFiles.value.push({
+        id: crypto.randomUUID(),
+        name: file.name,
+        size: file.size,
+        fileType,
+        progress: 0,
+        status: 'error',
+        errorMessage: 'Submission not ready yet. Please go back to Step 1 and try again.',
+      })
       return
     }
 

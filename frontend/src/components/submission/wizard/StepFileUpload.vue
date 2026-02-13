@@ -222,18 +222,6 @@ watch(serverFiles, (files) => {
       </p>
     </div>
 
-    <!-- No Submission Warning -->
-    <div v-if="!submissionId" class="mb-6 p-4 bg-amber-50 rounded-xl border border-amber-200">
-      <div class="flex gap-3">
-        <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <p class="text-sm text-amber-700">
-          Please complete the previous step first. A draft submission will be created automatically before file upload.
-        </p>
-      </div>
-    </div>
-
     <!-- File Type Selector -->
     <div class="mb-4">
       <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -242,7 +230,6 @@ watch(serverFiles, (files) => {
       <select
         v-model="selectedFileType"
         class="input-field"
-        :disabled="!submissionId"
       >
         <option
           v-for="(typeInfo, typeKey) in FILE_TYPES"
@@ -257,13 +244,10 @@ watch(serverFiles, (files) => {
     <!-- Drop Zone -->
     <div
       class="drop-zone"
-      :class="{
-        'dragging': isDragging,
-        'opacity-50 cursor-not-allowed': !submissionId
-      }"
-      @dragover.prevent="submissionId && (isDragging = true)"
+      :class="{ 'dragging': isDragging }"
+      @dragover.prevent="isDragging = true"
       @dragleave.prevent="isDragging = false"
-      @drop.prevent="submissionId && handleDrop($event)"
+      @drop.prevent="handleDrop"
     >
       <input
         type="file"
@@ -271,11 +255,10 @@ watch(serverFiles, (files) => {
         accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.tiff,.tif,.xlsx,.xls"
         class="hidden"
         id="fileInput"
-        :disabled="!submissionId"
         @change="handleFileInput"
       />
 
-      <label for="fileInput" :class="submissionId ? 'cursor-pointer' : 'cursor-not-allowed'">
+      <label for="fileInput" class="cursor-pointer">
         <div class="flex flex-col items-center">
           <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4">
             <svg class="w-8 h-8 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -515,20 +498,11 @@ watch(serverFiles, (files) => {
 /* List transition animations */
 .file-list-enter-active,
 .file-list-leave-active {
-  transition: all 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 
-.file-list-enter-from {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
+.file-list-enter-from,
 .file-list-leave-to {
   opacity: 0;
-  transform: translateX(20px);
-}
-
-.file-list-move {
-  transition: transform 0.3s ease;
 }
 </style>
