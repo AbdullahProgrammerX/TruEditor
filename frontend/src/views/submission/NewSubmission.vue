@@ -153,15 +153,27 @@ function goBack(): void {
  */
 async function goNext(): Promise<void> {
   if (currentStep.value < totalSteps && canGoNext.value) {
-    // Auto-create draft when moving to file upload step
-    if (currentStep.value === 1) {
-      await ensureDraftExists()
+    try {
+      // Auto-create draft when moving to file upload step
+      if (currentStep.value === 1) {
+        await ensureDraftExists()
+      }
+    } catch (err: any) {
+      console.error('Failed to create draft:', err)
+      // Still allow navigation - StepFileUpload handles missing submissionId gracefully
     }
+    
     currentStep.value++
+    
     // Fetch files from server when entering review step
     if (currentStep.value === 6) {
-      await fetchSubmissionFiles()
+      try {
+        await fetchSubmissionFiles()
+      } catch {
+        // Non-blocking: files will show empty
+      }
     }
+    
     saveProgress()
   }
 }
@@ -498,16 +510,11 @@ onBeforeRouteLeave((_to, _from, next) => {
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 
-.fade-enter-from {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
+.fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateX(-20px);
 }
 </style>
