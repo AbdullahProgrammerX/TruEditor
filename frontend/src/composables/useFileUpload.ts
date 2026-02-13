@@ -109,7 +109,7 @@ export function useFileUpload(submissionId: () => string | undefined) {
         fileType,
         progress: 0,
         status: 'error',
-        errorMessage: 'Submission not ready yet. Please go back to Step 1 and try again.',
+        errorMessage: 'Draft could not be created. Please go back, select an article type, and try again.',
       })
       return
     }

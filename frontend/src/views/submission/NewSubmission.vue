@@ -158,8 +158,8 @@ async function goNext(): Promise<void> {
   if (currentStep.value === 1 && !submissionStore.currentSubmission) {
     const created = await ensureDraftExists()
     if (!created) {
-      // Draft creation failed but still let user proceed - 
-      // StepFileUpload will attempt to create draft on demand
+      // Show error but still advance - file upload shows appropriate message per file
+      ;(window as any).toast?.('error', saveError.value || 'Could not save draft. You can still continue.')
     }
   }
 

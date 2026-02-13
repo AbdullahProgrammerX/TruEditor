@@ -103,6 +103,8 @@ class Submission(models.Model):
     title = models.CharField(
         _('Title'),
         max_length=500,
+        blank=True,
+        default='',
         help_text=_('Title of the manuscript')
     )
     
@@ -116,6 +118,8 @@ class Submission(models.Model):
     abstract = models.TextField(
         _('Abstract'),
         max_length=5000,
+        blank=True,
+        default='',
         help_text=_('Abstract of the manuscript (max 5000 characters)')
     )
     

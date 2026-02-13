@@ -201,7 +201,7 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
 class SubmissionCreateSerializer(serializers.ModelSerializer):
     """
     Serializer for creating a new submission.
-    Creates a DRAFT submission.
+    Creates a DRAFT submission. All fields are optional for drafts.
     """
     
     class Meta:
@@ -223,6 +223,14 @@ class SubmissionCreateSerializer(serializers.ModelSerializer):
             'wizard_step',
             'wizard_data',
         ]
+        # All fields optional for draft creation
+        extra_kwargs = {
+            'title': {'required': False},
+            'abstract': {'required': False},
+            'article_type': {'required': False},
+            'language': {'required': False},
+            'wizard_step': {'required': False},
+        }
     
     def validate_keywords(self, value):
         """Validate keywords format."""
