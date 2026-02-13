@@ -363,6 +363,10 @@ class AuthorCreateSerializer(serializers.ModelSerializer):
             'is_corresponding',
             'contribution',
         ]
+        extra_kwargs = {
+            'user': {'required': False, 'allow_null': True},
+            'order': {'required': False},
+        }
     
     def validate_email(self, value):
         """Validate email format."""

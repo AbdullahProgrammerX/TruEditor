@@ -97,11 +97,24 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            return success_response(
+                data={
+                    'count': self.paginator.page.paginator.count,
+                    'next': self.paginator.get_next_link(),
+                    'previous': self.paginator.get_previous_link(),
+                    'results': serializer.data,
+                },
+                message=_('Submissions retrieved successfully')
+            )
         
         serializer = self.get_serializer(queryset, many=True)
         return success_response(
-            data=serializer.data,
+            data={
+                'count': len(serializer.data),
+                'next': None,
+                'previous': None,
+                'results': serializer.data,
+            },
             message=_('Submissions retrieved successfully')
         )
     

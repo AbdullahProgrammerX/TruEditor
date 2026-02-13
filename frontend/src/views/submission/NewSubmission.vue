@@ -308,10 +308,36 @@ async function handleSubmit(): Promise<void> {
 
     const sid = submissionStore.currentSubmission.id
 
+    // Save all submission fields first
     await saveProgress()
 
-    for (const author of authors.value) {
-      await submissionStore.addAuthor(sid, author)
+    // Delete existing server-side authors (handles re-submit / retry gracefully)
+    const existingAuthors = submissionStore.currentSubmission?.authors || []
+    for (const existing of existingAuthors) {
+      try {
+        await submissionStore.removeAuthor(sid, existing.id)
+      } catch {
+        // Continue even if individual deletion fails
+      }
+    }
+
+    // Add authors from wizard with clean data (no user field, explicit order)
+    for (let i = 0; i < authors.value.length; i++) {
+      const a = authors.value[i]
+      if (!a) continue
+      await submissionStore.addAuthor(sid, {
+        given_name: a.given_name,
+        family_name: a.family_name,
+        email: a.email,
+        institution: a.institution,
+        orcid_id: a.orcid_id || '',
+        department: a.department || '',
+        country: a.country || '',
+        city: a.city || '',
+        order: i + 1,
+        is_corresponding: a.is_corresponding || false,
+        contribution: a.contribution || '',
+      })
     }
 
     await submissionStore.submitForReview(sid)
@@ -319,7 +345,8 @@ async function handleSubmit(): Promise<void> {
     ;(window as any).toast?.('success', 'Manuscript submitted successfully!')
     router.push('/dashboard')
   } catch (error: any) {
-    ;(window as any).toast?.('error', error.message || 'Submission failed')
+    const msg = error.response?.data?.error?.message || error.message || 'Submission failed'
+    ;(window as any).toast?.('error', msg)
   }
 }
 

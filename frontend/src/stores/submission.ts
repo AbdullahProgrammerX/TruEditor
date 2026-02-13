@@ -18,7 +18,6 @@ import type {
   WizardData,
   Author,
   AuthorInput,
-  PaginatedResponse,
 } from '@/types/submission'
 
 export const useSubmissionStore = defineStore('submission', () => {
@@ -151,12 +150,13 @@ export const useSubmissionStore = defineStore('submission', () => {
       params.append('page', String(currentPage.value))
       params.append('page_size', String(pageSize.value))
       
-      const response = await api.get<{ data: PaginatedResponse<SubmissionListItem> }>(
-        `/submissions/?${params.toString()}`
-      )
+      const response = await api.get(`/submissions/?${params.toString()}`)
       
-      submissions.value = response.data.data.results
-      totalCount.value = response.data.data.count
+      // Handle both wrapped ({success, data: {count, results}}) and
+      // unwrapped ({count, results}) response formats
+      const payload = response.data?.data ?? response.data
+      submissions.value = payload.results ?? []
+      totalCount.value = payload.count ?? 0
     } catch (err: any) {
       error.value = err.response?.data?.error?.message || 'Failed to load submissions'
       throw err

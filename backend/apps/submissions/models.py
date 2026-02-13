@@ -620,7 +620,6 @@ class Author(models.Model):
         verbose_name = _('Author')
         verbose_name_plural = _('Authors')
         ordering = ['order']
-        unique_together = [['submission', 'order']]
         indexes = [
             models.Index(fields=['submission', 'order']),
             models.Index(fields=['email']),
