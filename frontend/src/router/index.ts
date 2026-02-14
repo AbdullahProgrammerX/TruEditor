@@ -14,6 +14,7 @@ const ORCIDCallback = () => import('@/views/auth/ORCIDCallback.vue')
 const CompleteProfile = () => import('@/views/profile/CompleteProfile.vue')
 const Dashboard = () => import('@/views/dashboard/Dashboard.vue')
 const NewSubmission = () => import('@/views/submission/NewSubmission.vue')
+const SubmissionsList = () => import('@/views/submission/SubmissionsList.vue')
 const SubmissionDetail = () => import('@/views/submission/SubmissionDetail.vue')
 const Profile = () => import('@/views/profile/Profile.vue')
 const NotFound = () => import('@/views/NotFound.vue')
@@ -77,6 +78,15 @@ const routes: RouteRecordRaw[] = [
     path: '/submissions/new',
     name: 'new-submission',
     component: NewSubmission,
+    meta: { 
+      requiresAuth: true,
+      requiresProfile: true 
+    }
+  },
+  {
+    path: '/submissions',
+    name: 'submissions',
+    component: SubmissionsList,
     meta: { 
       requiresAuth: true,
       requiresProfile: true 

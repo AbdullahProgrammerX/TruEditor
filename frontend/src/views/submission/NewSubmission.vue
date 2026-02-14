@@ -321,9 +321,27 @@ async function handleSubmit(): Promise<void> {
       }
     }
 
+    // Validate authors before sending (required: given_name, family_name, email, institution)
+    const validAuthors = authors.value
+      .map(a => {
+        if (!a) return null
+        const given = (a.given_name || '').trim()
+        const family = (a.family_name || '').trim()
+        const email = (a.email || '').trim()
+        const institution = (a.institution || '').trim()
+        if (!given || !family || !email || !institution) return null
+        return { ...a, given_name: given, family_name: family, email, institution }
+      })
+      .filter((a): a is NonNullable<typeof a> => a !== null)
+
+    if (validAuthors.length !== authors.value.length) {
+      ;(window as any).toast?.('error', 'Please fill in all required fields for each author (first name, last name, email, institution).')
+      return
+    }
+
     // Add authors from wizard with clean data (no user field, explicit order)
-    for (let i = 0; i < authors.value.length; i++) {
-      const a = authors.value[i]
+    for (let i = 0; i < validAuthors.length; i++) {
+      const a = validAuthors[i]
       if (!a) continue
       await submissionStore.addAuthor(sid, {
         given_name: a.given_name,

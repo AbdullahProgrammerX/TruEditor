@@ -43,6 +43,10 @@ function viewSubmission(id: string) {
   router.push(`/submissions/${id}`)
 }
 
+function goToSubmissions(status?: string) {
+  router.push({ path: '/submissions', query: status ? { status } : {} })
+}
+
 function handlePageChange(page: number) {
   submissionStore.setPage(page)
 }
@@ -207,12 +211,16 @@ const greeting = computed(() => {
         </p>
       </div>
 
-      <!-- Stats Cards -->
+      <!-- Stats Cards (clickable when count > 0) -->
       <div 
         class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 transition-all duration-700 delay-100"
         :class="isVisible ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0'"
       >
-        <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 group">
+        <button
+          @click="stats.draft > 0 ? goToSubmissions('draft') : null"
+          class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 group text-left"
+          :class="{ 'cursor-pointer': stats.draft > 0, 'cursor-default': stats.draft === 0 }"
+        >
           <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
               <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -223,9 +231,13 @@ const greeting = computed(() => {
           </div>
           <div class="text-2xl sm:text-3xl font-bold text-gray-800">{{ stats.draft }}</div>
           <div class="text-xs sm:text-sm text-gray-500">Manuscripts</div>
-        </div>
+        </button>
 
-        <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 group">
+        <button
+          @click="stats.submitted > 0 ? goToSubmissions('submitted') : null"
+          class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 group text-left"
+          :class="{ 'cursor-pointer': stats.submitted > 0, 'cursor-default': stats.submitted === 0 }"
+        >
           <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
               <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -236,9 +248,13 @@ const greeting = computed(() => {
           </div>
           <div class="text-2xl sm:text-3xl font-bold text-blue-600">{{ stats.submitted }}</div>
           <div class="text-xs sm:text-sm text-gray-500">Awaiting Review</div>
-        </div>
+        </button>
 
-        <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 group">
+        <button
+          @click="stats.underReview > 0 ? goToSubmissions('under_review') : null"
+          class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 group text-left"
+          :class="{ 'cursor-pointer': stats.underReview > 0, 'cursor-default': stats.underReview === 0 }"
+        >
           <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
               <svg class="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -250,9 +266,13 @@ const greeting = computed(() => {
           </div>
           <div class="text-2xl sm:text-3xl font-bold text-amber-600">{{ stats.underReview }}</div>
           <div class="text-xs sm:text-sm text-gray-500">Being Reviewed</div>
-        </div>
+        </button>
 
-        <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 group">
+        <button
+          @click="stats.accepted > 0 ? goToSubmissions('accepted') : null"
+          class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-all border border-gray-100 group text-left"
+          :class="{ 'cursor-pointer': stats.accepted > 0, 'cursor-default': stats.accepted === 0 }"
+        >
           <div class="flex items-center justify-between mb-3">
             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
               <svg class="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -263,7 +283,7 @@ const greeting = computed(() => {
           </div>
           <div class="text-2xl sm:text-3xl font-bold text-emerald-600">{{ stats.accepted }}</div>
           <div class="text-xs sm:text-sm text-gray-500">Published</div>
-        </div>
+        </button>
       </div>
 
       <!-- Quick Actions & New Submission -->

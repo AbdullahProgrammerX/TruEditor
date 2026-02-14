@@ -110,26 +110,53 @@ function openAddModal(): void {
 }
 
 /**
- * Add current user as author
+ * Add current user as author.
+ * Fetches fresh profile if needed and uses full_name fallback for given/family.
  */
-function addSelfAsAuthor(): void {
+async function addSelfAsAuthor(): Promise<void> {
   if (!authStore.user) return
-  
-  const user = authStore.user
+
+  let user = authStore.user
+  if (!(user.given_name || '').trim() || !(user.family_name || '').trim() || !(user.institution || '').trim()) {
+    await authStore.fetchProfile()
+    user = authStore.user
+    if (!user) return
+  }
+
+  let given = (user.given_name || '').trim()
+  let family = (user.family_name || '').trim()
+  if (!given || !family) {
+    const parts = (user.full_name || '').trim().split(/\s+/).filter(Boolean)
+    given = given || parts[0] || 'Author'
+    family = family || (parts.slice(1).join(' ') || parts[0] || 'Name')
+  }
+
+  const email = (user.email || '').trim()
+  if (!email) {
+    ;(window as any).toast?.('error', 'Please add your email in Profile first.')
+    return
+  }
+
+  const institution = (user.institution || '').trim()
+  if (!institution) {
+    ;(window as any).toast?.('error', 'Please add your institution in Profile first.')
+    return
+  }
+
   const newAuthor: AuthorFormData = {
-    given_name: user.given_name,
-    family_name: user.family_name,
-    email: user.email || '',
-    orcid_id: user.orcid_id,
-    institution: user.institution,
-    department: user.department,
-    country: user.country,
-    city: user.city,
+    given_name: given,
+    family_name: family,
+    email,
+    orcid_id: user.orcid_id || '',
+    institution,
+    department: user.department || '',
+    country: user.country || '',
+    city: user.city || '',
     is_corresponding: !hasCorresponding.value,
     contribution: '',
     order: localAuthors.value.length + 1,
   }
-  
+
   localAuthors.value.push(newAuthor)
 }
 
