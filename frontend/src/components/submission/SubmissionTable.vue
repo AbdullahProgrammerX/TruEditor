@@ -6,7 +6,7 @@
  * Features: Skeleton loading, status badges, staggered animations, pagination.
  */
 
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import SkeletonLoader from '@/components/common/SkeletonLoader.vue'
@@ -41,6 +41,12 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const activeDropdown = ref<string | null>(null)
+const dropdownPosition = ref({ top: 0, left: 0, bottom: 0, openUpward: false })
+
+function getActiveItem(): SubmissionListItem | undefined {
+  if (!activeDropdown.value) return undefined
+  return props.items.find((i) => i.id === activeDropdown.value)
+}
 
 /**
  * Format date for display
@@ -72,11 +78,31 @@ function formatRelativeTime(dateStr: string): string {
   return `${Math.floor(days / 365)} years ago`
 }
 
+const DROPDOWN_HEIGHT = 140
+const DROPDOWN_WIDTH = 192
+
 /**
- * Toggle dropdown menu
+ * Toggle dropdown menu with position calculation
  */
-function toggleDropdown(id: string): void {
-  activeDropdown.value = activeDropdown.value === id ? null : id
+function toggleDropdown(id: string, event: MouseEvent): void {
+  if (activeDropdown.value === id) {
+    activeDropdown.value = null
+    return
+  }
+
+  const target = event.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+  const spaceBelow = window.innerHeight - rect.bottom
+  const openUpward = spaceBelow < DROPDOWN_HEIGHT && rect.top > spaceBelow
+
+  const left = Math.max(8, Math.min(rect.right - DROPDOWN_WIDTH, window.innerWidth - DROPDOWN_WIDTH - 8))
+  dropdownPosition.value = {
+    top: rect.bottom,
+    left,
+    bottom: window.innerHeight - rect.top + 4,
+    openUpward,
+  }
+  activeDropdown.value = id
 }
 
 /**
@@ -85,6 +111,20 @@ function toggleDropdown(id: string): void {
 function closeDropdown(): void {
   activeDropdown.value = null
 }
+
+function handleClickOutside(event: MouseEvent): void {
+  const target = event.target as HTMLElement
+  if (target.closest('.submission-table-dropdown-trigger') || target.closest('.submission-table-dropdown-menu')) return
+  closeDropdown()
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 
 /**
  * Handle view action
@@ -96,12 +136,12 @@ function handleView(item: SubmissionListItem): void {
 }
 
 /**
- * Handle edit action
+ * Handle edit action (navigates to detail page)
  */
 function handleEdit(item: SubmissionListItem): void {
   closeDropdown()
   emit('edit', item.id)
-  router.push(`/submissions/${item.id}/edit`)
+  router.push(`/submissions/${item.id}`)
 }
 
 /**
@@ -241,70 +281,78 @@ function getAnimationDelay(index: number): string {
 
               <!-- Actions -->
               <td class="px-6 py-4 text-right">
-                <div class="relative inline-block">
-                  <button
-                    @click="toggleDropdown(item.id)"
-                    class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                    </svg>
-                  </button>
-
-                  <!-- Dropdown Menu -->
-                  <Transition
-                    enter-active-class="transition ease-out duration-100"
-                    enter-from-class="transform opacity-0 scale-95"
-                    enter-to-class="transform opacity-100 scale-100"
-                    leave-active-class="transition ease-in duration-75"
-                    leave-from-class="transform opacity-100 scale-100"
-                    leave-to-class="transform opacity-0 scale-95"
-                  >
-                    <div
-                      v-if="activeDropdown === item.id"
-                      class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-10"
-                      @click.away="closeDropdown"
-                    >
-                      <button
-                        @click="handleView(item)"
-                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                      >
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        View Details
-                      </button>
-
-                      <button
-                        v-if="canEdit(item)"
-                        @click="handleEdit(item)"
-                        class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                      >
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Edit
-                      </button>
-
-                      <button
-                        v-if="canDelete(item)"
-                        @click="handleDelete(item)"
-                        class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                      >
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Delete
-                      </button>
-                    </div>
-                  </Transition>
-                </div>
+                <button
+                  type="button"
+                  class="submission-table-dropdown-trigger p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  @click.stop="toggleDropdown(item.id, $event)"
+                >
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  </svg>
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Dropdown Menu (Teleport to body - always on top, never clipped) -->
+      <Teleport to="body">
+        <Transition
+          enter-active-class="transition ease-out duration-100"
+          enter-from-class="opacity-0 scale-95"
+          enter-to-class="opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-75"
+          leave-from-class="opacity-100 scale-100"
+          leave-to-class="opacity-0 scale-95"
+        >
+          <div
+            v-if="getActiveItem()"
+            class="submission-table-dropdown-menu fixed w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-1 z-[9999]"
+            :style="{
+              top: dropdownPosition.openUpward ? 'auto' : `${dropdownPosition.top + 4}px`,
+              bottom: dropdownPosition.openUpward ? `${dropdownPosition.bottom}px` : 'auto',
+              left: `${dropdownPosition.left}px`,
+            }"
+          >
+            <button
+              type="button"
+              @click="handleView(getActiveItem()!)"
+              class="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+            >
+              <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              View Details
+            </button>
+
+            <button
+              v-if="getActiveItem() && canEdit(getActiveItem()!)"
+              type="button"
+              @click="handleEdit(getActiveItem()!)"
+              class="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+            >
+              <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Edit
+            </button>
+
+            <button
+              v-if="getActiveItem() && canDelete(getActiveItem()!)"
+              type="button"
+              @click="handleDelete(getActiveItem()!)"
+              class="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Delete
+            </button>
+          </div>
+        </Transition>
+      </Teleport>
 
       <!-- Pagination -->
       <div 
