@@ -133,8 +133,9 @@ async function handleRemoveFile(fileId: string, status: string): Promise<void> {
     try {
       await removeFile(fileId)
       emit('filesChanged', serverFiles.value)
+      ;(window as any).toast?.('success', 'File removed.')
     } catch {
-      // Error handled in composable
+      ;(window as any).toast?.('error', 'Could not remove file. Please try again.')
     } finally {
       isDeleting.value = false
       fileToDelete.value = null

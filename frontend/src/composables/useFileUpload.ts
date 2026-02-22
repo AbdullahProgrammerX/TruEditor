@@ -174,10 +174,8 @@ export function useFileUpload(submissionId: () => string | undefined) {
         serverFiles.value.push(response.data.data)
       }
 
-      // Remove completed entry from uploading list after short delay
-      setTimeout(() => {
-        uploadingFiles.value = uploadingFiles.value.filter(f => f.id !== trackingId)
-      }, 1500)
+      // Remove completed entry immediately to avoid duplicate display
+      uploadingFiles.value = uploadingFiles.value.filter(f => f.id !== trackingId)
     } catch (err: any) {
       const idx = uploadingFiles.value.findIndex(f => f.id === trackingId)
       const errorItem = idx !== -1 ? uploadingFiles.value[idx] : undefined

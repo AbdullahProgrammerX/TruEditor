@@ -51,19 +51,26 @@ class ManuscriptFileViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """
         Return files for the specified submission.
+        For list/create: requires submission_id query param.
+        For retrieve/destroy/update: uses pk, filters by user ownership.
         """
         submission_id = self.request.query_params.get('submission_id')
-        
+        pk = self.kwargs.get('pk')
+
+        # Detail actions (retrieve, destroy, update, etc.): allow by file pk + ownership
+        if pk:
+            return ManuscriptFile.objects.filter(
+                submission__submitter=self.request.user
+            )
+
+        # List/create: require submission_id
         if not submission_id:
             return ManuscriptFile.objects.none()
-        
-        # Get submission and check ownership
+
         submission = get_object_or_404(Submission, id=submission_id)
-        
-        # Only owner can access files
         if submission.submitter != self.request.user:
             return ManuscriptFile.objects.none()
-        
+
         return ManuscriptFile.objects.filter(
             submission=submission,
             is_active=True
