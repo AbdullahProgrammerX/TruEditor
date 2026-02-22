@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.utils.translation import gettext_lazy as _
 
-from .models import Submission, Author
+from .models import Submission, Author, SubmissionStatusHistory
 from .serializers import (
     SubmissionListSerializer,
     SubmissionDetailSerializer,
@@ -65,7 +65,9 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             'assigned_editor'
         ).prefetch_related(
             'authors',
-            'files'
+            'files',
+            'status_history',
+            'status_history__changed_by',
         ).order_by('-created_at')
         
         # Filter by status if provided
@@ -298,8 +300,17 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         
         # Perform FSM transition
         try:
+            old_status = submission.status
             submission.submit()
             submission.save()
+
+            SubmissionStatusHistory.objects.create(
+                submission=submission,
+                from_status=old_status,
+                to_status=submission.status,
+                changed_by=request.user,
+                notes=_('Manuscript submitted by author'),
+            )
             
             logger.info(
                 f"Submission {submission.manuscript_id} submitted by {request.user.email}"
@@ -342,6 +353,45 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             message=_('Task status retrieved')
         )
     
+    @action(detail=True, methods=['post'])
+    def withdraw(self, request, pk=None):
+        """Withdraw a submission (by author)."""
+        submission = self.get_object()
+
+        if not submission.can_be_withdrawn:
+            return validation_error_response(
+                _('This submission cannot be withdrawn in its current status.')
+            )
+
+        try:
+            old_status = submission.status
+            submission.withdraw()
+            submission.save()
+
+            SubmissionStatusHistory.objects.create(
+                submission=submission,
+                from_status=old_status,
+                to_status=submission.status,
+                changed_by=request.user,
+                notes=_('Manuscript withdrawn by author'),
+            )
+
+            logger.info(
+                f"Submission {submission.manuscript_id or submission.id} withdrawn by {request.user.email}"
+            )
+
+            return success_response(
+                data=SubmissionDetailSerializer(submission).data,
+                message=_('Submission withdrawn successfully')
+            )
+        except Exception as e:
+            logger.error(f"Error withdrawing submission: {str(e)}")
+            return error_response(
+                message=_('Failed to withdraw submission'),
+                code='WITHDRAW_ERROR',
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     @action(detail=True, methods=['get', 'post'])
     def authors(self, request, pk=None):
         """

@@ -136,12 +136,12 @@ function handleView(item: SubmissionListItem): void {
 }
 
 /**
- * Handle edit action (navigates to detail page)
+ * Handle edit action (navigates to wizard for editing)
  */
 function handleEdit(item: SubmissionListItem): void {
   closeDropdown()
   emit('edit', item.id)
-  router.push(`/submissions/${item.id}`)
+  router.push(`/submissions/new?edit=${item.id}`)
 }
 
 /**
@@ -240,9 +240,9 @@ function getAnimationDelay(index: number): string {
               <td class="px-6 py-4">
                 <div class="flex items-start gap-3">
                   <div class="flex-1 min-w-0">
-                    <p class="font-medium text-gray-900 truncate max-w-md group-hover:text-primary-600 transition-colors">
+                    <router-link :to="`/submissions/${item.id}`" class="font-medium text-gray-900 truncate max-w-md group-hover:text-primary-600 transition-colors block hover:underline">
                       {{ item.title || 'Untitled' }}
-                    </p>
+                    </router-link>
                     <div class="flex items-center gap-2 mt-1 text-sm text-gray-500">
                       <span v-if="item.manuscript_id" class="font-mono">
                         {{ item.manuscript_id }}

@@ -202,6 +202,21 @@ export interface ManuscriptFile {
 }
 
 /**
+ * Status history entry
+ */
+export interface StatusHistoryEntry {
+  id: string
+  from_status: SubmissionStatus
+  to_status: SubmissionStatus
+  from_status_display: string
+  to_status_display: string
+  changed_by: string | null
+  changed_by_name: string
+  notes: string
+  created_at: string
+}
+
+/**
  * Corresponding author summary
  */
 export interface CorrespondingAuthor {
@@ -282,6 +297,7 @@ export interface Submission {
   // Relations
   authors: Author[]
   files: ManuscriptFile[]
+  status_history: StatusHistoryEntry[]
   author_count: number
   file_count: number
   

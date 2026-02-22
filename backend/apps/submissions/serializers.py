@@ -10,9 +10,34 @@ from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
-from .models import Submission, Author
+from .models import Submission, Author, SubmissionStatusHistory
 from apps.users.serializers import UserMinimalSerializer
 from apps.files.serializers import ManuscriptFileSerializer
+
+
+class StatusHistorySerializer(serializers.ModelSerializer):
+    changed_by_name = serializers.SerializerMethodField()
+    from_status_display = serializers.SerializerMethodField()
+    to_status_display = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SubmissionStatusHistory
+        fields = [
+            'id', 'from_status', 'to_status',
+            'from_status_display', 'to_status_display',
+            'changed_by', 'changed_by_name', 'notes', 'created_at',
+        ]
+
+    def get_changed_by_name(self, obj):
+        if obj.changed_by:
+            return obj.changed_by.full_name or obj.changed_by.email
+        return 'System'
+
+    def get_from_status_display(self, obj):
+        return dict(Submission.Status.choices).get(obj.from_status, obj.from_status)
+
+    def get_to_status_display(self, obj):
+        return dict(Submission.Status.choices).get(obj.to_status, obj.to_status)
 
 
 class AuthorshipSerializer(serializers.ModelSerializer):
@@ -106,15 +131,16 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
     
     submitter = UserMinimalSerializer(read_only=True)
     authors = AuthorshipSerializer(many=True, read_only=True)
-    files = ManuscriptFileSerializer(many=True, read_only=True)
+    files = serializers.SerializerMethodField()
     assigned_editor = UserMinimalSerializer(read_only=True)
+    status_history = StatusHistorySerializer(many=True, read_only=True)
     author_count = serializers.ReadOnlyField()
     file_count = serializers.ReadOnlyField()
     is_editable = serializers.ReadOnlyField()
     can_be_withdrawn = serializers.ReadOnlyField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     article_type_display = serializers.CharField(source='get_article_type_display', read_only=True)
-    
+
     class Meta:
         model = Submission
         fields = [
@@ -167,6 +193,7 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
             # Relations
             'authors',
             'files',
+            'status_history',
             'author_count',
             'file_count',
             
@@ -196,6 +223,10 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
             'accepted_at',
             'published_at',
         ]
+
+    def get_files(self, obj):
+        active_files = obj.files.filter(is_active=True).order_by('order')
+        return ManuscriptFileSerializer(active_files, many=True).data
 
 
 class SubmissionCreateSerializer(serializers.ModelSerializer):
