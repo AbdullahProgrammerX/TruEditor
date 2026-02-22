@@ -173,6 +173,7 @@ function getTypeColor(type: FileType): string {
     copyright: 'bg-slate-100 text-slate-700',
     revision: 'bg-orange-100 text-orange-700',
     revision_notes: 'bg-teal-100 text-teal-700',
+    system_pdf: 'bg-red-100 text-red-700',
     other: 'bg-gray-100 text-gray-600',
   }
   return colors[type]

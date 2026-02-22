@@ -29,7 +29,6 @@ django-fsm>=2.8,<3.0
 
 # PDF Generation
 WeasyPrint>=60.0,<70.0
-xhtml2pdf>=0.2.11
 
 # Document Processing
 python-docx>=1.1,<2.0

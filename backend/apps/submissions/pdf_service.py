@@ -7,7 +7,6 @@ Stores the generated PDF in the configured storage backend (S3/R2/local).
 Developer: Abdullah Dogan
 """
 
-import io
 import logging
 from django.template.loader import render_to_string
 from django.utils import timezone
@@ -99,46 +98,8 @@ def _render_html(submission: Submission) -> str:
 
 
 def _html_to_pdf(html: str) -> bytes:
-    """Convert HTML to PDF bytes. Tries WeasyPrint, then xhtml2pdf as fallback."""
-    try:
-        from weasyprint import HTML
-        pdf = HTML(string=html).write_pdf()
-        logger.debug("PDF generated with WeasyPrint")
-        return pdf
-    except (ImportError, OSError) as exc:
-        logger.warning("WeasyPrint unavailable (%s), trying xhtml2pdf fallback", exc)
-
-    try:
-        import xhtml2pdf.pisa as pisa
-        buf = io.BytesIO()
-        result = pisa.CreatePDF(io.StringIO(html), dest=buf)
-        if result.err:
-            raise RuntimeError(f"xhtml2pdf errors: {result.err}")
-        logger.debug("PDF generated with xhtml2pdf")
-        return buf.getvalue()
-    except ImportError:
-        logger.warning("xhtml2pdf also unavailable, using minimal reportlab fallback")
-
-    return _reportlab_fallback(html)
-
-
-def _reportlab_fallback(html: str) -> bytes:
-    """Last-resort fallback: simple text PDF via reportlab (bundled with xhtml2pdf)."""
-    try:
-        from reportlab.lib.pagesizes import A4
-        from reportlab.pdfgen import canvas as rl_canvas
-
-        buf = io.BytesIO()
-        c = rl_canvas.Canvas(buf, pagesize=A4)
-        width, height = A4
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(72, height - 72, "TruEditor - Submission PDF")
-        c.setFont("Helvetica", 10)
-        c.drawString(72, height - 100, "Full PDF rendering requires WeasyPrint system libraries.")
-        c.drawString(72, height - 116, "Please install libpango and related packages on the server.")
-        c.save()
-        return buf.getvalue()
-    except ImportError:
-        raise RuntimeError(
-            "No PDF backend available. Install WeasyPrint or xhtml2pdf."
-        )
+    """Convert HTML to PDF bytes using WeasyPrint."""
+    from weasyprint import HTML
+    pdf = HTML(string=html).write_pdf()
+    logger.debug("PDF generated with WeasyPrint")
+    return pdf
