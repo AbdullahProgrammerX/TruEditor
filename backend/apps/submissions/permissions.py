@@ -29,10 +29,16 @@ class CanEditSubmission(permissions.BasePermission):
     """
     Permission to check if submission can be edited.
     Only DRAFT and REVISION_REQUIRED submissions can be edited.
+    Applies only to update/partial_update actions; custom actions
+    (submit, withdraw, approve, build_pdf) handle their own validation.
     """
     
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
+            return True
+
+        # Custom actions handle their own status validation
+        if view.action not in ('update', 'partial_update'):
             return True
         
         # Only owner can edit
