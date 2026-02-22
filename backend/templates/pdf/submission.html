@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page {
+    size: A4;
+    margin: 2.5cm 2cm 2.5cm 2cm;
+    @top-center {
+      content: "TruEditor — {{ manuscript_id }}";
+      font-size: 8pt;
+      color: #888;
+    }
+    @bottom-center {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 8pt;
+      color: #888;
+    }
+  }
+  body {
+    font-family: 'Liberation Serif', 'Times New Roman', serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #222;
+  }
+  .cover-page {
+    page-break-after: always;
+    text-align: center;
+    padding-top: 6cm;
+  }
+  .cover-page .journal-name {
+    font-size: 24pt;
+    font-weight: bold;
+    color: #1a56db;
+    margin-bottom: 0.3cm;
+  }
+  .cover-page .journal-sub {
+    font-size: 10pt;
+    color: #666;
+    margin-bottom: 2cm;
+  }
+  .cover-page .article-type {
+    display: inline-block;
+    padding: 4pt 16pt;
+    background: #eef2ff;
+    color: #1a56db;
+    font-size: 10pt;
+    font-weight: bold;
+    border-radius: 4pt;
+    margin-bottom: 1cm;
+  }
+  .cover-page .title {
+    font-size: 18pt;
+    font-weight: bold;
+    color: #111;
+    margin-bottom: 0.8cm;
+    line-height: 1.3;
+  }
+  .cover-page .authors {
+    font-size: 11pt;
+    color: #444;
+    margin-bottom: 0.3cm;
+  }
+  .cover-page .author-name {
+    font-weight: bold;
+  }
+  .cover-page .corresponding {
+    font-size: 9pt;
+    color: #666;
+    margin-top: 0.5cm;
+  }
+  .cover-page .meta-table {
+    margin: 1.5cm auto 0;
+    border-collapse: collapse;
+    font-size: 9pt;
+    text-align: left;
+  }
+  .cover-page .meta-table td {
+    padding: 3pt 10pt;
+  }
+  .cover-page .meta-table .label {
+    color: #888;
+    font-weight: bold;
+  }
+  h2 {
+    font-size: 13pt;
+    font-weight: bold;
+    color: #1a56db;
+    border-bottom: 1pt solid #ddd;
+    padding-bottom: 4pt;
+    margin-top: 1cm;
+    margin-bottom: 0.4cm;
+  }
+  h3 {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-top: 0.6cm;
+    margin-bottom: 0.2cm;
+  }
+  .keywords {
+    margin-top: 0.3cm;
+  }
+  .keywords span {
+    display: inline-block;
+    padding: 2pt 8pt;
+    background: #f3f4f6;
+    border-radius: 3pt;
+    font-size: 9pt;
+    margin-right: 4pt;
+    margin-bottom: 3pt;
+  }
+  .author-block {
+    margin-bottom: 0.4cm;
+    padding: 6pt 10pt;
+    background: #f9fafb;
+    border-left: 3pt solid #1a56db;
+  }
+  .author-block .name {
+    font-weight: bold;
+    font-size: 10pt;
+  }
+  .author-block .affil {
+    font-size: 9pt;
+    color: #555;
+  }
+  .author-block .email {
+    font-size: 9pt;
+    color: #1a56db;
+  }
+  .author-block .badge {
+    display: inline-block;
+    padding: 1pt 6pt;
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: 8pt;
+    border-radius: 3pt;
+    font-weight: bold;
+  }
+  .file-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    margin-top: 0.3cm;
+  }
+  .file-table th {
+    background: #f3f4f6;
+    padding: 5pt 8pt;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 1pt solid #ddd;
+  }
+  .file-table td {
+    padding: 4pt 8pt;
+    border-bottom: 1pt solid #eee;
+  }
+  .info-block {
+    background: #f9fafb;
+    padding: 8pt 12pt;
+    border-radius: 4pt;
+    margin-top: 0.3cm;
+    font-size: 10pt;
+    white-space: pre-line;
+  }
+  .text-muted { color: #888; font-size: 9pt; }
+  .generated-notice {
+    margin-top: 1.5cm;
+    padding-top: 0.3cm;
+    border-top: 1pt solid #ddd;
+    font-size: 8pt;
+    color: #999;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover-page">
+  <div class="journal-name">TruEditor</div>
+  <div class="journal-sub">Manuscript Submission System</div>
+
+  <div class="article-type">{{ article_type_display }}</div>
+
+  <div class="title">{{ title }}</div>
+
+  {% if title_en and language == 'tr' %}
+  <div style="font-size: 12pt; color: #666; margin-bottom: 0.8cm; font-style: italic;">{{ title_en }}</div>
+  {% endif %}
+
+  <div class="authors">
+    {% for author in authors %}
+      <span class="author-name">{{ author.full_name }}</span><sup>{{ author.order }}</sup>{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if corresponding_author %}
+  <div class="corresponding">
+    Corresponding Author: {{ corresponding_author.full_name }} — {{ corresponding_author.email }}
+  </div>
+  {% endif %}
+
+  <table class="meta-table">
+    <tr><td class="label">Manuscript ID</td><td>{{ manuscript_id|default:"DRAFT" }}</td></tr>
+    <tr><td class="label">Article Type</td><td>{{ article_type_display }}</td></tr>
+    <tr><td class="label">Language</td><td>{{ language_display }}</td></tr>
+    <tr><td class="label">Submitted</td><td>{{ submitted_at|default:"Not yet submitted" }}</td></tr>
+    <tr><td class="label">Generated</td><td>{{ generated_at }}</td></tr>
+  </table>
+</div>
+
+<!-- ABSTRACT -->
+{% if abstract %}
+<h2>Abstract</h2>
+<p>{{ abstract }}</p>
+{% endif %}
+
+{% if abstract_en and language == 'tr' %}
+<h2>Abstract (English)</h2>
+<p>{{ abstract_en }}</p>
+{% endif %}
+
+<!-- KEYWORDS -->
+{% if keywords %}
+<h2>Keywords</h2>
+<div class="keywords">
+  {% for kw in keywords %}
+    <span>{{ kw }}</span>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if keywords_en and language == 'tr' %}
+<h3>Keywords (English)</h3>
+<div class="keywords">
+  {% for kw in keywords_en %}
+    <span>{{ kw }}</span>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- AUTHORS -->
+<h2>Authors</h2>
+{% for author in authors %}
+<div class="author-block">
+  <div class="name">
+    {{ author.order }}. {{ author.full_name }}
+    {% if author.is_corresponding %}<span class="badge">Corresponding Author</span>{% endif %}
+  </div>
+  <div class="affil">{{ author.affiliation }}</div>
+  <div class="email">{{ author.email }}{% if author.orcid_id %} &nbsp;|&nbsp; ORCID: {{ author.orcid_id }}{% endif %}</div>
+  {% if author.contribution %}
+  <div class="text-muted" style="margin-top: 2pt;">Contribution: {{ author.contribution }}</div>
+  {% endif %}
+</div>
+{% endfor %}
+
+<!-- FILES -->
+{% if files %}
+<h2>Uploaded Files</h2>
+<table class="file-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>File Name</th>
+      <th>Type</th>
+      <th>Size</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for file in files %}
+    <tr>
+      <td>{{ file.order }}</td>
+      <td>{{ file.original_filename }}</td>
+      <td>{{ file.get_file_type_display }}</td>
+      <td>{{ file.file_size_human }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<!-- ADDITIONAL INFORMATION -->
+{% if cover_letter or ethics_statement or conflict_of_interest or funding_statement %}
+<h2>Additional Information</h2>
+
+{% if cover_letter %}
+<h3>Cover Letter</h3>
+<div class="info-block">{{ cover_letter }}</div>
+{% endif %}
+
+{% if ethics_statement %}
+<h3>Ethics Statement</h3>
+<div class="info-block">{{ ethics_statement }}{% if ethics_approval_number %} (Approval #{{ ethics_approval_number }}){% endif %}</div>
+{% endif %}
+
+{% if conflict_of_interest %}
+<h3>Conflict of Interest</h3>
+<div class="info-block">{{ conflict_of_interest }}</div>
+{% endif %}
+
+{% if funding_statement %}
+<h3>Funding Statement</h3>
+<div class="info-block">{{ funding_statement }}</div>
+{% endif %}
+{% endif %}
+
+<div class="generated-notice">
+  This document was automatically generated by TruEditor on {{ generated_at }}.
+</div>
+
+</body>
+</html>

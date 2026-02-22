@@ -29,6 +29,8 @@ const activeTab = ref<'overview' | 'files' | 'authors' | 'additional'>('overview
 const showWithdrawConfirm = ref(false)
 const isWithdrawing = ref(false)
 const isMobileMenuOpen = ref(false)
+const isGeneratingPdf = ref(false)
+const pdfUrl = ref<string | null>(null)
 
 const submission = computed(() => submissionStore.currentSubmission)
 
@@ -52,7 +54,11 @@ const correspondingAuthor = computed(() => {
 })
 
 const activeFiles = computed(() => {
-  return submission.value?.files?.filter(f => f.is_active) || []
+  return submission.value?.files?.filter(f => f.is_active && f.file_type !== 'system_pdf') || []
+})
+
+const existingPdf = computed(() => {
+  return submission.value?.files?.find(f => f.is_active && f.file_type === 'system_pdf') || null
 })
 
 const suggestedReviewers = computed(() => {
@@ -100,6 +106,38 @@ async function handleDelete() {
     router.push('/submissions')
   } catch {
     ;(window as any).toast?.('error', 'Failed to delete draft.')
+  }
+}
+
+async function handleGeneratePdf() {
+  if (!submission.value) return
+  isGeneratingPdf.value = true
+  pdfUrl.value = null
+  try {
+    const { api } = await import('@/services/api')
+    const response = await api.post(`/submissions/${submission.value.id}/build_pdf/`)
+    const data = response.data?.data
+    if (data?.download_url) {
+      pdfUrl.value = data.download_url
+      ;(window as any).toast?.('success', 'PDF generated successfully.')
+      // Refetch to update files list
+      await submissionStore.fetchSubmission(submission.value.id)
+    }
+  } catch {
+    ;(window as any).toast?.('error', 'PDF generation failed. Please try again.')
+  } finally {
+    isGeneratingPdf.value = false
+  }
+}
+
+async function handleViewPdf() {
+  if (pdfUrl.value) {
+    window.open(pdfUrl.value, '_blank')
+    return
+  }
+  if (existingPdf.value) {
+    await downloadFile(existingPdf.value.id)
+    return
   }
 }
 
@@ -476,6 +514,27 @@ const tabs = [
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
             <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Actions</h3>
             <div class="space-y-2.5">
+              <!-- Generate PDF -->
+              <button
+                @click="handleGeneratePdf"
+                :disabled="isGeneratingPdf"
+                class="w-full flex items-center gap-3 px-4 py-2.5 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-sm disabled:opacity-50"
+              >
+                <svg v-if="!isGeneratingPdf" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                {{ isGeneratingPdf ? 'Generating PDF...' : existingPdf ? 'Regenerate PDF' : 'Generate PDF' }}
+              </button>
+
+              <!-- View/Download PDF -->
+              <button
+                v-if="existingPdf || pdfUrl"
+                @click="handleViewPdf"
+                class="w-full flex items-center gap-3 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors font-medium text-sm"
+              >
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                View / Download PDF
+              </button>
+
               <!-- Edit (draft / revision_required) -->
               <button
                 v-if="submission.is_editable"

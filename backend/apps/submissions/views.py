@@ -188,30 +188,34 @@ class SubmissionViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def build_pdf(self, request, pk=None):
         """
-        Trigger PDF generation for the submission.
-        
-        Note: PDF generation will be implemented in Phase 7 (Celery + WeasyPrint).
-        For now, this endpoint returns a placeholder response.
+        Generate submission PDF synchronously.
+        Returns the generated file info with a download URL.
         """
+        from .pdf_service import generate_submission_pdf
+        from apps.files.services import FileService
+
         submission = self.get_object()
-        
-        # Check if submission is in valid state
-        if submission.status != Submission.Status.DRAFT:
-            return validation_error_response(
-                _('PDF can only be generated for draft submissions.')
+
+        try:
+            manuscript_file = generate_submission_pdf(submission, user=request.user)
+            download_url = FileService.get_presigned_url(manuscript_file)
+
+            return success_response(
+                data={
+                    'file_id': str(manuscript_file.id),
+                    'filename': manuscript_file.original_filename,
+                    'file_size': manuscript_file.file_size,
+                    'download_url': download_url,
+                },
+                message=_('PDF generated successfully')
             )
-        
-        # TODO: Implement Celery task in Phase 7
-        # task = generate_submission_pdf.delay(submission.id)
-        
-        return success_response(
-            data={
-                'submission_id': str(submission.id),
-                'status': 'pending',
-                'message': 'PDF generation will be implemented in Phase 7'
-            },
-            message=_('PDF generation initiated')
-        )
+        except Exception as e:
+            logger.error(f"PDF generation failed for {submission.id}: {e}")
+            return error_response(
+                message=_('PDF generation failed. Please try again later.'),
+                code='PDF_ERROR',
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):

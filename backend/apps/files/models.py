@@ -57,6 +57,7 @@ class ManuscriptFile(models.Model):
         COPYRIGHT = 'copyright', _('Copyright Form')
         REVISION = 'revision', _('Revision File')
         REVISION_NOTES = 'revision_notes', _('Revision Notes')
+        SYSTEM_PDF = 'system_pdf', _('System Generated PDF')
         OTHER = 'other', _('Other')
     
     # ============================================

@@ -100,6 +100,7 @@ export type FileType =
   | 'copyright'
   | 'revision'
   | 'revision_notes'
+  | 'system_pdf'
   | 'other'
 
 /**
@@ -117,6 +118,7 @@ export const FILE_TYPES: Record<FileType, { label: string; required: boolean; de
   copyright: { label: 'Copyright Form', required: false, description: 'Copyright transfer agreement' },
   revision: { label: 'Revision File', required: false, description: 'Revised manuscript' },
   revision_notes: { label: 'Revision Notes', required: false, description: 'Response to reviewers' },
+  system_pdf: { label: 'Submission PDF', required: false, description: 'Auto-generated submission PDF' },
   other: { label: 'Other', required: false, description: 'Other documents' },
 }
 
