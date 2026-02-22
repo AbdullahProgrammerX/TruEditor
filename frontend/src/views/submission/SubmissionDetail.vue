@@ -15,8 +15,6 @@ import {
   ARTICLE_TYPES,
   FILE_TYPES,
   LANGUAGES,
-  type Submission,
-  type SubmissionStatus,
 } from '@/types/submission'
 
 const route = useRoute()
