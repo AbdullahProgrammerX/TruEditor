@@ -17,11 +17,6 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    libpango1.0-dev \
-    libcairo2-dev \
-    libgdk-pixbuf2.0-dev \
-    libffi-dev \
-    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Python dependencies
