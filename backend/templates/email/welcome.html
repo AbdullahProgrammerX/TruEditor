@@ -1,0 +1,26 @@
+{% extends "email/_base.html" %}
+{% block content %}
+<h2>Welcome to TruEditor!</h2>
+<p>Dear {{ user_name }},</p>
+<p>Your account has been created successfully using your ORCID credentials. You can now submit and manage manuscripts through our system.</p>
+
+<div class="info-box">
+  <div class="label">ORCID ID</div>
+  <div class="value">{{ orcid_id }}</div>
+</div>
+
+<p>To get started:</p>
+<ul style="padding-left:20px; line-height:2;">
+  <li>Complete your profile with your institutional details</li>
+  <li>Start a new manuscript submission</li>
+  <li>Track your submissions from your dashboard</li>
+</ul>
+
+{% if site_url %}
+<p style="text-align:center; margin-top:24px;">
+  <a href="{{ site_url }}/dashboard" class="btn">Go to Dashboard</a>
+</p>
+{% endif %}
+
+<p style="color:#6b7280; font-size:13px; margin-top:24px;">If you did not create this account, please disregard this email.</p>
+{% endblock %}

@@ -263,6 +263,14 @@ class ORCIDCallbackView(APIView):
             # Step 5: Update last login
             user.last_login = timezone.now()
             user.save(update_fields=['last_login'])
+
+            # Send welcome email for new users (non-blocking)
+            if is_new_user:
+                try:
+                    from apps.notifications.email_service import send_welcome_email
+                    send_welcome_email(user)
+                except Exception as email_err:
+                    logger.warning(f"Welcome email failed: {email_err}")
             
             # Step 6: Serialize user data
             user_serializer = UserSerializer(user)

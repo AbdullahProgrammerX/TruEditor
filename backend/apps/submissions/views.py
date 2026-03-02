@@ -319,6 +319,13 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             logger.info(
                 f"Submission {submission.manuscript_id} submitted by {request.user.email}"
             )
+
+            # Send confirmation email (non-blocking)
+            try:
+                from apps.notifications.email_service import send_submission_confirmation
+                send_submission_confirmation(submission)
+            except Exception as email_err:
+                logger.warning(f"Submission email failed: {email_err}")
             
             return success_response(
                 data=SubmissionDetailSerializer(submission).data,
@@ -383,6 +390,13 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             logger.info(
                 f"Submission {submission.manuscript_id or submission.id} withdrawn by {request.user.email}"
             )
+
+            # Send withdrawal confirmation email (non-blocking)
+            try:
+                from apps.notifications.email_service import send_withdrawal_confirmation
+                send_withdrawal_confirmation(submission)
+            except Exception as email_err:
+                logger.warning(f"Withdrawal email failed: {email_err}")
 
             return success_response(
                 data=SubmissionDetailSerializer(submission).data,

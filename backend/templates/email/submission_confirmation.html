@@ -1,0 +1,29 @@
+{% extends "email/_base.html" %}
+{% block content %}
+<h2>Submission Confirmed</h2>
+<p>Dear {{ user_name }},</p>
+<p>Your manuscript has been successfully submitted and is now being processed.</p>
+
+<div class="info-box">
+  <div class="label">Manuscript ID</div>
+  <div class="value">{{ manuscript_id }}</div>
+</div>
+
+<table class="details">
+  <tr><td class="lbl">Title</td><td class="val">{{ title }}</td></tr>
+  <tr><td class="lbl">Article Type</td><td class="val">{{ article_type }}</td></tr>
+  <tr><td class="lbl">Authors</td><td class="val">{{ author_count }} author{{ author_count|pluralize }}</td></tr>
+  <tr><td class="lbl">Files</td><td class="val">{{ file_count }} file{{ file_count|pluralize }}</td></tr>
+</table>
+
+<div class="divider"></div>
+
+<p><strong>What happens next?</strong></p>
+<p>Your submission will be reviewed by the editorial team. You will receive an email notification when there is an update on your manuscript's status.</p>
+
+{% if site_url %}
+<p style="text-align:center; margin-top:24px;">
+  <a href="{{ site_url }}/dashboard" class="btn">View Dashboard</a>
+</p>
+{% endif %}
+{% endblock %}

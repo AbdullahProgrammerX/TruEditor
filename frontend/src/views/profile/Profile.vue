@@ -9,6 +9,7 @@
 import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { api } from '@/services/api'
 import { ACADEMIC_TITLES, COUNTRIES, type UserProfileUpdate, type AcademicTitle } from '@/types/user'
 
 const router = useRouter()
@@ -43,10 +44,58 @@ const formData = reactive<UserProfileUpdate>({
 
 const newExpertise = ref('')
 
+// Email preferences
+interface EmailPrefs {
+  submission_confirmation: boolean
+  status_updates: boolean
+  revision_requests: boolean
+  decision_notifications: boolean
+  system_announcements: boolean
+}
+const emailPrefs = reactive<EmailPrefs>({
+  submission_confirmation: true,
+  status_updates: true,
+  revision_requests: true,
+  decision_notifications: true,
+  system_announcements: true,
+})
+const isSavingPrefs = ref(false)
+
+async function fetchEmailPrefs() {
+  try {
+    const res = await api.get('/notifications/preferences/')
+    const data = res.data?.data
+    if (data) {
+      emailPrefs.submission_confirmation = data.submission_confirmation
+      emailPrefs.status_updates = data.status_updates
+      emailPrefs.revision_requests = data.revision_requests
+      emailPrefs.decision_notifications = data.decision_notifications
+      emailPrefs.system_announcements = data.system_announcements
+    }
+  } catch {
+    // Use defaults
+  }
+}
+
+async function toggleEmailPref(key: keyof EmailPrefs) {
+  const prev = emailPrefs[key]
+  emailPrefs[key] = !prev
+  isSavingPrefs.value = true
+  try {
+    await api.put('/notifications/preferences/', { [key]: emailPrefs[key] })
+  } catch {
+    emailPrefs[key] = prev
+    ;(window as any).toast?.('error', 'Failed to update preference')
+  } finally {
+    isSavingPrefs.value = false
+  }
+}
+
 onMounted(() => {
   setTimeout(() => {
     isVisible.value = true
   }, 100)
+  fetchEmailPrefs()
 })
 
 function initForm() {
@@ -353,6 +402,46 @@ const bioCharCount = computed(() => formData.bio?.length || 0)
                   </svg>
                   {{ authStore.isLoading ? 'Syncing...' : 'Sync from ORCID' }}
                 </button>
+              </div>
+            </section>
+
+            <!-- Email Notifications -->
+            <section>
+              <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Email Notifications
+              </h3>
+              <div class="space-y-3">
+                <div
+                  v-for="pref in [
+                    { key: 'submission_confirmation' as const, label: 'Submission Confirmation', desc: 'Receive email when your manuscript is submitted' },
+                    { key: 'status_updates' as const, label: 'Status Updates', desc: 'Receive email when submission status changes' },
+                    { key: 'revision_requests' as const, label: 'Revision Requests', desc: 'Receive email when a revision is requested' },
+                    { key: 'decision_notifications' as const, label: 'Editorial Decisions', desc: 'Receive email for accept/reject decisions' },
+                    { key: 'system_announcements' as const, label: 'System Announcements', desc: 'General system updates and news' },
+                  ]"
+                  :key="pref.key"
+                  class="flex items-center justify-between gap-4 bg-gray-50 rounded-xl p-4"
+                >
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800">{{ pref.label }}</p>
+                    <p class="text-xs text-gray-500">{{ pref.desc }}</p>
+                  </div>
+                  <button
+                    type="button"
+                    @click="toggleEmailPref(pref.key)"
+                    :disabled="isSavingPrefs"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
+                    :class="emailPrefs[pref.key] ? 'bg-primary-500' : 'bg-gray-300'"
+                  >
+                    <span
+                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      :class="emailPrefs[pref.key] ? 'translate-x-5' : 'translate-x-0'"
+                    />
+                  </button>
+                </div>
               </div>
             </section>
           </div>

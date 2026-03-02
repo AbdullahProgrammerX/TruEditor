@@ -1,15 +1,11 @@
 """
 TruEditor - Notifications URLs
-==============================
-Bildirim endpoint'leri.
-
-Endpoint'ler:
-- GET  /api/v1/notifications/          -> Bildirim listesi
-- POST /api/v1/notifications/mark-read/ -> Okundu olarak işaretle
 """
 
 from django.urls import path
+from . import views
 
 urlpatterns = [
-    # Bildirim endpoint'leri daha sonra eklenecek
+    path('preferences/', views.EmailPreferenceView.as_view(), name='email-preferences'),
+    path('email-log/', views.EmailLogListView.as_view(), name='email-log'),
 ]

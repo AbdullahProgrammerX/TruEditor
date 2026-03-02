@@ -489,6 +489,9 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'TruEditor <noreply@trueditor.com>')
 
+# Frontend URL (for email links)
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://trueditor.vercel.app')
+
 # ============================================
 # SENTRY (Error Tracking - Opsiyonel)
 # ============================================

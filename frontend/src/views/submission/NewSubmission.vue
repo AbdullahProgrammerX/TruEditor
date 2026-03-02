@@ -355,7 +355,7 @@ async function handleSubmit(): Promise<void> {
 
     await submissionStore.submitForReview(sid)
 
-    ;(window as any).toast?.('success', 'Manuscript submitted successfully!')
+    ;(window as any).toast?.('success', 'Manuscript submitted successfully! A confirmation email has been sent.')
     router.push('/dashboard')
   } catch (error: any) {
     const msg = error.response?.data?.error?.message || error.message || 'Submission failed'
