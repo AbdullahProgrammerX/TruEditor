@@ -10,7 +10,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSubmissionStore } from '@/stores/submission'
 import { useFileUpload } from '@/composables/useFileUpload'
 import { SUBMISSION_STATUS, FILE_TYPES } from '@/types/submission'
-import type { FileType, ManuscriptFile } from '@/types/submission'
+import type { FileType } from '@/types/submission'
 
 const route = useRoute()
 const router = useRouter()
@@ -522,7 +522,7 @@ onMounted(async () => {
           <div class="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-2">Submit Revision?</h3>
             <p class="text-sm text-gray-600 mb-6">
-              You are about to submit <strong>Revision #{{ submission.revision_number }}</strong> with
+              You are about to submit <strong>Revision #{{ submission?.revision_number }}</strong> with
               <strong>{{ revisionFiles.length }}</strong> file(s). This action cannot be undone.
             </p>
             <div class="flex gap-3">
