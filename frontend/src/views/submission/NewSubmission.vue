@@ -7,7 +7,7 @@
  */
 
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter, onBeforeRouteLeave } from 'vue-router'
+import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
 import { useSubmissionStore } from '@/stores/submission'
 import StepArticleType from '@/components/submission/wizard/StepArticleType.vue'
 import StepFileUpload from '@/components/submission/wizard/StepFileUpload.vue'
@@ -19,14 +19,17 @@ import { api } from '@/services/api'
 import type { ArticleType, Language, AuthorInput, ManuscriptFile, SuggestedReviewer, OpposedReviewer } from '@/types/submission'
 
 const router = useRouter()
+const route = useRoute()
 const submissionStore = useSubmissionStore()
 
 // Wizard state
 const currentStep = ref(1)
 const totalSteps = 6
 const isSaving = ref(false)
+const isLoadingDraft = ref(false)
 const lastSavedAt = ref<string | null>(null)
 const saveError = ref<string | null>(null)
+const isCreating = ref(false)
 
 // Form data
 const articleType = ref<ArticleType | undefined>(undefined)
@@ -96,7 +99,9 @@ const isDirty = computed(() => {
  */
 async function ensureDraftExists(): Promise<boolean> {
   if (submissionStore.currentSubmission) return true
+  if (isCreating.value) return false
 
+  isCreating.value = true
   try {
     await submissionStore.createSubmission({
       title: title.value || 'Untitled',
@@ -111,6 +116,8 @@ async function ensureDraftExists(): Promise<boolean> {
     console.error('Failed to create draft:', err)
     saveError.value = err.response?.data?.error?.message || 'Could not save draft. Please check your connection.'
     return false
+  } finally {
+    isCreating.value = false
   }
 }
 
@@ -219,13 +226,9 @@ async function saveProgress(): Promise<void> {
 
   try {
     if (!submissionStore.currentSubmission) {
-      await submissionStore.createSubmission({
-        title: title.value || 'Untitled',
-        article_type: articleType.value,
-        wizard_step: currentStep.value,
-        wizard_data: getWizardData(),
-      })
-    } else {
+      await ensureDraftExists()
+    }
+    if (submissionStore.currentSubmission) {
       await submissionStore.updateSubmission(submissionStore.currentSubmission.id, {
         title: title.value,
         title_en: titleEn.value,
@@ -258,33 +261,25 @@ async function saveProgress(): Promise<void> {
  * Save progress quietly (no UI indicator, for background saves)
  */
 async function saveProgressQuiet(): Promise<void> {
+  if (!submissionStore.currentSubmission) return
   try {
-    if (!submissionStore.currentSubmission) {
-      await submissionStore.createSubmission({
-        title: title.value || 'Untitled',
-        article_type: articleType.value,
-        wizard_step: currentStep.value,
-        wizard_data: getWizardData(),
-      })
-    } else {
-      await submissionStore.updateSubmission(submissionStore.currentSubmission.id, {
-        title: title.value,
-        title_en: titleEn.value,
-        abstract: abstract.value,
-        abstract_en: abstractEn.value,
-        keywords: keywords.value,
-        keywords_en: keywordsEn.value,
-        article_type: articleType.value,
-        language: language.value,
-        cover_letter: coverLetter.value,
-        ethics_statement: ethicsStatement.value,
-        ethics_approval_number: ethicsApprovalNumber.value,
-        conflict_of_interest: conflictOfInterest.value,
-        funding_statement: fundingStatement.value,
-        wizard_step: currentStep.value,
-        wizard_data: getWizardData(),
-      })
-    }
+    await submissionStore.updateSubmission(submissionStore.currentSubmission.id, {
+      title: title.value,
+      title_en: titleEn.value,
+      abstract: abstract.value,
+      abstract_en: abstractEn.value,
+      keywords: keywords.value,
+      keywords_en: keywordsEn.value,
+      article_type: articleType.value,
+      language: language.value,
+      cover_letter: coverLetter.value,
+      ethics_statement: ethicsStatement.value,
+      ethics_approval_number: ethicsApprovalNumber.value,
+      conflict_of_interest: conflictOfInterest.value,
+      funding_statement: fundingStatement.value,
+      wizard_step: currentStep.value,
+      wizard_data: getWizardData(),
+    })
     lastSavedAt.value = new Date().toISOString()
   } catch {
     // Silent
@@ -381,7 +376,71 @@ function formatLastSaved(): string {
 // LIFECYCLE
 // ============================================
 
-onMounted(() => {
+async function loadExistingDraft(editId: string): Promise<void> {
+  isLoadingDraft.value = true
+  try {
+    const submission = await submissionStore.fetchSubmission(editId)
+
+    articleType.value = submission.article_type as ArticleType
+    title.value = submission.title || ''
+    titleEn.value = submission.title_en || ''
+    abstract.value = submission.abstract || ''
+    abstractEn.value = submission.abstract_en || ''
+    keywords.value = submission.keywords || []
+    keywordsEn.value = submission.keywords_en || []
+    language.value = (submission.language as Language) || 'en'
+    coverLetter.value = submission.cover_letter || ''
+    ethicsStatement.value = submission.ethics_statement || ''
+    ethicsApprovalNumber.value = submission.ethics_approval_number || ''
+    conflictOfInterest.value = submission.conflict_of_interest || ''
+    fundingStatement.value = submission.funding_statement || ''
+
+    // Restore authors from server
+    if (submission.authors?.length) {
+      authors.value = submission.authors.map(a => ({
+        given_name: a.given_name,
+        family_name: a.family_name,
+        email: a.email,
+        institution: a.institution,
+        department: a.department || '',
+        city: a.city || '',
+        country: a.country || '',
+        orcid_id: a.orcid_id || '',
+        is_corresponding: a.is_corresponding,
+        order: a.order,
+        contribution: a.contribution || '',
+      }))
+    }
+
+    // Restore wizard data extras
+    const wd = submission.wizard_data || {}
+    if (wd.suggested_reviewers) suggestedReviewers.value = wd.suggested_reviewers
+    if (wd.opposed_reviewers) opposedReviewers.value = wd.opposed_reviewers
+    if (wd.editor_comments) editorComments.value = wd.editor_comments
+
+    // Restore files
+    uploadedFiles.value = submission.files?.filter(f => f.is_active && f.file_type !== 'system_pdf') || []
+
+    // Restore step
+    currentStep.value = submission.wizard_step || 1
+  } catch {
+    ;(window as any).toast?.('error', 'Failed to load draft. Starting fresh.')
+    submissionStore.resetWizard()
+  } finally {
+    isLoadingDraft.value = false
+  }
+}
+
+onMounted(async () => {
+  // Reset wizard for a clean start
+  submissionStore.resetWizard()
+
+  // Check for ?edit= param to load existing draft
+  const editId = route.query.edit as string
+  if (editId) {
+    await loadExistingDraft(editId)
+  }
+
   autosaveTimer = setInterval(() => {
     if (isDirty.value && submissionStore.currentSubmission) {
       saveProgressQuiet()
@@ -391,6 +450,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (autosaveTimer) clearInterval(autosaveTimer)
+  autosaveTimer = null
 })
 
 onBeforeRouteLeave((_to, _from, next) => {
@@ -418,7 +478,7 @@ onBeforeRouteLeave((_to, _from, next) => {
             </svg>
             Back
           </button>
-          <h1 class="text-lg font-semibold text-gray-800">New Manuscript Submission</h1>
+          <h1 class="text-lg font-semibold text-gray-800">{{ route.query.edit ? 'Edit Submission' : 'New Manuscript Submission' }}</h1>
           <div class="flex items-center gap-2 text-sm text-gray-500 min-w-[100px] justify-end">
             <template v-if="isSaving">
               <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -435,8 +495,17 @@ onBeforeRouteLeave((_to, _from, next) => {
       </div>
     </header>
 
+    <!-- Loading Draft -->
+    <div v-if="isLoadingDraft" class="flex flex-col items-center justify-center py-32">
+      <svg class="w-10 h-10 animate-spin text-primary-500 mb-4" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+      </svg>
+      <p class="text-gray-500">Loading draft...</p>
+    </div>
+
     <!-- Progress Bar -->
-    <div class="bg-white border-b">
+    <div v-if="!isLoadingDraft" class="bg-white border-b">
       <div class="max-w-4xl mx-auto px-6">
         <div class="h-1 bg-gray-100 rounded-full overflow-hidden">
           <div
@@ -479,7 +548,7 @@ onBeforeRouteLeave((_to, _from, next) => {
     </div>
 
     <!-- Step Content (NO transition wrapper - prevents layout shifts) -->
-    <main class="max-w-4xl mx-auto px-6 py-8">
+    <main v-if="!isLoadingDraft" class="max-w-4xl mx-auto px-6 py-8">
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
         <StepArticleType
           v-if="currentStep === 1"
