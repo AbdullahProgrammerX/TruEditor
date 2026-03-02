@@ -33,6 +33,18 @@ def _send(email_type: str, recipient_email: str, subject: str,
     )
 
     try:
+        # Skip sending if SMTP not configured (no credentials)
+        email_host_user = getattr(settings, 'EMAIL_HOST_USER', '')
+        email_backend = getattr(settings, 'EMAIL_BACKEND', '')
+        is_console = 'console' in email_backend.lower() if email_backend else False
+
+        if not is_console and not email_host_user:
+            log.status = EmailLog.Status.FAILED
+            log.error_message = 'SMTP credentials not configured'
+            log.save(update_fields=['status', 'error_message'])
+            logger.warning("Email skipped (no SMTP credentials): [%s] %s", email_type, subject)
+            return log
+
         context.setdefault('site_name', 'TruEditor')
         context.setdefault('site_url', settings.FRONTEND_URL if hasattr(settings, 'FRONTEND_URL') else '')
 
@@ -83,7 +95,7 @@ def send_welcome_email(user) -> EmailLog | None:
 
 def send_submission_confirmation(submission) -> EmailLog | None:
     """Send confirmation after successful manuscript submission."""
-    user = submission.created_by
+    user = submission.submitter
     if not user or not user.email:
         return None
 
@@ -113,7 +125,7 @@ def send_status_change(submission, old_status: str, new_status: str, notes: str 
     """Send notification when submission status changes."""
     from apps.submissions.models import Submission
 
-    user = submission.created_by
+    user = submission.submitter
     if not user or not user.email:
         return None
 
@@ -143,7 +155,7 @@ def send_status_change(submission, old_status: str, new_status: str, notes: str 
 
 def send_withdrawal_confirmation(submission) -> EmailLog | None:
     """Send confirmation after manuscript withdrawal."""
-    user = submission.created_by
+    user = submission.submitter
     if not user or not user.email:
         return None
 

@@ -425,7 +425,7 @@ const bioCharCount = computed(() => formData.bio?.length || 0)
                   :key="pref.key"
                   class="flex items-center justify-between gap-4 bg-gray-50 rounded-xl p-4"
                 >
-                  <div>
+                  <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-gray-800">{{ pref.label }}</p>
                     <p class="text-xs text-gray-500">{{ pref.desc }}</p>
                   </div>
@@ -433,12 +433,15 @@ const bioCharCount = computed(() => formData.bio?.length || 0)
                     type="button"
                     @click="toggleEmailPref(pref.key)"
                     :disabled="isSavingPrefs"
-                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
+                    role="switch"
+                    :aria-checked="emailPrefs[pref.key]"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50"
                     :class="emailPrefs[pref.key] ? 'bg-primary-500' : 'bg-gray-300'"
                   >
                     <span
-                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                      :class="emailPrefs[pref.key] ? 'translate-x-5' : 'translate-x-0'"
+                      aria-hidden="true"
+                      class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
+                      :style="{ transform: emailPrefs[pref.key] ? 'translateX(20px)' : 'translateX(0)' }"
                     />
                   </button>
                 </div>
