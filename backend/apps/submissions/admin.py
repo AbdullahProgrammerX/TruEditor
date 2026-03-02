@@ -68,7 +68,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         for sub in queryset:
             try:
                 old_status = sub.status
-                sub.start_review()
+                sub.start_review(editor=request.user)
                 sub.save()
                 SubmissionStatusHistory.objects.create(
                     submission=sub, from_status=old_status,
