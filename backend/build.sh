@@ -46,6 +46,9 @@ python manage.py migrate --no-input --verbosity 2
 echo ">>> Verifying migrations..."
 python manage.py showmigrations
 
+echo ">>> Promoting admin user (if configured)..."
+python manage.py promote_admin
+
 echo "============================================"
 echo ">>> Build completed successfully!"
 echo "============================================"
