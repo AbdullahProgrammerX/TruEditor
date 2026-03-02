@@ -492,11 +492,19 @@ const tabs = [
               </div>
 
               <!-- Revision Info -->
-              <div v-if="submission.revision_notes">
-                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Revision Notes from Editor</h3>
-                <div class="bg-orange-50 rounded-lg p-4 text-sm border border-orange-100">
+              <div v-if="submission.revision_notes || submission.revision_response">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Revision Information</h3>
+                
+                <div v-if="submission.revision_notes" class="bg-orange-50 rounded-lg p-4 text-sm border border-orange-100 mb-3">
+                  <p class="text-xs font-semibold text-orange-600 mb-1">Editor's Request (Revision #{{ submission.revision_number }})</p>
                   <p class="text-gray-700 whitespace-pre-line">{{ submission.revision_notes }}</p>
                   <p v-if="submission.revision_deadline" class="text-orange-600 text-xs mt-2 font-medium">Deadline: {{ formatDate(submission.revision_deadline) }}</p>
+                </div>
+
+                <div v-if="submission.revision_response" class="bg-purple-50 rounded-lg p-4 text-sm border border-purple-100">
+                  <p class="text-xs font-semibold text-purple-600 mb-1">Author's Response</p>
+                  <p class="text-gray-700 whitespace-pre-line">{{ submission.revision_response }}</p>
+                  <p v-if="submission.revision_submitted_at" class="text-purple-600 text-xs mt-2 font-medium">Submitted: {{ formatDate(submission.revision_submitted_at) }}</p>
                 </div>
               </div>
 
@@ -535,9 +543,19 @@ const tabs = [
                 View / Download PDF
               </button>
 
-              <!-- Edit (draft / revision_required) -->
+              <!-- Submit Revision (revision_required) -->
               <button
-                v-if="submission.is_editable"
+                v-if="submission.status === 'revision_required'"
+                @click="router.push(`/submissions/${submission.id}/revise`)"
+                class="w-full flex items-center gap-3 px-4 py-2.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors font-medium text-sm"
+              >
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Submit Revision
+              </button>
+
+              <!-- Edit (draft only now) -->
+              <button
+                v-if="submission.status === 'draft'"
                 @click="router.push(`/submissions/new?edit=${submission.id}`)"
                 class="w-full flex items-center gap-3 px-4 py-2.5 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-medium text-sm"
               >

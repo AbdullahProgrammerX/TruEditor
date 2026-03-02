@@ -382,6 +382,28 @@ export const useSubmissionStore = defineStore('submission', () => {
     }
   }
   
+  /**
+   * Submit a revision
+   */
+  async function submitRevision(id: string, revisionResponse: string): Promise<Submission> {
+    isSaving.value = true
+    error.value = null
+    
+    try {
+      const response = await api.post<{ data: Submission }>(`/submissions/${id}/submit_revision/`, {
+        revision_response: revisionResponse
+      })
+      currentSubmission.value = response.data.data
+      await fetchSubmissions()
+      return response.data.data
+    } catch (err: any) {
+      error.value = err.response?.data?.error?.message || 'Failed to submit revision'
+      throw err
+    } finally {
+      isSaving.value = false
+    }
+  }
+
   // ============================================
   // ACTIONS - Author Operations
   // ============================================
@@ -638,7 +660,8 @@ export const useSubmissionStore = defineStore('submission', () => {
     // Submission Actions
     submitForReview,
     withdraw,
-    
+    submitRevision,
+
     // Author Actions
     addAuthor,
     updateAuthor,

@@ -183,6 +183,8 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
             'revision_number',
             'revision_notes',
             'revision_deadline',
+            'revision_response',
+            'revision_submitted_at',
             
             # Editor Assignment
             'assigned_editor',

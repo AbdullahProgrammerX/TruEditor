@@ -235,6 +235,19 @@ class Submission(models.Model):
         help_text=_('Deadline for revision submission')
     )
     
+    revision_response = models.TextField(
+        _('Revision Response'),
+        blank=True,
+        help_text=_('Author response to reviewer comments')
+    )
+    
+    revision_submitted_at = models.DateTimeField(
+        _('Revision Submitted At'),
+        null=True,
+        blank=True,
+        help_text=_('When the revision was last submitted')
+    )
+    
     # ============================================
     # EDITOR ASSIGNMENT
     # ============================================
@@ -397,7 +410,7 @@ class Submission(models.Model):
     @transition(field=status, source=Status.REVISION_REQUIRED, target=Status.REVISION_SUBMITTED)
     def submit_revision(self):
         """Submit the revision."""
-        pass
+        self.revision_submitted_at = timezone.now()
     
     @transition(
         field=status,

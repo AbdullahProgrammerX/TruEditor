@@ -289,7 +289,9 @@ export interface Submission {
   revision_number: number
   revision_notes: string
   revision_deadline: string | null
-  
+  revision_response: string
+  revision_submitted_at: string | null
+
   // Editor Assignment
   assigned_editor: UserMinimal | null
   editor_notes: string

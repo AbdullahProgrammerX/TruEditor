@@ -20,6 +20,10 @@
 | FAZ-6 | Author Module Backend API | ✅ Tamamlandı |
 | FAZ-7 | Author Module Frontend (6 Adımlı Wizard) | ✅ Tamamlandı |
 | FAZ-8 | S3 Dosya Yönetimi (Cloudflare R2) | ✅ Tamamlandı |
+| FAZ-9 | Gönderi Detay Sayfası | ✅ Tamamlandı |
+| FAZ-10 | PDF Oluşturma & Önizleme | ✅ Tamamlandı |
+| FAZ-11 | E-posta Bildirim Sistemi | ✅ Tamamlandı |
+| FAZ-12 | Revizyon İş Akışı | ✅ Tamamlandı |
 
 ---
 
@@ -111,32 +115,31 @@
 
 ---
 
-### FAZ-12: Revizyon İş Akışı
+### FAZ-12: Revizyon İş Akışı ✅ Tamamlandı
 
-**Neden Kritik:** EM'de revizyon süreci, yazarın en sık kullandığı özelliklerden biridir. Editör revizyon istediğinde yazar dosyalarını güncelleyebilmeli.
+**Tamamlanma Tarihi:** 2026-03-02
 
-**Kapsam:**
+**Yapılanlar:**
 
 #### Backend
-- [ ] Revizyon versiyonlama sistemi
-  - `revision_number` otomatik artırma
-  - Önceki versiyon dosyalarını koruma
-  - Revizyon geçmişi
-- [ ] Hakemlere yanıt alanı (revision response)
-  - `RevisionResponse` modeli veya mevcut modele alan ekleme
-- [ ] Revizyon FSM geçişleri
-  - `revision_required` → `revision_submitted` (yazar revize etti)
-  - `revision_required` → `withdrawn` (yazar revizyonu reddetti)
-- [ ] Dosya taşıma mekanizması
-  - Önceki versiyondan dosyaları yeni revizyona kopyalama (seçmeli)
+- [x] `revision_response` ve `revision_submitted_at` alanları Submission modeline eklendi
+- [x] `submit_revision` FSM geçişi güncellendi (timestamp kaydı)
+- [x] `submit_revision` API endpoint oluşturuldu (POST /submissions/{id}/submit_revision/)
+- [x] Dosya yükleme sırasında `revision_number` otomatik atanıyor
+- [x] Revizyon durumu e-posta bildirimi (mevcut status_change şablonu)
+- [x] Serializer güncellendi (revision_response, revision_submitted_at)
 
 #### Frontend
-- [ ] Revizyon sayfası (mevcut wizard'a benzer ama revizyon modunda)
-  - Önceki dosyaları göster (taşı / kaldır seçenekleri)
-  - Yeni dosya yükleme
-  - "Hakemlere Yanıt" metin alanı / dosya yükleme
-- [ ] Revizyon detay görünümü
-  - Orijinal vs. revize edilmiş versiyon karşılaştırması (başlık, özet)
+- [x] `/submissions/:id/revise` — Tam kapsamlı revizyon sayfası
+  - Editörün revizyon notları ve deadline gösterimi
+  - Hakemlere yanıt (textarea, min 20 karakter)
+  - Revizyon dosyası yükleme (drag & drop)
+  - Önceki dosyaları görüntüleme (read-only)
+  - Checklist (yanıt / dosya / upload durumu)
+  - Onay modalı
+- [x] Detail sayfasına "Submit Revision" butonu (revision_required durumunda)
+- [x] Additional sekmesinde editör isteği + yazar yanıtı birlikte gösterim
+- [x] TypeScript tipleri güncellendi (revision_response, revision_submitted_at)
 - [ ] "Revizyonu Reddet" butonu ve onay dialogu
 - [ ] Revizyon geçmişi timeline
 

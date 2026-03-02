@@ -133,6 +133,7 @@ class FileUploadSerializer(serializers.ModelSerializer):
         validated_data['submission'] = submission
         validated_data['uploaded_by'] = user
         validated_data['original_filename'] = validated_data['file'].name
+        validated_data['revision_number'] = submission.revision_number
         
         # Set file size and mime type
         file = validated_data['file']

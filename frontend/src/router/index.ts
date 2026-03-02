@@ -16,6 +16,7 @@ const Dashboard = () => import('@/views/dashboard/Dashboard.vue')
 const NewSubmission = () => import('@/views/submission/NewSubmission.vue')
 const SubmissionsList = () => import('@/views/submission/SubmissionsList.vue')
 const SubmissionDetail = () => import('@/views/submission/SubmissionDetail.vue')
+const SubmitRevision = () => import('@/views/submission/SubmitRevision.vue')
 const Profile = () => import('@/views/profile/Profile.vue')
 const NotFound = () => import('@/views/NotFound.vue')
 
@@ -96,6 +97,15 @@ const routes: RouteRecordRaw[] = [
     path: '/submissions/:id',
     name: 'submission-detail',
     component: SubmissionDetail,
+    meta: { 
+      requiresAuth: true,
+      requiresProfile: true 
+    }
+  },
+  {
+    path: '/submissions/:id/revise',
+    name: 'submit-revision',
+    component: SubmitRevision,
     meta: { 
       requiresAuth: true,
       requiresProfile: true 

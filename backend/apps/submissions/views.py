@@ -410,6 +410,64 @@ class SubmissionViewSet(viewsets.ModelViewSet):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    @action(detail=True, methods=['post'])
+    def submit_revision(self, request, pk=None):
+        """
+        Submit a revision for a manuscript in revision_required status.
+        Expects: { revision_response: "..." }
+        """
+        submission = self.get_object()
+
+        if submission.status != Submission.Status.REVISION_REQUIRED:
+            return validation_error_response(
+                _('This submission is not awaiting a revision.')
+            )
+
+        revision_response = request.data.get('revision_response', '').strip()
+        if not revision_response:
+            return validation_error_response(
+                _('A response to reviewer comments is required.')
+            )
+
+        try:
+            old_status = submission.status
+            submission.revision_response = revision_response
+            submission.submit_revision()
+            submission.save()
+
+            SubmissionStatusHistory.objects.create(
+                submission=submission,
+                from_status=old_status,
+                to_status=submission.status,
+                changed_by=request.user,
+                notes=_('Revision submitted by author'),
+            )
+
+            logger.info(
+                f"Revision #{submission.revision_number} submitted for {submission.manuscript_id}"
+            )
+
+            try:
+                from apps.notifications.email_service import send_status_change
+                send_status_change(
+                    submission, old_status, submission.status,
+                    notes=f'Revision #{submission.revision_number} submitted'
+                )
+            except Exception as email_err:
+                logger.warning(f"Revision email failed: {email_err}")
+
+            return success_response(
+                data=SubmissionDetailSerializer(submission).data,
+                message=_('Revision submitted successfully')
+            )
+        except Exception as e:
+            logger.error(f"Error submitting revision: {str(e)}")
+            return error_response(
+                message=_('Failed to submit revision'),
+                code='REVISION_ERROR',
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     @action(detail=True, methods=['get', 'post'])
     def authors(self, request, pk=None):
         """
