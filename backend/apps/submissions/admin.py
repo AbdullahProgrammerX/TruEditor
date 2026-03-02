@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils import timezone
 from .models import Submission, Author, SubmissionStatusHistory
 
 
@@ -7,8 +8,9 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_display = ('manuscript_id', 'title_short', 'submitter_email', 'status', 'article_type', 'revision_number', 'created_at')
     list_filter = ('status', 'article_type', 'language')
     search_fields = ('manuscript_id', 'title', 'submitter__email')
-    readonly_fields = ('id', 'manuscript_id', 'created_at', 'updated_at', 'submitted_at', 'accepted_at', 'published_at', 'revision_submitted_at')
+    readonly_fields = ('id', 'manuscript_id', 'status', 'created_at', 'updated_at', 'submitted_at', 'accepted_at', 'published_at', 'revision_submitted_at')
     ordering = ('-created_at',)
+    actions = ['action_request_revision', 'action_accept', 'action_reject', 'action_start_review']
 
     fieldsets = (
         ('Status', {
@@ -19,7 +21,6 @@ class SubmissionAdmin(admin.ModelAdmin):
         }),
         ('Revision', {
             'fields': ('revision_number', 'revision_notes', 'revision_deadline', 'revision_response', 'revision_submitted_at'),
-            'classes': ('collapse',),
         }),
         ('Editor', {
             'fields': ('assigned_editor', 'editor_notes', 'editor_decision', 'editor_decision_date'),
@@ -41,6 +42,79 @@ class SubmissionAdmin(admin.ModelAdmin):
     def submitter_email(self, obj):
         return obj.submitter.email if obj.submitter else '—'
     submitter_email.short_description = 'Submitter'
+
+    @admin.action(description='Request Revision (submitted/under_review → revision_required)')
+    def action_request_revision(self, request, queryset):
+        count = 0
+        for sub in queryset:
+            try:
+                old_status = sub.status
+                notes = sub.revision_notes or 'Please revise your manuscript.'
+                sub.request_revision(notes=notes, deadline_days=30)
+                sub.save()
+                SubmissionStatusHistory.objects.create(
+                    submission=sub, from_status=old_status,
+                    to_status=sub.status, changed_by=request.user,
+                    notes='Revision requested via admin',
+                )
+                count += 1
+            except Exception as e:
+                self.message_user(request, f'Error on {sub.manuscript_id}: {e}', level='error')
+        self.message_user(request, f'{count} submission(s) set to revision_required.')
+
+    @admin.action(description='Start Review (submitted → under_review)')
+    def action_start_review(self, request, queryset):
+        count = 0
+        for sub in queryset:
+            try:
+                old_status = sub.status
+                sub.start_review()
+                sub.save()
+                SubmissionStatusHistory.objects.create(
+                    submission=sub, from_status=old_status,
+                    to_status=sub.status, changed_by=request.user,
+                    notes='Review started via admin',
+                )
+                count += 1
+            except Exception as e:
+                self.message_user(request, f'Error on {sub.manuscript_id}: {e}', level='error')
+        self.message_user(request, f'{count} submission(s) set to under_review.')
+
+    @admin.action(description='Accept (under_review/revision_submitted → accepted)')
+    def action_accept(self, request, queryset):
+        count = 0
+        for sub in queryset:
+            try:
+                old_status = sub.status
+                sub.accept()
+                sub.save()
+                SubmissionStatusHistory.objects.create(
+                    submission=sub, from_status=old_status,
+                    to_status=sub.status, changed_by=request.user,
+                    notes='Accepted via admin',
+                )
+                count += 1
+            except Exception as e:
+                self.message_user(request, f'Error on {sub.manuscript_id}: {e}', level='error')
+        self.message_user(request, f'{count} submission(s) accepted.')
+
+    @admin.action(description='Reject (submitted/under_review → rejected)')
+    def action_reject(self, request, queryset):
+        count = 0
+        for sub in queryset:
+            try:
+                old_status = sub.status
+                sub.reject()
+                sub.save()
+                SubmissionStatusHistory.objects.create(
+                    submission=sub, from_status=old_status,
+                    to_status=sub.status, changed_by=request.user,
+                    notes='Rejected via admin',
+                )
+                count += 1
+            except Exception as e:
+                self.message_user(request, f'Error on {sub.manuscript_id}: {e}', level='error')
+        self.message_user(request, f'{count} submission(s) rejected.')
 
 
 @admin.register(Author)
