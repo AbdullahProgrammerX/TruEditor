@@ -65,9 +65,6 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 RUN groupadd --gid 1000 appgroup && \
     useradd --uid 1000 --gid appgroup --shell /bin/bash --create-home appuser
 
-# Cache bust for code changes
-ARG CACHEBUST=1
-
 # Copy application code
 COPY --chown=appuser:appgroup . .
 
@@ -88,5 +85,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE ${PORT}
 
-# Run migrations, promote admin, and start gunicorn
-CMD ["sh", "-c", "python manage.py migrate --no-input && python manage.py promote_admin && gunicorn core.wsgi:application --bind 0.0.0.0:${PORT} --workers 2 --threads 4 --worker-class gthread --worker-tmp-dir /dev/shm --access-logfile - --error-logfile -"]
+# Run migrations and start gunicorn
+CMD ["sh", "-c", "python manage.py migrate --no-input && gunicorn core.wsgi:application --bind 0.0.0.0:${PORT} --workers 2 --threads 4 --worker-class gthread --worker-tmp-dir /dev/shm --access-logfile - --error-logfile -"]
