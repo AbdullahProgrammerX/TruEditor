@@ -291,6 +291,12 @@ async function saveProgressQuiet(): Promise<void> {
 // ============================================
 
 async function handleSubmit(): Promise<void> {
+  // Stop autosave immediately to prevent 403 after status change
+  if (autosaveTimer) {
+    clearInterval(autosaveTimer)
+    autosaveTimer = null
+  }
+
   try {
     if (!submissionStore.currentSubmission) {
       await saveProgress()

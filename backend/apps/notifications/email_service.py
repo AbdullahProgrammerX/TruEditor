@@ -7,6 +7,7 @@ Developer: Abdullah Dogan
 """
 
 import logging
+import threading
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -15,6 +16,9 @@ from django.utils.html import strip_tags
 from .models import EmailLog, EmailPreference
 
 logger = logging.getLogger(__name__)
+
+# Connection timeout for SMTP (seconds)
+SMTP_TIMEOUT = 10
 
 
 def _send(email_type: str, recipient_email: str, subject: str,
@@ -32,43 +36,74 @@ def _send(email_type: str, recipient_email: str, subject: str,
         status=EmailLog.Status.PENDING,
     )
 
+    # Render the template on the main thread (uses Django template engine)
+    context.setdefault('site_name', 'TruEditor')
+    context.setdefault('site_url', getattr(settings, 'FRONTEND_URL', ''))
+
     try:
-        # Skip sending if SMTP not configured (no credentials)
-        email_host_user = getattr(settings, 'EMAIL_HOST_USER', '')
-        email_backend = getattr(settings, 'EMAIL_BACKEND', '')
-        is_console = 'console' in email_backend.lower() if email_backend else False
-
-        if not is_console and not email_host_user:
-            log.status = EmailLog.Status.FAILED
-            log.error_message = 'SMTP credentials not configured'
-            log.save(update_fields=['status', 'error_message'])
-            logger.warning("Email skipped (no SMTP credentials): [%s] %s", email_type, subject)
-            return log
-
-        context.setdefault('site_name', 'TruEditor')
-        context.setdefault('site_url', settings.FRONTEND_URL if hasattr(settings, 'FRONTEND_URL') else '')
-
         html_body = render_to_string(f'email/{template_name}.html', context)
-        text_body = strip_tags(html_body)
-
-        msg = EmailMultiAlternatives(
-            subject=subject,
-            body=text_body,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[recipient_email],
-        )
-        msg.attach_alternative(html_body, 'text/html')
-        msg.send(fail_silently=False)
-
-        log.status = EmailLog.Status.SENT
-        log.save(update_fields=['status'])
-        logger.info("Email sent: [%s] %s → %s", email_type, subject, recipient_email)
-
     except Exception as exc:
         log.status = EmailLog.Status.FAILED
-        log.error_message = str(exc)[:500]
+        log.error_message = f'Template render error: {exc}'[:500]
         log.save(update_fields=['status', 'error_message'])
-        logger.error("Email failed: [%s] %s → %s — %s", email_type, subject, recipient_email, exc)
+        logger.error("Email template error: [%s] — %s", email_type, exc)
+        return log
+
+    # Send in a background thread so it never blocks the HTTP response
+    def _do_send():
+        from django.db import connection
+        try:
+            email_backend = getattr(settings, 'EMAIL_BACKEND', '')
+            is_console = 'console' in email_backend.lower() if email_backend else False
+            is_resend = 'resend' in email_backend.lower() if email_backend else False
+
+            if is_resend:
+                api_key = getattr(settings, 'ANYMAIL', {}).get('RESEND_API_KEY', '')
+                if not api_key:
+                    log.status = EmailLog.Status.FAILED
+                    log.error_message = 'RESEND_API_KEY not configured'
+                    log.save(update_fields=['status', 'error_message'])
+                    logger.warning("Email skipped (no Resend API key): [%s] %s", email_type, subject)
+                    return
+            elif not is_console:
+                email_host_user = getattr(settings, 'EMAIL_HOST_USER', '')
+                if not email_host_user:
+                    log.status = EmailLog.Status.FAILED
+                    log.error_message = 'SMTP credentials not configured'
+                    log.save(update_fields=['status', 'error_message'])
+                    logger.warning("Email skipped (no SMTP credentials): [%s] %s", email_type, subject)
+                    return
+
+            text_body = strip_tags(html_body)
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                body=text_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[recipient_email],
+            )
+            msg.attach_alternative(html_body, 'text/html')
+
+            # Set a short timeout so we don't hang on unreachable SMTP
+            conn = msg.get_connection()
+            if hasattr(conn, 'timeout'):
+                conn.timeout = SMTP_TIMEOUT
+
+            msg.send(fail_silently=False)
+
+            log.status = EmailLog.Status.SENT
+            log.save(update_fields=['status'])
+            logger.info("Email sent: [%s] %s → %s", email_type, subject, recipient_email)
+
+        except Exception as exc:
+            log.status = EmailLog.Status.FAILED
+            log.error_message = str(exc)[:500]
+            log.save(update_fields=['status', 'error_message'])
+            logger.error("Email failed: [%s] %s → %s — %s", email_type, subject, recipient_email, exc)
+        finally:
+            connection.close()
+
+    thread = threading.Thread(target=_do_send, daemon=True)
+    thread.start()
 
     return log
 

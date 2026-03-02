@@ -61,6 +61,7 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'django_fsm',
     'storages',
+    'anymail',
 ]
 
 LOCAL_APPS = [
@@ -476,17 +477,28 @@ if ENV != 'development':
 # ============================================
 # EMAIL (Platform-Agnostic)
 # ============================================
+# Supports 3 modes via EMAIL_BACKEND env var:
+#   1. "console"  → prints to stdout (development default)
+#   2. "resend"   → HTTP API via Resend (recommended for Render/Vercel)
+#   3. "smtp"     → Traditional SMTP (Gmail, SendGrid SMTP, etc.)
 
-EMAIL_BACKEND = os.environ.get(
-    'EMAIL_BACKEND', 
-    'django.core.mail.backends.console.EmailBackend' if ENV == 'development' 
-    else 'django.core.mail.backends.smtp.EmailBackend'
-)
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() == 'true'
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+_EMAIL_MODE = os.environ.get('EMAIL_MODE', 'console' if ENV == 'development' else 'resend')
+
+if _EMAIL_MODE == 'resend':
+    EMAIL_BACKEND = 'anymail.backends.resend.EmailBackend'
+    ANYMAIL = {
+        'RESEND_API_KEY': os.environ.get('RESEND_API_KEY', ''),
+    }
+elif _EMAIL_MODE == 'smtp':
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() == 'true'
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'TruEditor <noreply@trueditor.com>')
 
 # Frontend URL (for email links)
