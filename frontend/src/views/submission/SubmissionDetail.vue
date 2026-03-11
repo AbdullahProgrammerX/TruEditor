@@ -5,7 +5,7 @@
  * Full submission detail view with status timeline,
  * manuscript info, authors, files, and action buttons.
  */
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useSubmissionStore } from '@/stores/submission'
@@ -95,6 +95,15 @@ onMounted(async () => {
     error.value = 'Failed to load submission details.'
   } finally {
     isLoading.value = false
+  }
+})
+
+watch(activeTab, async (tab) => {
+  if (tab === 'correspondence' && submission.value && unreadCount.value > 0) {
+    try {
+      await submissionStore.fetchCorrespondence(submissionId)
+      await submissionStore.fetchSubmission(submissionId)
+    } catch { /* ignore */ }
   }
 })
 
