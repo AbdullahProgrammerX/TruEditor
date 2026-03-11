@@ -25,6 +25,7 @@
 | FAZ-11 | E-posta Bildirim Sistemi | ✅ Tamamlandı |
 | FAZ-12 | Revizyon İş Akışı | ✅ Tamamlandı |
 | FAZ-13 | Metadata Çıkarma | ✅ Tamamlandı |
+| FAZ-14 | Dosya Sıralama UI | ✅ Tamamlandı |
 
 ---
 
@@ -170,15 +171,16 @@
 
 ## Orta Öncelik Fazları (Kaliteyi Artıran)
 
-### FAZ-14: Dosya Sıralama UI (Sürükle-Bırak)
+### FAZ-14: Dosya Sıralama UI (Sürükle-Bırak) ✅ Tamamlandı
 
-**Kapsam:**
-- [ ] Frontend sürükle-bırak dosya sıralama (vuedraggable veya native HTML5 DnD)
-- [ ] Dosya açıklama (description) alanı ekleme
-- [ ] Dosya sıra numarası gösterimi
-- [ ] Backend reorder endpoint zaten mevcut
+**Tamamlanma Tarihi:** 2026-03-02
 
-**Tahmini Süre:** 0.5-1 gün
+**Yapılanlar:**
+- [x] Native HTML5 DnD ile sürükle-bırak dosya sıralama
+- [x] Sıra numarası gösterimi (1, 2, 3...)
+- [x] Drag handle (altı nokta ikon) + görsel geri bildirim (dragging/drag-over)
+- [x] Backend reorder endpoint çağrısı (mevcut endpoint kullanıldı)
+- [x] "Drag to reorder" ipucu metni (2+ dosya olduğunda)
 
 ---
 

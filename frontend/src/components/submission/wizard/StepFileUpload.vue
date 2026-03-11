@@ -33,6 +33,7 @@ const {
   removeFile,
   dismissUploadEntry,
   getDownloadUrl,
+  reorderFiles,
   lastExtractedMetadata,
 } = useFileUpload(() => props.submissionId)
 
@@ -50,6 +51,43 @@ const isDragging = ref(false)
 const selectedFileType = ref<FileType>('main_text')
 const fileToDelete = ref<string | null>(null)
 const isDeleting = ref(false)
+
+const dragIndex = ref<number | null>(null)
+const dropIndex = ref<number | null>(null)
+
+function onDragStart(index: number): void {
+  dragIndex.value = index
+}
+
+function onDragOver(index: number, event: DragEvent): void {
+  event.preventDefault()
+  dropIndex.value = index
+}
+
+function onDragEnd(): void {
+  dragIndex.value = null
+  dropIndex.value = null
+}
+
+async function onDropReorder(targetIndex: number): Promise<void> {
+  if (dragIndex.value === null || dragIndex.value === targetIndex) {
+    onDragEnd()
+    return
+  }
+
+  const serverOnly = allFiles.value.filter(f => f.status === 'server')
+  const draggedItem = serverOnly[dragIndex.value]
+  const items = [...serverOnly]
+  items.splice(dragIndex.value, 1)
+  items.splice(targetIndex, 0, draggedItem)
+
+  onDragEnd()
+
+  const fileIds = items.map(f => f.id)
+  await reorderFiles(fileIds)
+  emit('filesChanged', serverFiles.value)
+  ;(window as any).toast?.('success', 'File order updated')
+}
 
 /**
  * Computed: has main text uploaded
@@ -301,21 +339,39 @@ watch(serverFiles, (files) => {
 
     <!-- Files List -->
     <div v-if="allFiles.length > 0" class="mt-6 space-y-3">
-      <h4 class="text-sm font-medium text-gray-700">
-        Uploaded Files ({{ allFiles.length }})
-      </h4>
+      <div class="flex items-center justify-between">
+        <h4 class="text-sm font-medium text-gray-700">
+          Uploaded Files ({{ allFiles.length }})
+        </h4>
+        <p v-if="allFiles.filter(f => f.status === 'server').length > 1" class="text-xs text-gray-400">
+          Drag to reorder
+        </p>
+      </div>
 
-      <TransitionGroup name="file-list" tag="div" class="space-y-3">
+      <TransitionGroup name="file-list" tag="div" class="space-y-2">
         <div
-          v-for="file in allFiles"
+          v-for="(file, index) in allFiles"
           :key="file.id"
           class="file-item"
           :class="{
             'error': file.status === 'error',
-            'uploading': file.status === 'uploading'
+            'uploading': file.status === 'uploading',
+            'drag-over': dropIndex === index && dragIndex !== index,
+            'dragging': dragIndex === index,
           }"
+          :draggable="file.status === 'server'"
+          @dragstart="file.status === 'server' && onDragStart(index)"
+          @dragover="file.status === 'server' && onDragOver(index, $event)"
+          @drop.prevent="file.status === 'server' && onDropReorder(index)"
+          @dragend="onDragEnd"
         >
           <div class="flex items-center gap-3">
+            <!-- Drag Handle + Order Number -->
+            <div v-if="file.status === 'server'" class="flex-shrink-0 flex items-center gap-1 cursor-grab active:cursor-grabbing">
+              <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
+              <span class="text-xs font-mono text-gray-400 w-5 text-center">{{ index + 1 }}</span>
+            </div>
+
             <!-- File Icon -->
             <div class="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
               <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -488,6 +544,25 @@ watch(serverFiles, (files) => {
 .file-item.uploading {
   border-color: #bfdbfe;
   background-color: #eff6ff;
+}
+
+.file-item.dragging {
+  opacity: 0.4;
+  border-style: dashed;
+}
+
+.file-item.drag-over {
+  border-color: var(--color-primary-400, #5a87be);
+  background-color: rgba(30, 58, 95, 0.03);
+  box-shadow: 0 0 0 1px var(--color-primary-300, #8ab0d8);
+}
+
+.file-item[draggable="true"] {
+  cursor: grab;
+}
+
+.file-item[draggable="true"]:active {
+  cursor: grabbing;
 }
 
 .input-field {
