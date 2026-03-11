@@ -25,12 +25,15 @@ const submissionStore = useSubmissionStore()
 const submissionId = route.params.id as string
 const isLoading = ref(true)
 const error = ref<string | null>(null)
-const activeTab = ref<'overview' | 'files' | 'authors' | 'additional'>('overview')
+const activeTab = ref<'overview' | 'files' | 'authors' | 'correspondence' | 'additional'>('overview')
 const showWithdrawConfirm = ref(false)
 const isWithdrawing = ref(false)
 const isMobileMenuOpen = ref(false)
 const isGeneratingPdf = ref(false)
 const pdfUrl = ref<string | null>(null)
+const newMessageBody = ref('')
+const newMessageSubject = ref('')
+const isSendingMessage = ref(false)
 
 const submission = computed(() => submissionStore.currentSubmission)
 
@@ -71,6 +74,18 @@ const opposedReviewers = computed(() => {
 
 const editorComments = computed(() => {
   return submission.value?.wizard_data?.editor_comments || ''
+})
+
+const correspondenceMessages = computed(() => {
+  return submission.value?.correspondence || []
+})
+
+const decisionLetter = computed(() => {
+  return correspondenceMessages.value.find(m => m.message_type === 'decision_letter') || null
+})
+
+const unreadCount = computed(() => {
+  return correspondenceMessages.value.filter(m => !m.is_read && m.message_type !== 'author_to_editor').length
 })
 
 onMounted(async () => {
@@ -153,6 +168,25 @@ async function downloadFile(fileId: string) {
   }
 }
 
+async function handleSendMessage() {
+  if (!submission.value || !newMessageBody.value.trim()) return
+  isSendingMessage.value = true
+  try {
+    await submissionStore.sendCorrespondence(
+      submission.value.id,
+      newMessageBody.value.trim(),
+      newMessageSubject.value.trim() || undefined,
+    )
+    newMessageBody.value = ''
+    newMessageSubject.value = ''
+    ;(window as any).toast?.('success', 'Message sent successfully.')
+  } catch {
+    ;(window as any).toast?.('error', 'Failed to send message.')
+  } finally {
+    isSendingMessage.value = false
+  }
+}
+
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '—'
   const d = new Date(dateStr)
@@ -185,6 +219,7 @@ const tabs = [
   { id: 'overview' as const, label: 'Overview', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
   { id: 'files' as const, label: 'Files', icon: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z' },
   { id: 'authors' as const, label: 'Authors', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
+  { id: 'correspondence' as const, label: 'Messages', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
   { id: 'additional' as const, label: 'Details', icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
 ]
 </script>
@@ -314,6 +349,7 @@ const tabs = [
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="tab.icon" /></svg>
                 <span class="hidden sm:inline">{{ tab.label }}</span>
+                <span v-if="tab.id === 'correspondence' && unreadCount > 0" class="w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">{{ unreadCount }}</span>
               </button>
             </div>
 
@@ -437,6 +473,97 @@ const tabs = [
                   <p v-if="author.contribution" class="text-xs text-gray-500 mt-2 pl-13"><span class="font-medium">Contribution:</span> {{ author.contribution }}</p>
                 </div>
               </div>
+            </div>
+
+            <!-- Correspondence Tab -->
+            <div v-if="activeTab === 'correspondence'" class="p-6 space-y-5">
+              <!-- Decision Letter (if exists, show first) -->
+              <div v-if="decisionLetter" class="border-2 border-emerald-200 bg-emerald-50 rounded-xl p-5">
+                <div class="flex items-center gap-2 mb-3">
+                  <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-emerald-800">Decision Letter</p>
+                    <p class="text-xs text-emerald-600">{{ formatDateTime(decisionLetter.created_at) }}</p>
+                  </div>
+                </div>
+                <p v-if="decisionLetter.subject" class="font-semibold text-emerald-900 mb-2">{{ decisionLetter.subject }}</p>
+                <div class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{{ decisionLetter.body }}</div>
+              </div>
+
+              <!-- Message thread -->
+              <div v-if="correspondenceMessages.length === 0 && !decisionLetter" class="text-center py-10 text-gray-500">
+                <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                <p class="font-medium">No messages yet</p>
+                <p class="text-sm mt-1">Send a message to the editor using the form below.</p>
+              </div>
+
+              <div v-else class="space-y-3">
+                <div
+                  v-for="msg in correspondenceMessages.filter(m => m.message_type !== 'decision_letter')"
+                  :key="msg.id"
+                  class="rounded-xl p-4"
+                  :class="[
+                    msg.message_type === 'author_to_editor'
+                      ? 'bg-primary-50 border border-primary-100 ml-6'
+                      : msg.message_type === 'system'
+                        ? 'bg-gray-50 border border-gray-100'
+                        : 'bg-blue-50 border border-blue-100 mr-6'
+                  ]"
+                >
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                        :class="msg.message_type === 'author_to_editor' ? 'bg-primary-200 text-primary-700' : 'bg-blue-200 text-blue-700'"
+                      >
+                        {{ msg.sender_name?.charAt(0) || '?' }}
+                      </div>
+                      <div>
+                        <p class="text-sm font-semibold" :class="msg.message_type === 'author_to_editor' ? 'text-primary-800' : 'text-blue-800'">
+                          {{ msg.sender_name }}
+                        </p>
+                        <p class="text-xs text-gray-500">{{ msg.message_type_display }}</p>
+                      </div>
+                    </div>
+                    <span class="text-xs text-gray-400">{{ formatDateTime(msg.created_at) }}</span>
+                  </div>
+                  <p v-if="msg.subject" class="text-sm font-semibold text-gray-800 mb-1">{{ msg.subject }}</p>
+                  <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{{ msg.body }}</p>
+                </div>
+              </div>
+
+              <!-- Send Message Form (only for non-draft) -->
+              <div v-if="submission.status !== 'draft'" class="border-t border-gray-200 pt-5">
+                <h4 class="text-sm font-semibold text-gray-700 mb-3">Send Message to Editor</h4>
+                <div class="space-y-3">
+                  <input
+                    v-model="newMessageSubject"
+                    type="text"
+                    placeholder="Subject (optional)"
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 transition-all"
+                  />
+                  <textarea
+                    v-model="newMessageBody"
+                    rows="4"
+                    placeholder="Write your message..."
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 transition-all resize-none"
+                  ></textarea>
+                  <div class="flex justify-end">
+                    <button
+                      @click="handleSendMessage"
+                      :disabled="!newMessageBody.trim() || isSendingMessage"
+                      class="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-semibold text-sm rounded-xl shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <svg v-if="!isSendingMessage" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                      <svg v-else class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                      {{ isSendingMessage ? 'Sending...' : 'Send Message' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p v-else class="text-sm text-gray-400 text-center">Submit your manuscript before sending messages to the editor.</p>
             </div>
 
             <!-- Additional Details Tab -->

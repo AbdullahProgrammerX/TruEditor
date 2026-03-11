@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import Submission, Author, SubmissionStatusHistory
+from .models import Submission, Author, SubmissionStatusHistory, Correspondence
 
 
 @admin.register(Submission)
@@ -145,3 +145,23 @@ class StatusHistoryAdmin(admin.ModelAdmin):
     def changed_by_name(self, obj):
         return obj.changed_by.email if obj.changed_by else 'System'
     changed_by_name.short_description = 'Changed By'
+
+
+@admin.register(Correspondence)
+class CorrespondenceAdmin(admin.ModelAdmin):
+    list_display = ('submission_manuscript', 'message_type', 'sender_name', 'subject_short', 'is_read', 'created_at')
+    list_filter = ('message_type', 'is_read')
+    readonly_fields = ('id', 'created_at', 'read_at')
+    search_fields = ('subject', 'body')
+
+    def submission_manuscript(self, obj):
+        return obj.submission.manuscript_id or str(obj.submission_id)[:8]
+    submission_manuscript.short_description = 'Submission'
+
+    def sender_name(self, obj):
+        return obj.sender.full_name if obj.sender else 'System'
+    sender_name.short_description = 'Sender'
+
+    def subject_short(self, obj):
+        return (obj.subject or '(no subject)')[:50]
+    subject_short.short_description = 'Subject'

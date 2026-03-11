@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.utils.translation import gettext_lazy as _
 
-from .models import Submission, Author, SubmissionStatusHistory
+from .models import Submission, Author, SubmissionStatusHistory, Correspondence
 from .serializers import (
     SubmissionListSerializer,
     SubmissionDetailSerializer,
@@ -22,6 +22,8 @@ from .serializers import (
     SubmissionUpdateSerializer,
     AuthorCreateSerializer,
     SubmissionSubmitSerializer,
+    CorrespondenceSerializer,
+    CorrespondenceCreateSerializer,
 )
 from .permissions import IsOwnerOrReadOnly, CanEditSubmission, CanDeleteSubmission
 from apps.common.response import (
@@ -540,3 +542,81 @@ class SubmissionViewSet(viewsets.ModelViewSet):
                 auth.save(update_fields=['order'])
             
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # =============================================
+    # CORRESPONDENCE
+    # =============================================
+
+    @action(detail=True, methods=['get', 'post'], url_path='correspondence')
+    def correspondence(self, request, pk=None):
+        """
+        GET:  List all correspondence for this submission.
+        POST: Author sends a message to the editor.
+        """
+        submission = self.get_object()
+
+        if request.method == 'GET':
+            messages = submission.correspondence.all()
+            # Mark editor/system messages as read when author fetches
+            unread = messages.filter(
+                is_read=False,
+                message_type__in=[
+                    Correspondence.MessageType.EDITOR_TO_AUTHOR,
+                    Correspondence.MessageType.DECISION_LETTER,
+                    Correspondence.MessageType.SYSTEM,
+                ],
+            )
+            from django.utils import timezone as tz
+            unread.update(is_read=True, read_at=tz.now())
+
+            serializer = CorrespondenceSerializer(messages, many=True)
+            return success_response(
+                data=serializer.data,
+                message=_('Correspondence retrieved successfully'),
+            )
+
+        # POST – author sends message
+        if submission.status == Submission.Status.DRAFT:
+            return validation_error_response(
+                _('Cannot send messages for draft submissions.')
+            )
+
+        ser = CorrespondenceCreateSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        msg = Correspondence.objects.create(
+            submission=submission,
+            sender=request.user,
+            message_type=Correspondence.MessageType.AUTHOR_TO_EDITOR,
+            subject=ser.validated_data.get('subject', ''),
+            body=ser.validated_data['body'],
+        )
+
+        try:
+            from apps.notifications.email_service import _send
+            from apps.notifications.models import EmailLog
+            editor = submission.assigned_editor
+            if editor and editor.email:
+                _send(
+                    email_type=EmailLog.EmailType.OTHER,
+                    recipient_email=editor.email,
+                    subject=f'New message from author — {submission.manuscript_id}',
+                    template_name='status_change',
+                    context={
+                        'user_name': editor.full_name or editor.email,
+                        'manuscript_id': submission.manuscript_id,
+                        'title': submission.title,
+                        'old_status': 'Message',
+                        'new_status': 'New author correspondence',
+                        'notes': msg.body[:200],
+                    },
+                    recipient_user=editor,
+                    submission=submission,
+                )
+        except Exception as e:
+            logger.warning(f"Correspondence email failed: {e}")
+
+        return created_response(
+            data=CorrespondenceSerializer(msg).data,
+            message=_('Message sent successfully'),
+        )

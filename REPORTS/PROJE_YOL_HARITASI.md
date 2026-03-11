@@ -202,16 +202,22 @@
 
 ---
 
-### FAZ-16: Yazışma Geçmişi & Karar Mektubu
+### FAZ-16: Yazışma Geçmişi & Karar Mektubu ✅
+
+**Durum:** Tamamlandı  
+**Tamamlanma Tarihi:** 2026-03-11
 
 **Kapsam:**
-- [ ] `Correspondence` modeli (gönderen, alıcı, konu, içerik, tarih)
-- [ ] Yazışma geçmişi API endpoint'leri
-- [ ] Detay sayfasında yazışma sekmesi
-- [ ] Karar mektubu görüntüleme
-- [ ] Editöre mesaj gönderme formu
+- [x] `Correspondence` modeli (sender, message_type, subject, body, is_read)
+- [x] Yazışma geçmişi API endpoint'leri (GET/POST /submissions/{id}/correspondence/)
+- [x] Detay sayfasında "Messages" sekmesi (okunmamış badge ile)
+- [x] Karar mektubu görüntüleme (özel yeşil kutu)
+- [x] Editöre mesaj gönderme formu
+- [x] Yeni mesajda editöre e-posta bildirimi
+- [x] Django Admin'de Correspondence yönetimi
+- [x] Mesajlar okunduğunda otomatik read marking
 
-**Tahmini Süre:** 1-2 gün  
+**Tahmini Süre:** 1-2 gün
 **Bağımlılıklar:** FAZ-9 (detay sayfası)
 
 ---

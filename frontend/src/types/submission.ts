@@ -219,6 +219,25 @@ export interface StatusHistoryEntry {
 }
 
 /**
+ * Correspondence message
+ */
+export type CorrespondenceType = 'author_to_editor' | 'editor_to_author' | 'decision_letter' | 'system'
+
+export interface CorrespondenceMessage {
+  id: string
+  submission: string
+  sender: string | null
+  sender_name: string
+  message_type: CorrespondenceType
+  message_type_display: string
+  subject: string
+  body: string
+  is_read: boolean
+  read_at: string | null
+  created_at: string
+}
+
+/**
  * Corresponding author summary
  */
 export interface CorrespondingAuthor {
@@ -302,6 +321,7 @@ export interface Submission {
   authors: Author[]
   files: ManuscriptFile[]
   status_history: StatusHistoryEntry[]
+  correspondence: CorrespondenceMessage[]
   author_count: number
   file_count: number
   

@@ -10,7 +10,7 @@ from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
-from .models import Submission, Author, SubmissionStatusHistory
+from .models import Submission, Author, SubmissionStatusHistory, Correspondence
 from apps.users.serializers import UserMinimalSerializer
 from apps.files.serializers import ManuscriptFileSerializer
 
@@ -38,6 +38,30 @@ class StatusHistorySerializer(serializers.ModelSerializer):
 
     def get_to_status_display(self, obj):
         return dict(Submission.Status.choices).get(obj.to_status, obj.to_status)
+
+
+class CorrespondenceSerializer(serializers.ModelSerializer):
+    sender_name = serializers.SerializerMethodField()
+    message_type_display = serializers.CharField(source='get_message_type_display', read_only=True)
+
+    class Meta:
+        model = Correspondence
+        fields = [
+            'id', 'submission', 'sender', 'sender_name',
+            'message_type', 'message_type_display',
+            'subject', 'body', 'is_read', 'read_at', 'created_at',
+        ]
+        read_only_fields = ['id', 'submission', 'sender', 'is_read', 'read_at', 'created_at']
+
+    def get_sender_name(self, obj):
+        if obj.sender:
+            return obj.sender.full_name or obj.sender.email
+        return 'System'
+
+
+class CorrespondenceCreateSerializer(serializers.Serializer):
+    subject = serializers.CharField(max_length=300, required=False, allow_blank=True)
+    body = serializers.CharField()
 
 
 class AuthorshipSerializer(serializers.ModelSerializer):
@@ -134,6 +158,7 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
     files = serializers.SerializerMethodField()
     assigned_editor = UserMinimalSerializer(read_only=True)
     status_history = StatusHistorySerializer(many=True, read_only=True)
+    correspondence = CorrespondenceSerializer(many=True, read_only=True)
     author_count = serializers.ReadOnlyField()
     file_count = serializers.ReadOnlyField()
     is_editable = serializers.ReadOnlyField()
@@ -196,6 +221,7 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
             'authors',
             'files',
             'status_history',
+            'correspondence',
             'author_count',
             'file_count',
             

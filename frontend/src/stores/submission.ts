@@ -405,6 +405,37 @@ export const useSubmissionStore = defineStore('submission', () => {
   }
 
   // ============================================
+  // ACTIONS - Correspondence
+  // ============================================
+
+  async function sendCorrespondence(submissionId: string, body: string, subject?: string) {
+    isSaving.value = true
+    error.value = null
+    try {
+      const response = await api.post(`/submissions/${submissionId}/correspondence/`, { body, subject })
+      if (currentSubmission.value && currentSubmission.value.id === submissionId) {
+        await fetchSubmission(submissionId)
+      }
+      return response.data.data
+    } catch (err: any) {
+      error.value = err.response?.data?.error?.message || 'Failed to send message'
+      throw err
+    } finally {
+      isSaving.value = false
+    }
+  }
+
+  async function fetchCorrespondence(submissionId: string) {
+    try {
+      const response = await api.get(`/submissions/${submissionId}/correspondence/`)
+      return response.data.data
+    } catch (err: any) {
+      error.value = err.response?.data?.error?.message || 'Failed to load correspondence'
+      throw err
+    }
+  }
+
+  // ============================================
   // ACTIONS - Author Operations
   // ============================================
   
@@ -661,6 +692,10 @@ export const useSubmissionStore = defineStore('submission', () => {
     submitForReview,
     withdraw,
     submitRevision,
+
+    // Correspondence
+    sendCorrespondence,
+    fetchCorrespondence,
 
     // Author Actions
     addAuthor,

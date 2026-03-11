@@ -674,6 +674,72 @@ class Author(models.Model):
             ).exclude(pk=self.pk).update(is_corresponding=False)
 
 
+class Correspondence(models.Model):
+    """
+    Messages exchanged between author and editor regarding a submission.
+    Also stores decision letters as a special message type.
+    """
+
+    class MessageType(models.TextChoices):
+        AUTHOR_TO_EDITOR = 'author_to_editor', _('Author to Editor')
+        EDITOR_TO_AUTHOR = 'editor_to_author', _('Editor to Author')
+        DECISION_LETTER = 'decision_letter', _('Decision Letter')
+        SYSTEM = 'system', _('System Message')
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    submission = models.ForeignKey(
+        Submission,
+        on_delete=models.CASCADE,
+        related_name='correspondence',
+        verbose_name=_('Submission'),
+    )
+
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='sent_correspondence',
+        verbose_name=_('Sender'),
+    )
+
+    message_type = models.CharField(
+        _('Message Type'),
+        max_length=30,
+        choices=MessageType.choices,
+    )
+
+    subject = models.CharField(
+        _('Subject'),
+        max_length=300,
+        blank=True,
+    )
+
+    body = models.TextField(_('Body'))
+
+    is_read = models.BooleanField(_('Read'), default=False)
+    read_at = models.DateTimeField(_('Read At'), null=True, blank=True)
+
+    created_at = models.DateTimeField(_('Created At'), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Correspondence')
+        verbose_name_plural = _('Correspondence')
+        ordering = ['created_at']
+        indexes = [
+            models.Index(fields=['submission', 'created_at']),
+        ]
+
+    def __str__(self):
+        return f"[{self.get_message_type_display()}] {self.subject or 'No subject'}"
+
+    def mark_read(self):
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
+
+
 class SubmissionStatusHistory(models.Model):
     """
     Submission Status History.
