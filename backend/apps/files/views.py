@@ -221,6 +221,54 @@ class ManuscriptFileViewSet(viewsets.ModelViewSet):
             message=_('Files reordered successfully')
         )
     
+    @action(detail=True, methods=['post'])
+    def extract_metadata(self, request, pk=None):
+        """
+        Extract title, abstract, and keywords from a main_text file.
+        Only works on main_text, revision, or revision_notes file types.
+        """
+        instance = self.get_object()
+
+        if instance.submission and instance.submission.submitter != request.user:
+            return forbidden_response(
+                _('You do not have permission to access this file.')
+            )
+
+        if instance.file_type not in ('main_text', 'revision'):
+            return validation_error_response(
+                _('Metadata extraction is only available for main text or revision files.')
+            )
+
+        try:
+            from .metadata_extractor import extract_metadata as do_extract
+
+            file_obj = instance.file.open('rb')
+            result = do_extract(file_obj, instance.original_filename)
+            file_obj.close()
+
+            if not result.has_data:
+                return success_response(
+                    data={'extracted': False},
+                    message=_('No metadata could be extracted from this file.')
+                )
+
+            return success_response(
+                data={
+                    'extracted': True,
+                    'title': result.title,
+                    'abstract': result.abstract,
+                    'keywords': result.keywords,
+                },
+                message=_('Metadata extracted successfully')
+            )
+        except Exception as e:
+            logger.error("Metadata extraction error: %s", e)
+            return error_response(
+                message=_('Metadata extraction failed'),
+                code='EXTRACTION_ERROR',
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
     @action(detail=True, methods=['get'])
     def presigned_url(self, request, pk=None):
         """

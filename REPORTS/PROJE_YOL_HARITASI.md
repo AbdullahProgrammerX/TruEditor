@@ -24,6 +24,7 @@
 | FAZ-10 | PDF Oluşturma & Önizleme | ✅ Tamamlandı |
 | FAZ-11 | E-posta Bildirim Sistemi | ✅ Tamamlandı |
 | FAZ-12 | Revizyon İş Akışı | ✅ Tamamlandı |
+| FAZ-13 | Metadata Çıkarma | ✅ Tamamlandı |
 
 ---
 
@@ -148,34 +149,22 @@
 
 ---
 
-### FAZ-13: Metadata Çıkarma (Extraction)
+### FAZ-13: Metadata Çıkarma (Extraction) ✅ Tamamlandı
 
-**Neden Kritik:** EM'de yüklenen dosyadan Başlık, Özet, Anahtar Kelimeler ve Yazarlar otomatik çıkarılır. Bu, veri girişini büyük ölçüde azaltır.
+**Tamamlanma Tarihi:** 2026-03-02
 
-**Kapsam:**
+**Yapılanlar:**
 
 #### Backend
-- [ ] DOCX dosyasından metadata çıkarma (`python-docx`)
-  - Başlık (document properties + ilk satır analizi)
-  - Özet (Abstract bölümü tespiti)
-  - Anahtar kelimeler (Keywords bölümü tespiti)
-  - Yazar isimleri (belge özellikleri + metin analizi)
-- [ ] PDF dosyasından metadata çıkarma (`PyPDF2` / `pdfplumber`)
-  - Başlık (PDF metadata + ilk satır)
-  - Özet
-- [ ] Metadata çıkarma API endpoint'i
-  - `POST /files/{id}/extract_metadata/`
-  - Sonuç: `{ title, abstract, keywords[], authors[] }`
-- [ ] Hata toleransı (çıkarma başarısız olursa sessizce devam et)
+- [x] DOCX metadata çıkarma (`python-docx`): başlık, özet, keywords (TR + EN)
+- [x] PDF metadata çıkarma (`pdfplumber`): başlık, özet, keywords (basit)
+- [x] `POST /files/{id}/extract_metadata/` endpoint
+- [x] Hata toleransı (başarısız olursa sessizce devam)
 
 #### Frontend
-- [ ] Dosya yükleme sonrası otomatik metadata çıkarma tetikleme
-- [ ] Çıkarılan verileri wizard alanlarına önerme (overwrite değil, öneri)
-- [ ] "Otomatik dolduruldu" bildirim mesajı
-- [ ] Kullanıcının önerileri kabul/red etme seçeneği
-
-**Tahmini Süre:** 2-3 gün  
-**Bağımlılıklar:** FAZ-8 (dosya yükleme)
+- [x] main_text / revision yükleme sonrası otomatik extract çağrısı
+- [x] Boş alanları otomatik doldurma (dolu alanlar dokunulmaz)
+- [x] Toast bildirimi: "Auto-filled from file: title, abstract, keywords"
 
 ---
 

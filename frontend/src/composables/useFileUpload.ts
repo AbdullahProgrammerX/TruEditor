@@ -8,6 +8,13 @@ import { ref, computed } from 'vue'
 import { api } from '@/services/api'
 import type { FileType, ManuscriptFile } from '@/types/submission'
 
+export interface ExtractedMetadata {
+  extracted: boolean
+  title?: string | null
+  abstract?: string | null
+  keywords?: string[]
+}
+
 export interface UploadingFile {
   /** Client-side tracking ID */
   id: string
@@ -176,6 +183,14 @@ export function useFileUpload(submissionId: () => string | undefined) {
 
       // Remove completed entry immediately to avoid duplicate display
       uploadingFiles.value = uploadingFiles.value.filter(f => f.id !== trackingId)
+
+      // Auto-extract metadata for main_text or revision files
+      if (
+        (fileType === 'main_text' || fileType === 'revision') &&
+        response.data.data?.id
+      ) {
+        extractMetadata(response.data.data.id).catch(() => {})
+      }
     } catch (err: any) {
       const idx = uploadingFiles.value.findIndex(f => f.id === trackingId)
       const errorItem = idx !== -1 ? uploadingFiles.value[idx] : undefined
@@ -229,6 +244,25 @@ export function useFileUpload(submissionId: () => string | undefined) {
     }
   }
 
+  const lastExtractedMetadata = ref<ExtractedMetadata | null>(null)
+
+  /**
+   * Extract metadata (title, abstract, keywords) from a file
+   */
+  async function extractMetadata(fileId: string): Promise<ExtractedMetadata | null> {
+    try {
+      const response = await api.post<{ data: ExtractedMetadata }>(`/files/${fileId}/extract_metadata/`)
+      const data = response.data.data
+      if (data?.extracted) {
+        lastExtractedMetadata.value = data
+        return data
+      }
+    } catch {
+      // Silently fail — metadata extraction is best-effort
+    }
+    return null
+  }
+
   /**
    * Reorder files
    */
@@ -250,6 +284,7 @@ export function useFileUpload(submissionId: () => string | undefined) {
     uploadingFiles,
     serverFiles,
     isLoadingFiles,
+    lastExtractedMetadata,
 
     // Computed
     totalFiles,
@@ -265,5 +300,6 @@ export function useFileUpload(submissionId: () => string | undefined) {
     dismissUploadEntry,
     getDownloadUrl,
     reorderFiles,
+    extractMetadata,
   }
 }

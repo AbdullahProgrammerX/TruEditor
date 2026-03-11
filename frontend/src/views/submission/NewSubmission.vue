@@ -140,6 +140,27 @@ function onFilesChanged(files: ManuscriptFile[]): void {
   uploadedFiles.value = files
 }
 
+function onMetadataExtracted(meta: { title?: string | null; abstract?: string | null; keywords?: string[] }): void {
+  let filled: string[] = []
+
+  if (meta.title && !title.value.trim()) {
+    title.value = meta.title
+    filled.push('title')
+  }
+  if (meta.abstract && !abstract.value.trim()) {
+    abstract.value = meta.abstract
+    filled.push('abstract')
+  }
+  if (meta.keywords && meta.keywords.length > 0 && keywords.value.length === 0) {
+    keywords.value = meta.keywords
+    filled.push('keywords')
+  }
+
+  if (filled.length > 0) {
+    ;(window as any).toast?.('success', `Auto-filled from file: ${filled.join(', ')}`)
+  }
+}
+
 // ============================================
 // NAVIGATION
 // ============================================
@@ -565,6 +586,7 @@ onBeforeRouteLeave((_to, _from, next) => {
           v-else-if="currentStep === 2"
           :submissionId="submissionId"
           @filesChanged="onFilesChanged"
+          @metadataExtracted="onMetadataExtracted"
         />
 
         <StepArticleInfo

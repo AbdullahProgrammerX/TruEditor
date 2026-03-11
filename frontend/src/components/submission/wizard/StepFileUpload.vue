@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   filesChanged: [files: ManuscriptFile[]]
+  metadataExtracted: [metadata: { title?: string | null; abstract?: string | null; keywords?: string[] }]
 }>()
 
 const {
@@ -32,7 +33,18 @@ const {
   removeFile,
   dismissUploadEntry,
   getDownloadUrl,
+  lastExtractedMetadata,
 } = useFileUpload(() => props.submissionId)
+
+watch(lastExtractedMetadata, (meta) => {
+  if (meta?.extracted) {
+    emit('metadataExtracted', {
+      title: meta.title,
+      abstract: meta.abstract,
+      keywords: meta.keywords,
+    })
+  }
+})
 
 const isDragging = ref(false)
 const selectedFileType = ref<FileType>('main_text')
