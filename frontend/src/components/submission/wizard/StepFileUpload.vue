@@ -77,6 +77,7 @@ async function onDropReorder(targetIndex: number): Promise<void> {
 
   const serverOnly = allFiles.value.filter(f => f.status === 'server')
   const draggedItem = serverOnly[dragIndex.value]
+  if (!draggedItem) { onDragEnd(); return }
   const items = [...serverOnly]
   items.splice(dragIndex.value, 1)
   items.splice(targetIndex, 0, draggedItem)
