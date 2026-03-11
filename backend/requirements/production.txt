@@ -21,9 +21,5 @@ django-csp>=3.8,<4.0
 # Monitoring & Logging
 sentry-sdk>=1.39,<2.0
 
-# Redis & Caching
-django-redis>=5.4,<6.0
-
-# Celery for background tasks
+# Celery for background tasks (redis, django-redis already in base.txt)
 celery>=5.3,<6.0
-redis>=5.0,<6.0
