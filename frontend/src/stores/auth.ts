@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const isNewUser = ref(false)
 
   // Getters
   const isAuthenticated = computed(() => !!accessToken.value && !!user.value)
@@ -54,11 +55,10 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await api.post('/auth/orcid/callback/', { code })
       const data = response.data.data
 
-      // Save token and user info
       accessToken.value = data.access_token
       user.value = data.user
+      isNewUser.value = !!data.is_new_user
 
-      // Add token to API instance
       api.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`
 
     } catch (err: any) {
@@ -183,6 +183,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken,
     isLoading,
     error,
+    isNewUser,
     
     // Getters
     isAuthenticated,

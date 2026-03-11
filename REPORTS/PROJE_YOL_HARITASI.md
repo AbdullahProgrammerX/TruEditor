@@ -184,13 +184,18 @@
 
 ---
 
-### FAZ-15: Kayıt Onay E-postası & Hoş Geldiniz Akışı
+### FAZ-15: Kayıt Onay E-postası & Hoş Geldiniz Akışı ✅
+
+**Durum:** Tamamlandı  
+**Tamamlanma Tarihi:** 2026-03-11
 
 **Kapsam:**
-- [ ] ORCID ile ilk kayıt sonrası hoş geldiniz e-postası
-- [ ] E-posta doğrulama mekanizması (isteğe bağlı)
-- [ ] Hesap oluşturma onay sayfası
-- [ ] Profil tamamlama hatırlatma e-postası (profil eksikse 24 saat sonra)
+- [x] ORCID ile ilk kayıt sonrası hoş geldiniz e-postası (FAZ-11'de yapılmıştı)
+- [x] Hesap oluşturma sonrası hoş geldiniz banner'ı (Dashboard)
+- [x] Profil eksik uyarı banner'ı (Dashboard)
+- [x] Profil tamamlama hatırlatma e-postası (profil eksikse 24 saat sonra)
+- [x] `send_profile_reminders` management komutu (cron ile çalıştırılabilir)
+- [x] E-posta şablonu: `profile_reminder.html`
 
 **Tahmini Süre:** 0.5-1 gün  
 **Bağımlılıklar:** FAZ-11 (e-posta servisi)

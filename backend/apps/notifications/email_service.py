@@ -207,3 +207,32 @@ def send_withdrawal_confirmation(submission) -> EmailLog | None:
         recipient_user=user,
         submission=submission,
     )
+
+
+def send_profile_reminder(user) -> EmailLog | None:
+    """Send a reminder to complete their profile."""
+    if not user.email:
+        return None
+
+    if user.profile_completed:
+        return None
+
+    already_sent = EmailLog.objects.filter(
+        recipient=user,
+        email_type=EmailLog.EmailType.PROFILE_REMINDER,
+        status=EmailLog.Status.SENT,
+    ).exists()
+    if already_sent:
+        return None
+
+    return _send(
+        email_type=EmailLog.EmailType.PROFILE_REMINDER,
+        recipient_email=user.email,
+        subject='Complete Your TruEditor Profile',
+        template_name='profile_reminder',
+        context={
+            'user_name': user.full_name or user.email,
+            'orcid_id': user.orcid_id,
+        },
+        recipient_user=user,
+    )

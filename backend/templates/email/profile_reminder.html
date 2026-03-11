@@ -1,0 +1,26 @@
+{% extends "email/_base.html" %}
+{% block content %}
+<h2>Complete Your TruEditor Profile</h2>
+<p>Dear {{ user_name }},</p>
+<p>We noticed your profile is not yet complete. A complete profile helps editors and reviewers identify you, and is required before submitting a manuscript.</p>
+
+<div class="info-box">
+  <div class="label">ORCID ID</div>
+  <div class="value">{{ orcid_id }}</div>
+</div>
+
+<p>Please make sure you have filled in:</p>
+<ul style="padding-left:20px; line-height:2;">
+  <li><strong>Full Name</strong></li>
+  <li><strong>Email Address</strong></li>
+  <li><strong>Institution / Affiliation</strong></li>
+</ul>
+
+{% if site_url %}
+<p style="text-align:center; margin-top:24px;">
+  <a href="{{ site_url }}/profile" class="btn">Complete Your Profile</a>
+</p>
+{% endif %}
+
+<p style="color:#6b7280; font-size:13px; margin-top:24px;">You are receiving this email because your TruEditor profile is incomplete. Once you complete it, you will not receive further reminders.</p>
+{% endblock %}

@@ -132,6 +132,7 @@ async function submitProfile() {
 
   try {
     await authStore.updateProfile(formData)
+    authStore.isNewUser = true
     router.push('/dashboard')
   } catch (err: any) {
     saveError.value = err.response?.data?.error?.message || 'Failed to save profile'

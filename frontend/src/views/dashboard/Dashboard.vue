@@ -17,6 +17,8 @@ const submissionStore = useSubmissionStore()
 
 const isVisible = ref(false)
 const isMobileMenuOpen = ref(false)
+const showWelcomeBanner = ref(false)
+const showProfileReminder = ref(false)
 
 // Stats from submission store
 const stats = computed(() => ({
@@ -32,6 +34,16 @@ onMounted(async () => {
   setTimeout(() => {
     isVisible.value = true
   }, 100)
+
+  if (authStore.isNewUser) {
+    showWelcomeBanner.value = true
+    authStore.isNewUser = false
+  }
+
+  if (!authStore.profileCompleted) {
+    showProfileReminder.value = true
+  }
+
   await submissionStore.fetchSubmissions()
 })
 
@@ -198,6 +210,64 @@ const greeting = computed(() => {
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <!-- Welcome Banner (new users) -->
+      <Transition name="banner">
+        <div 
+          v-if="showWelcomeBanner"
+          class="mb-6 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-5 sm:p-6 text-white relative overflow-hidden"
+        >
+          <button 
+            @click="showWelcomeBanner = false"
+            class="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center flex-shrink-0">
+              <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+            </div>
+            <div>
+              <h2 class="text-lg sm:text-xl font-bold">Welcome to TruEditor!</h2>
+              <p class="text-white/85 text-sm mt-1">
+                Your account has been created successfully. Start by completing your profile, then submit your first manuscript.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Transition>
+
+      <!-- Profile Completion Reminder -->
+      <Transition name="banner">
+        <div 
+          v-if="showProfileReminder && !showWelcomeBanner"
+          class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5 sm:p-6 relative"
+        >
+          <button 
+            @click="showProfileReminder = false"
+            class="absolute top-3 right-3 p-1.5 rounded-lg text-amber-400 hover:text-amber-600 hover:bg-amber-100 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-amber-800">Complete Your Profile</h3>
+              <p class="text-amber-700 text-sm mt-0.5">
+                Your profile is incomplete. A complete profile is required before submitting manuscripts.
+              </p>
+            </div>
+            <RouterLink 
+              to="/profile"
+              class="flex-shrink-0 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm rounded-xl transition-colors"
+            >
+              Complete Profile
+            </RouterLink>
+          </div>
+        </div>
+      </Transition>
+
       <!-- Welcome Section -->
       <div 
         class="mb-6 sm:mb-8 transition-all duration-700"
@@ -419,3 +489,19 @@ const greeting = computed(() => {
     </footer>
   </div>
 </template>
+
+<style scoped>
+.banner-enter-active,
+.banner-leave-active {
+  transition: all 0.4s ease;
+}
+.banner-enter-from,
+.banner-leave-to {
+  opacity: 0;
+  max-height: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+</style>

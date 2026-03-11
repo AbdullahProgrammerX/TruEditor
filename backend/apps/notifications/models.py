@@ -22,6 +22,7 @@ class EmailLog(models.Model):
         WITHDRAWAL_CONFIRMATION = 'withdrawal_confirmation', _('Withdrawal Confirmation')
         REVISION_REQUEST = 'revision_request', _('Revision Request')
         DECISION = 'decision', _('Decision Notification')
+        PROFILE_REMINDER = 'profile_reminder', _('Profile Reminder')
         OTHER = 'other', _('Other')
 
     class Status(models.TextChoices):
