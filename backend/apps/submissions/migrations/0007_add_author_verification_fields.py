@@ -2,6 +2,13 @@ import uuid
 from django.db import migrations, models
 
 
+def populate_unique_tokens(apps, schema_editor):
+    Author = apps.get_model("submissions", "Author")
+    for author in Author.objects.all():
+        author.verification_token = uuid.uuid4()
+        author.save(update_fields=["verification_token"])
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -25,7 +32,20 @@ class Migration(migrations.Migration):
                 verbose_name="Verification Status",
             ),
         ),
+        # Step 1: Add token field WITHOUT unique constraint
         migrations.AddField(
+            model_name="author",
+            name="verification_token",
+            field=models.UUIDField(
+                default=uuid.uuid4,
+                help_text="Token for email-based verification link",
+                verbose_name="Verification Token",
+            ),
+        ),
+        # Step 2: Assign a unique UUID to each existing row
+        migrations.RunPython(populate_unique_tokens, migrations.RunPython.noop),
+        # Step 3: Now add the unique constraint
+        migrations.AlterField(
             model_name="author",
             name="verification_token",
             field=models.UUIDField(
