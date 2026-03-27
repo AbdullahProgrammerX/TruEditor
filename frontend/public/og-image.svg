@@ -8,8 +8,8 @@
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <circle cx="940" cy="315" r="200" fill="#1a56db" opacity="0.1"/>
-  <!-- User mark (same file as app logo); aspect 2816:1536 -->
-  <image href="logo-icon.svg" x="718" y="165" width="420" height="229" preserveAspectRatio="xMidYMid meet"/>
+  <!-- Mark: logo-icon.png (square) -->
+  <image href="logo-icon.png" x="780" y="155" width="340" height="340" preserveAspectRatio="xMidYMid meet"/>
   <text x="72" y="248" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="68" font-weight="800" fill="white" letter-spacing="-2">TruEditor</text>
   <text x="72" y="308" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="26" font-weight="400" fill="rgba(255,255,255,0.62)">Manuscript submission for modern journals</text>
   <text x="72" y="352" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="rgba(255,255,255,0.42)">ORCID · Secure workflows · Author-first UX</text>

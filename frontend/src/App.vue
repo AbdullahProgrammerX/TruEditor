@@ -25,7 +25,7 @@ onMounted(() => {
       <div class="splash-content">
         <!-- Same asset as headers: no inner SVG animation (avoids perceived misalignment) -->
         <div class="splash-logo">
-          <img src="/logo-icon.svg" alt="" class="brand-logo brand-logo--splash brand-logo--on-dark splash-logo-img" />
+          <img src="/logo-icon.png" alt="" class="brand-logo brand-logo--splash brand-logo--on-dark splash-logo-img" />
         </div>
         <h1 class="splash-title">
           <span class="splash-tru">Tru</span><span class="splash-editor">Editor</span>
