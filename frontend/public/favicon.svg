@@ -1,19 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" aria-hidden="true">
   <defs>
     <style><![CDATA[
-      .t { fill: #1A52C5; }
+      .t { fill: #1B4FBD; }
       .tick {
-        fill: #1A52C5;
+        fill: #1B4FBD;
         stroke: #FFFFFF;
-        stroke-width: 6.5;
-        stroke-linejoin: round;
-        stroke-linecap: round;
+        stroke-width: 5.5;
+        stroke-linejoin: miter;
+        stroke-linecap: butt;
+        stroke-miterlimit: 3;
         paint-order: stroke fill;
       }
     ]]></style>
   </defs>
-  <!-- Block T: uniform bar + stem, 90° corners -->
-  <path class="t" d="M32 48h192v28H140v136h-24V76H32V48z"/>
-  <!-- Check: Bézier swoosh, white knockout separates from T; tip extends past bar -->
-  <path class="tick" d="M96 130 C94 126 98 122 102 124 L122 148 C168 94 208 52 246 28 C252 24 262 32 258 40 L128 202 C122 208 112 202 108 196 L84 154 C80 148 88 132 96 130 Z"/>
+  <!-- T: bar + stem same thickness (28), stem centered on x=128, sharp corners -->
+  <path class="t" d="M36 48h184v28H142v140h-28V76H36V48z"/>
+  <!-- Check: vertex low at stem base; short arm toward stem; long arm crosses right bar, tip above bar -->
+  <!-- Thick angular check: single sharp vertex, miter-style outline -->
+  <path class="tick" d="M230 36 L158 118 L128 200 L74 168 L88 154 L218 48 Z"/>
 </svg>
