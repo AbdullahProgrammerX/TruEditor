@@ -15,39 +15,29 @@ onMounted(() => {
   authStore.initAuth()
   setTimeout(() => {
     isAppReady.value = true
-  }, 1200)
+  }, 1100)
 })
 </script>
 
 <template>
-  <!-- Splash Screen -->
   <Transition name="splash">
     <div v-if="!isAppReady" class="splash-screen">
       <div class="splash-content">
+        <!-- Same asset as headers: no inner SVG animation (avoids perceived misalignment) -->
         <div class="splash-logo">
-          <svg width="80" height="80" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" class="splash-icon">
-            <defs>
-              <linearGradient id="splash-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1e3a5f"/>
-                <stop offset="100%" stop-color="#1a56db"/>
-              </linearGradient>
-            </defs>
-            <rect width="512" height="512" rx="108" fill="url(#splash-bg)"/>
-            <path class="splash-t" d="M148 148 h216 v52 h-82 v164 h-52 V200 h-82 z" fill="white"/>
-            <rect class="splash-accent" x="282" y="312" width="82" height="52" rx="8" fill="#34d399"/>
-          </svg>
+          <img src="/logo-icon.svg" width="80" height="80" alt="" class="splash-logo-img" />
         </div>
         <h1 class="splash-title">
           <span class="splash-tru">Tru</span><span class="splash-editor">Editor</span>
         </h1>
-        <div class="splash-loader">
+        <p class="splash-tagline">Manuscript submission system</p>
+        <div class="splash-loader" aria-hidden="true">
           <div class="splash-loader-bar"></div>
         </div>
       </div>
     </div>
   </Transition>
 
-  <!-- App Content -->
   <div id="app" class="min-h-screen">
     <RouterView />
     <ToastContainer />
@@ -66,33 +56,42 @@ onMounted(() => {
 }
 
 .splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  width: 100%;
+  max-width: 20rem;
+  padding: 0 1.5rem;
 }
 
 .splash-logo {
-  margin-bottom: 24px;
-  animation: splashLogoIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.25rem;
+  flex-shrink: 0;
+  animation: splashReveal 0.45s ease-out both;
 }
 
-.splash-icon {
-  filter: drop-shadow(0 8px 24px rgba(30, 58, 95, 0.5));
-}
-
-.splash-t {
-  animation: fadeIn 0.4s 0.25s ease-out both;
-}
-
-.splash-accent {
-  animation: accentSlide 0.4s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+.splash-logo-img {
+  display: block;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }
 
 .splash-title {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -1px;
-  margin: 0 0 20px;
-  animation: fadeInUp 0.5s 0.4s ease-out both;
+  /* Serif wordmark: aligns with scholarly / publisher-facing products (Elsevier, Wiley-style gravitas) */
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0 0 0.35rem;
+  animation: splashFade 0.4s 0.12s ease-out both;
 }
 
 .splash-tru {
@@ -100,17 +99,26 @@ onMounted(() => {
 }
 
 .splash-editor {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.splash-tagline {
+  margin: 0 0 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  animation: splashFade 0.4s 0.2s ease-out both;
 }
 
 .splash-loader {
   width: 120px;
   height: 3px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 4px;
-  margin: 0 auto;
   overflow: hidden;
-  animation: fadeIn 0.3s 0.6s ease-out both;
+  animation: splashFade 0.35s 0.28s ease-out both;
 }
 
 .splash-loader-bar {
@@ -118,35 +126,40 @@ onMounted(() => {
   width: 0;
   background: linear-gradient(90deg, #34d399, #10b981);
   border-radius: 4px;
-  animation: loaderFill 0.8s 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: loaderFill 0.75s 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .splash-leave-active {
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 0.35s ease;
 }
 .splash-leave-to {
   opacity: 0;
-  transform: scale(1.05);
 }
 
-@keyframes splashLogoIn {
-  from { opacity: 0; transform: scale(0.8) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+@keyframes splashReveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
-@keyframes accentSlide {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
+
+@keyframes splashFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+
 @keyframes loaderFill {
-  from { width: 0; }
-  to { width: 100%; }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 </style>

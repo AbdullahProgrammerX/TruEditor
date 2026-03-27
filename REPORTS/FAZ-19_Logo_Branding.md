@@ -7,25 +7,36 @@
 
 ## 1. Yapılan İşler
 
+### 1.0 Rakip / sektör benchmark (özet)
+
+Kurumsal makale gönderim ve editöryal yönetim ürünleri (ör. **ScholarOne Manuscripts**, **Editorial Manager**, büyük yayıncı portalları) genelde şu görsel dilde toplanır:
+
+- **Güven ve kurumsallık:** koyu mavi / lacivert ağırlıklı palet, sade arayüz.
+- **İkonografi:** soyut veya minimal **belge / sayfa** motifleri; abartılı harf oyunlarından kaçınma.
+- **Wordmark:** okunaklı sans veya akademik bağlamda serif vurgusu; dar tracking, net hiyerarşi.
+- **Vurgu rengi:** tek bir ikincil renk (CTA / durum), görsel gürültü sınırlı.
+
+TruEditor ikonu bu çizgiye göre **merkezlenmiş belge + katlanmış köşe + metin satırları + tek emerald çizgi** olarak yeniden tanımlandı.
+
 ### 1.1 Logo Tasarımı (SVG)
 
-Profesyonel, vektörel SVG logo sistemi oluşturuldu. Logo, stilize bir "T" harfinden oluşmakta olup "doküman/makale" konseptini yansıtmaktadır.
+Vektörel logo sistemi; **manuscript / editorial** alanına uygun, optik olarak merkezlenmiş sayfa ikonu.
 
 **Logo Varyantları:**
 
 | Dosya | Kullanım Alanı | Açıklama |
 |-------|---------------|----------|
-| `favicon.svg` | Tarayıcı tab ikonu | 512x512 icon, gradient arka plan |
-| `logo-icon.svg` | Tüm sayfa header'ları | Yalnızca ikon (kare format) |
-| `logo-full.svg` | Header + footer (açık arka plan) | İkon + "TruEditor" wordmark + "MANUSCRIPT SYSTEM" alt yazı |
-| `logo-white.svg` | Koyu arka plan (landing page vb.) | Beyaz/şeffaf varyant |
-| `og-image.svg` | Sosyal medya paylaşımları | 1200x630 Open Graph resmi |
+| `favicon.svg` | Tarayıcı tab ikonu | 512×512, gradient zemin |
+| `logo-icon.svg` | Header’lar, splash (img) | Kare uygulama ikonu |
+| `logo-full.svg` | Tam marka şeridi | İkon + Inter wordmark + alt satır |
+| `logo-white.svg` | Koyu zemin | Açık ikon + beyaz wordmark |
+| `og-image.svg` | OG / Twitter | 1200×630 tanıtım görseli |
 
-**Logo Tasarım Elemanları:**
-- **Ana Şekil:** Yuvarlatılmış dikdörtgen (rx=96) navy-to-blue gradient arka plan
-- **T Harfi:** Yatay çubuk (üst) + dikey çubuk (gövde) beyaz renkli
-- **Accent Çubuk:** Alt kısımda emerald yeşili gradient çizgi (marka vurgusu)
-- **Yeşil Nokta:** Sağ üst köşede (aktiflik/canlılık göstergesi)
+**Logo öğeleri:**
+- **Zemin:** Yuvarlatılmış kare, üç duraklı navy → mavi gradient (`#1e3a5f` → `#1e4a7a` → `#1a56db`).
+- **Beyaz sayfa:** Yuvarlatılmış dikdörtgen; sağ üst **katlanmış köşe** (yayıncılık belgesi çağrışımı).
+- **Gri metin satırları:** Sayfa içeriğini temsil eden dört çizgi (`#e8eef5`).
+- **Emerald çizgi:** Sayfanın altında **ortalanmış** tek vurgu (`#34d399` — revizyon / onay çağrışımı, mevcut accent paleti ile uyumlu).
 
 ### 1.2 Favicon & Meta Tag'ler
 
@@ -67,17 +78,13 @@ Profesyonel, vektörel SVG logo sistemi oluşturuldu. Logo, stilize bir "T" harf
 
 ### 1.5 Splash / Loading Screen
 
-`App.vue`'ya animasyonlu splash screen eklendi:
-- **Arka plan:** Hero gradient (navy → blue)
-- **Logo animasyonu:** Scale-in + staggered element animasyonları
-  - Yatay çubuk: slide-right (0.2s delay)
-  - Dikey çubuk: slide-down (0.35s delay)
-  - Accent çubuk: slide-right (0.5s delay)
-  - Yeşil nokta: pop-in (0.65s delay)
-- **Wordmark:** "TruEditor" fade-in-up (0.4s delay)
-- **Progress bar:** Emerald gradient, 0→100% animasyonu (0.8s)
-- **Çıkış:** Scale-up + fade-out (0.4s)
-- **Toplam süre:** ~1.2 saniye (auth init ile paralel)
+`App.vue` splash ekranı, **logo kayması algısını** gidermek için güncellendi:
+- **Logo:** `/logo-icon.svg` dosyası `<img>` ile gösterilir (header ile piksel uyumu); SVG parçalarına ayrı `transform` animasyonu **yoktur**.
+- **Kutu hizası:** `80×80` sabit flex konteyner, `object-fit: contain`.
+- **Animasyon:** Yalnızca **opacity** ile kısa görünüm + metin / progress bar için hafif fade-in; çıkışta sadece **fade** (scale yok).
+- **Wordmark:** Splash’te **Playfair Display** (projede zaten yüklü serif) — yayıncı arayüzlerindeki ciddiyet ile uyum.
+- **Alt satır:** "Manuscript submission system" (uppercase, letter-spacing).
+- **Süre:** ~1.1 saniye (auth init ile paralel).
 
 ### 1.6 Tüm Sayfalarda Logo Güncellemesi
 

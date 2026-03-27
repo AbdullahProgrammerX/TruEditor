@@ -1,10 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80">
-  <!-- Icon -->
-  <rect width="80" height="80" rx="17" fill="rgba(255,255,255,0.15)"/>
-  <path d="M22 22 h36 v9 h-13.5 v27 h-9 V31 H22 z" fill="white"/>
-  <rect x="44.5" y="49" width="13.5" height="9" rx="1.5" fill="#34d399"/>
-  <!-- Wordmark -->
-  <text x="96" y="38" font-family="Inter, -apple-system, sans-serif" font-size="32" font-weight="800" fill="white" letter-spacing="-1">Tru</text>
-  <text x="155" y="38" font-family="Inter, -apple-system, sans-serif" font-size="32" font-weight="800" fill="rgba(255,255,255,0.7)" letter-spacing="-1">Editor</text>
-  <text x="96" y="58" font-family="Inter, -apple-system, sans-serif" font-size="11" font-weight="500" fill="rgba(255,255,255,0.45)" letter-spacing="2">MANUSCRIPT SYSTEM</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 88">
+  <defs>
+    <linearGradient id="fold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(4,4) scale(0.15625)">
+    <rect width="512" height="512" rx="112" fill="rgba(255,255,255,0.12)"/>
+    <rect x="132" y="118" width="248" height="276" rx="22" fill="white"/>
+    <path d="M380 118 L380 182 L318 118 Z" fill="url(#fold)"/>
+    <rect x="164" y="168" width="184" height="14" rx="7" fill="#e8eef5"/>
+    <rect x="164" y="198" width="156" height="14" rx="7" fill="#e8eef5"/>
+    <rect x="164" y="228" width="168" height="14" rx="7" fill="#e8eef5"/>
+    <rect x="164" y="258" width="112" height="14" rx="7" fill="#e8eef5"/>
+    <rect x="186" y="318" width="140" height="14" rx="7" fill="#34d399"/>
+  </g>
+  <text x="96" y="42" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="30" font-weight="800" fill="white" letter-spacing="-0.8">Tru</text>
+  <text x="148" y="42" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="30" font-weight="800" fill="rgba(255,255,255,0.72)" letter-spacing="-0.8">Editor</text>
+  <text x="96" y="64" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="rgba(255,255,255,0.45)" letter-spacing="2.2">MANUSCRIPT SYSTEM</text>
 </svg>

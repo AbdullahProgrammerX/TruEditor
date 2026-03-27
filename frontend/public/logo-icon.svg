@@ -2,10 +2,20 @@
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="55%" stop-color="#1e4a7a"/>
       <stop offset="100%" stop-color="#1a56db"/>
     </linearGradient>
+    <linearGradient id="fold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
+    </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
-  <path d="M148 148 h216 v52 h-82 v164 h-52 V200 h-82 z" fill="white"/>
-  <rect x="282" y="312" width="82" height="52" rx="8" fill="#34d399"/>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="132" y="118" width="248" height="276" rx="22" fill="white"/>
+  <path d="M380 118 L380 182 L318 118 Z" fill="url(#fold)"/>
+  <rect x="164" y="168" width="184" height="14" rx="7" fill="#e8eef5"/>
+  <rect x="164" y="198" width="156" height="14" rx="7" fill="#e8eef5"/>
+  <rect x="164" y="228" width="168" height="14" rx="7" fill="#e8eef5"/>
+  <rect x="164" y="258" width="112" height="14" rx="7" fill="#e8eef5"/>
+  <rect x="186" y="318" width="140" height="14" rx="7" fill="#34d399"/>
 </svg>

@@ -2,33 +2,34 @@
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="50%" stop-color="#1e3a5f"/>
+      <stop offset="45%" stop-color="#1e3a5f"/>
       <stop offset="100%" stop-color="#1e40af"/>
     </linearGradient>
     <linearGradient id="iconbg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="55%" stop-color="#1e4a7a"/>
       <stop offset="100%" stop-color="#1a56db"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <!-- Subtle dots -->
-  <g fill="white" opacity="0.03">
-    <circle cx="100" cy="100" r="2"/><circle cx="200" cy="100" r="2"/><circle cx="300" cy="100" r="2"/><circle cx="400" cy="100" r="2"/><circle cx="500" cy="100" r="2"/>
-    <circle cx="100" cy="200" r="2"/><circle cx="200" cy="200" r="2"/><circle cx="300" cy="200" r="2"/><circle cx="400" cy="200" r="2"/><circle cx="500" cy="200" r="2"/>
-    <circle cx="700" cy="300" r="2"/><circle cx="800" cy="300" r="2"/><circle cx="900" cy="300" r="2"/><circle cx="1000" cy="300" r="2"/><circle cx="1100" cy="300" r="2"/>
-    <circle cx="700" cy="400" r="2"/><circle cx="800" cy="400" r="2"/><circle cx="900" cy="400" r="2"/><circle cx="1000" cy="400" r="2"/><circle cx="1100" cy="400" r="2"/>
+  <circle cx="940" cy="315" r="200" fill="#1a56db" opacity="0.1"/>
+  <!-- Large icon -->
+  <g transform="translate(820, 115) scale(0.47)">
+    <rect width="512" height="512" rx="112" fill="url(#iconbg)" stroke="rgba(255,255,255,0.12)" stroke-width="4"/>
+    <rect x="132" y="118" width="248" height="276" rx="22" fill="white"/>
+    <path d="M380 118 L380 182 L318 118 Z" fill="url(#fold)"/>
+    <rect x="164" y="168" width="184" height="14" rx="7" fill="#e8eef5"/>
+    <rect x="164" y="198" width="156" height="14" rx="7" fill="#e8eef5"/>
+    <rect x="164" y="228" width="168" height="14" rx="7" fill="#e8eef5"/>
+    <rect x="164" y="258" width="112" height="14" rx="7" fill="#e8eef5"/>
+    <rect x="186" y="318" width="140" height="14" rx="7" fill="#34d399"/>
   </g>
-  <!-- Glow -->
-  <circle cx="920" cy="315" r="220" fill="#1a56db" opacity="0.12"/>
-  <!-- Logo icon -->
-  <rect x="840" y="200" width="240" height="240" rx="52" fill="url(#iconbg)" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
-  <path d="M905 268 h110 v26 h-42 v84 h-26 V294 h-42 z" fill="white"/>
-  <rect x="973" y="352" width="42" height="26" rx="4" fill="#34d399"/>
-  <!-- Text -->
-  <text x="100" y="260" font-family="Inter, -apple-system, sans-serif" font-size="72" font-weight="800" fill="white" letter-spacing="-2">TruEditor</text>
-  <text x="100" y="320" font-family="Inter, -apple-system, sans-serif" font-size="28" font-weight="400" fill="rgba(255,255,255,0.6)">Next Generation Academic Publishing</text>
-  <text x="100" y="370" font-family="Inter, -apple-system, sans-serif" font-size="20" font-weight="500" fill="rgba(255,255,255,0.4)">Manuscript Submission Made Simple</text>
-  <!-- Accent bar -->
-  <rect x="100" y="440" width="60" height="4" rx="2" fill="#34d399" opacity="0.7"/>
-  <text x="100" y="490" font-family="Inter, -apple-system, sans-serif" font-size="16" font-weight="500" fill="rgba(255,255,255,0.3)" letter-spacing="3">ORCID INTEGRATED · MODERN · SECURE</text>
+  <text x="72" y="248" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="68" font-weight="800" fill="white" letter-spacing="-2">TruEditor</text>
+  <text x="72" y="308" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="26" font-weight="400" fill="rgba(255,255,255,0.62)">Manuscript submission for modern journals</text>
+  <text x="72" y="352" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="rgba(255,255,255,0.42)">ORCID · Secure workflows · Author-first UX</text>
+  <rect x="72" y="418" width="56" height="4" rx="2" fill="#34d399" opacity="0.85"/>
 </svg>
