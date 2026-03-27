@@ -242,7 +242,7 @@ const tabs = [
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="flex items-center justify-between h-16 sm:h-20">
           <RouterLink to="/dashboard" class="flex items-center gap-2 sm:gap-3 group">
-            <img src="/logo-icon.svg" alt="TruEditor" class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl shadow-lg group-hover:scale-105 transition-transform" />
+            <img src="/logo-icon.svg" alt="TruEditor" class="brand-logo brand-logo--header brand-logo--on-dark group-hover:opacity-90 transition-opacity" />
             <div class="hidden sm:block">
               <span class="text-xl font-bold text-white tracking-tight">Tru<span class="text-white/70">Editor</span></span>
               <p class="text-xs text-white/60 -mt-0.5">Submission Detail</p>

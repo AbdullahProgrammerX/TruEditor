@@ -1,21 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 88">
-  <defs>
-    <linearGradient id="fold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
-      <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
-    </linearGradient>
-  </defs>
-  <g transform="translate(4,4) scale(0.15625)">
-    <rect width="512" height="512" rx="112" fill="rgba(255,255,255,0.12)"/>
-    <rect x="132" y="118" width="248" height="276" rx="22" fill="white"/>
-    <path d="M380 118 L380 182 L318 118 Z" fill="url(#fold)"/>
-    <rect x="164" y="168" width="184" height="14" rx="7" fill="#e8eef5"/>
-    <rect x="164" y="198" width="156" height="14" rx="7" fill="#e8eef5"/>
-    <rect x="164" y="228" width="168" height="14" rx="7" fill="#e8eef5"/>
-    <rect x="164" y="258" width="112" height="14" rx="7" fill="#e8eef5"/>
-    <rect x="186" y="318" width="140" height="14" rx="7" fill="#34d399"/>
-  </g>
-  <text x="96" y="42" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="30" font-weight="800" fill="white" letter-spacing="-0.8">Tru</text>
-  <text x="148" y="42" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="30" font-weight="800" fill="rgba(255,255,255,0.72)" letter-spacing="-0.8">Editor</text>
-  <text x="96" y="64" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="rgba(255,255,255,0.45)" letter-spacing="2.2">MANUSCRIPT SYSTEM</text>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 380 88">
+  <image href="logo-icon.svg" x="0" y="4" width="148" height="80" preserveAspectRatio="xMidYMid meet" style="filter: brightness(0) invert(1)"/>
+  <text x="164" y="42" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="30" font-weight="800" fill="white" letter-spacing="-0.8">Tru</text>
+  <text x="212" y="42" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="30" font-weight="800" fill="rgba(255,255,255,0.72)" letter-spacing="-0.8">Editor</text>
+  <text x="164" y="64" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" fill="rgba(255,255,255,0.45)" letter-spacing="2.2">MANUSCRIPT SYSTEM</text>
 </svg>

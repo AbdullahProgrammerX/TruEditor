@@ -56,7 +56,7 @@ onMounted(async () => {
       <!-- Header -->
       <div class="text-center mb-8">
         <div class="inline-flex items-center gap-2 mb-4">
-          <img src="/logo-icon.svg" alt="TruEditor" class="w-11 h-11 rounded-xl shadow-lg" />
+          <img src="/logo-icon.svg" alt="TruEditor" class="brand-logo brand-logo--login brand-logo--on-light" />
           <span class="text-2xl font-bold text-gray-900 tracking-tight">Tru<span class="text-primary-400">Editor</span></span>
         </div>
       </div>

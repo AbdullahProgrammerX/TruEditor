@@ -42,24 +42,11 @@
 <div class="wrapper">
   <div class="card">
     <div class="header">
-      <!-- Inline SVG Logo (manuscript mark — aligned with app icon) -->
+      <!-- Logo from frontend (FRONTEND_URL); white treatment for dark header -->
       <div class="header-logo">
-        <svg width="48" height="48" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="em-fold" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
-              <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
-            </linearGradient>
-          </defs>
-          <rect width="512" height="512" rx="112" fill="rgba(255,255,255,0.15)"/>
-          <rect x="132" y="118" width="248" height="276" rx="22" fill="white"/>
-          <path d="M380 118 L380 182 L318 118 Z" fill="url(#em-fold)"/>
-          <rect x="164" y="168" width="184" height="14" rx="7" fill="#e8eef5"/>
-          <rect x="164" y="198" width="156" height="14" rx="7" fill="#e8eef5"/>
-          <rect x="164" y="228" width="168" height="14" rx="7" fill="#e8eef5"/>
-          <rect x="164" y="258" width="112" height="14" rx="7" fill="#e8eef5"/>
-          <rect x="186" y="318" width="140" height="14" rx="7" fill="#34d399"/>
-        </svg>
+        {% if site_url %}
+        <img src="{{ site_url }}/logo-icon.svg" alt="TruEditor" width="200" height="48" style="display:block;margin:0 auto 10px;max-height:48px;width:auto;max-width:220px;filter:brightness(0) invert(1);">
+        {% endif %}
       </div>
       <h1>Tru<span>Editor</span></h1>
       <p>Manuscript System</p>

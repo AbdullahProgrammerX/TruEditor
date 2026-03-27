@@ -25,7 +25,7 @@ onMounted(() => {
       <div class="splash-content">
         <!-- Same asset as headers: no inner SVG animation (avoids perceived misalignment) -->
         <div class="splash-logo">
-          <img src="/logo-icon.svg" width="80" height="80" alt="" class="splash-logo-img" />
+          <img src="/logo-icon.svg" alt="" class="brand-logo brand-logo--splash brand-logo--on-dark splash-logo-img" />
         </div>
         <h1 class="splash-title">
           <span class="splash-tru">Tru</span><span class="splash-editor">Editor</span>
@@ -69,8 +69,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
   margin: 0 auto 1.25rem;
   flex-shrink: 0;
   animation: splashReveal 0.45s ease-out both;
@@ -78,9 +76,6 @@ onMounted(() => {
 
 .splash-logo-img {
   display: block;
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
 }
 
 .splash-title {

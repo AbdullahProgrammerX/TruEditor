@@ -1,33 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0f172a"/>
       <stop offset="45%" stop-color="#1e3a5f"/>
       <stop offset="100%" stop-color="#1e40af"/>
     </linearGradient>
-    <linearGradient id="iconbg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e3a5f"/>
-      <stop offset="55%" stop-color="#1e4a7a"/>
-      <stop offset="100%" stop-color="#1a56db"/>
-    </linearGradient>
-    <linearGradient id="fold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
-      <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
-    </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <circle cx="940" cy="315" r="200" fill="#1a56db" opacity="0.1"/>
-  <!-- Large icon -->
-  <g transform="translate(820, 115) scale(0.47)">
-    <rect width="512" height="512" rx="112" fill="url(#iconbg)" stroke="rgba(255,255,255,0.12)" stroke-width="4"/>
-    <rect x="132" y="118" width="248" height="276" rx="22" fill="white"/>
-    <path d="M380 118 L380 182 L318 118 Z" fill="url(#fold)"/>
-    <rect x="164" y="168" width="184" height="14" rx="7" fill="#e8eef5"/>
-    <rect x="164" y="198" width="156" height="14" rx="7" fill="#e8eef5"/>
-    <rect x="164" y="228" width="168" height="14" rx="7" fill="#e8eef5"/>
-    <rect x="164" y="258" width="112" height="14" rx="7" fill="#e8eef5"/>
-    <rect x="186" y="318" width="140" height="14" rx="7" fill="#34d399"/>
-  </g>
+  <!-- User mark (same file as app logo); aspect 2816:1536 -->
+  <image href="logo-icon.svg" x="718" y="165" width="420" height="229" preserveAspectRatio="xMidYMid meet"/>
   <text x="72" y="248" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="68" font-weight="800" fill="white" letter-spacing="-2">TruEditor</text>
   <text x="72" y="308" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="26" font-weight="400" fill="rgba(255,255,255,0.62)">Manuscript submission for modern journals</text>
   <text x="72" y="352" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="rgba(255,255,255,0.42)">ORCID · Secure workflows · Author-first UX</text>

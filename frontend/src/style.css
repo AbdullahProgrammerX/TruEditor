@@ -438,3 +438,51 @@ h1, h2, h3, h4, h5, h6 {
 .transition-default {
   transition: all 0.3s ease;
 }
+
+/* TruEditor mark (wide SVG): height-constrained, natural aspect ratio */
+.brand-logo {
+  width: auto;
+  object-fit: contain;
+  object-position: center;
+  flex-shrink: 0;
+}
+.brand-logo--header {
+  height: 2.25rem;
+  max-width: 9.5rem;
+}
+@media (min-width: 640px) {
+  .brand-logo--header {
+    height: 2.75rem;
+    max-width: 11rem;
+  }
+}
+.brand-logo--header-sm {
+  height: 2rem;
+  max-width: 8rem;
+}
+.brand-logo--footer {
+  height: 1.5rem;
+  max-width: 6rem;
+}
+.brand-logo--splash {
+  height: 5rem;
+  max-width: min(18rem, 88vw);
+}
+.brand-logo--login {
+  height: 2.75rem;
+  max-width: 11rem;
+}
+@media (min-width: 640px) {
+  .brand-logo--login {
+    height: 3.25rem;
+    max-width: 13rem;
+  }
+}
+/* Monochrome on dark UI (navy header, splash, dark hero) */
+.brand-logo--on-dark {
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgb(0 0 0 / 0.15));
+}
+/* Solid black mark on light backgrounds */
+.brand-logo--on-light {
+  filter: brightness(0) drop-shadow(0 1px 1px rgb(0 0 0 / 0.06));
+}
