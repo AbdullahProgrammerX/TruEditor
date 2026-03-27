@@ -214,10 +214,8 @@ onMounted(async () => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <router-link to="/dashboard" class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-              <span class="text-white font-bold text-sm">T</span>
-            </div>
-            <span class="text-lg font-semibold text-gray-900">TruEditor</span>
+            <img src="/logo-icon.svg" alt="TruEditor" class="w-8 h-8 rounded-lg" />
+            <span class="text-lg font-semibold text-gray-900">Tru<span class="text-primary-400">Editor</span></span>
           </router-link>
           <nav class="hidden md:flex items-center gap-6">
             <router-link to="/dashboard" class="text-sm text-gray-600 hover:text-primary-600 transition-colors">Dashboard</router-link>

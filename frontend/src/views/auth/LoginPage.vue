@@ -54,15 +54,10 @@ async function loginWithORCID() {
         <!-- Logo -->
         <div class="text-center mb-6 sm:mb-8">
           <RouterLink to="/" class="inline-flex items-center gap-2 sm:gap-3 group">
-            <div class="relative">
-              <div class="w-11 h-11 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform">
-                <span class="text-white font-bold text-xl sm:text-2xl">T</span>
-              </div>
-              <div class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white"></div>
-            </div>
+            <img src="/logo-icon.svg" alt="TruEditor" class="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl shadow-lg shadow-primary-500/30 group-hover:scale-105 transition-transform" />
             <div class="text-left">
-              <span class="text-xl sm:text-2xl font-bold text-gray-800 tracking-tight">TruEditor</span>
-              <p class="text-xs text-gray-500 -mt-0.5">Academic Publishing</p>
+              <span class="text-xl sm:text-2xl font-bold text-gray-800 tracking-tight">Tru<span class="text-primary-400">Editor</span></span>
+              <p class="text-xs text-gray-500 -mt-0.5">Manuscript System</p>
             </div>
           </RouterLink>
         </div>

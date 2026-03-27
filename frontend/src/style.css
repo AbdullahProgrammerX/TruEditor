@@ -9,19 +9,23 @@
    ================================ */
 
 @theme {
-  /* Primary - Koyu Mavi */
-  --color-primary-50: #e8eef5;
-  --color-primary-100: #c5d4e8;
-  --color-primary-200: #9eb8d9;
-  --color-primary-300: #779cca;
-  --color-primary-400: #5a87be;
+  /* ================================
+     TRUEDITOR BRAND PALETTE
+     ================================ */
+
+  /* Primary - Navy Blue (brand anchor) */
+  --color-primary-50: #eef2f7;
+  --color-primary-100: #d4dfec;
+  --color-primary-200: #a9bfd9;
+  --color-primary-300: #7e9fc6;
+  --color-primary-400: #4d7aad;
   --color-primary-500: #1e3a5f;
   --color-primary-600: #1a3354;
   --color-primary-700: #152b47;
   --color-primary-800: #11233a;
   --color-primary-900: #0b1825;
 
-  /* Secondary - Açık Mavi */
+  /* Secondary - Bright Blue */
   --color-secondary-50: #eff6ff;
   --color-secondary-100: #dbeafe;
   --color-secondary-200: #bfdbfe;
@@ -33,7 +37,7 @@
   --color-secondary-800: #1e40af;
   --color-secondary-900: #1e3a8a;
 
-  /* Accent - Yeşil */
+  /* Accent - Emerald Green */
   --color-accent-50: #ecfdf5;
   --color-accent-100: #d1fae5;
   --color-accent-200: #a7f3d0;
@@ -49,6 +53,11 @@
   --color-orcid: #a6ce39;
   --color-orcid-dark: #8cb32d;
   --color-orcid-light: #c5e063;
+
+  /* Brand tokens (semantic aliases) */
+  --color-brand: #1e3a5f;
+  --color-brand-light: #1a56db;
+  --color-brand-accent: #34d399;
 
   /* Fonts */
   --font-sans: 'Inter', system-ui, sans-serif;

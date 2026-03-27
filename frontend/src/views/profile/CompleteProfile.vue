@@ -171,14 +171,9 @@ const steps = [
       >
         <div class="max-w-4xl mx-auto flex items-center justify-between">
           <div class="flex items-center gap-2 sm:gap-3">
-            <div class="relative">
-              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-white/20">
-                <span class="text-primary-500 font-bold text-xl sm:text-2xl">T</span>
-              </div>
-              <div class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900"></div>
-            </div>
+            <img src="/logo-icon.svg" alt="TruEditor" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl shadow-lg shadow-white/20" />
             <div>
-              <span class="text-xl sm:text-2xl font-bold text-white tracking-tight">TruEditor</span>
+              <span class="text-xl sm:text-2xl font-bold text-white tracking-tight">Tru<span class="text-white/70">Editor</span></span>
               <p class="text-xs text-white/50 -mt-1 hidden sm:block">Complete Your Profile</p>
             </div>
           </div>

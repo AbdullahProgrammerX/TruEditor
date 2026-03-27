@@ -133,15 +133,10 @@ const stats = [
             class="flex items-center gap-3 transition-all duration-700 ease-out"
             :class="isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'"
           >
-            <div class="relative">
-              <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-white/20">
-                <span class="text-primary-500 font-bold text-2xl">T</span>
-              </div>
-              <div class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900"></div>
-            </div>
+            <img src="/logo-icon.svg" alt="TruEditor" class="w-12 h-12 rounded-xl shadow-lg shadow-white/20" />
             <div>
-              <span class="text-2xl font-bold text-white tracking-tight">TruEditor</span>
-              <p class="text-xs text-white/50 -mt-1">Editorial Manager</p>
+              <span class="text-2xl font-bold text-white tracking-tight">Tru<span class="text-white/70">Editor</span></span>
+              <p class="text-xs text-white/50 -mt-1">Manuscript System</p>
             </div>
           </div>
 
@@ -323,9 +318,7 @@ const stats = [
       <div class="max-w-7xl mx-auto px-6">
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
           <div class="flex items-center gap-2 text-white/50">
-            <div class="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-              <span class="text-white font-bold text-sm">T</span>
-            </div>
+            <img src="/logo-icon.svg" alt="TruEditor" class="w-8 h-8 rounded-lg" />
             <span class="font-medium">TruEditor</span>
           </div>
           <p class="text-white/40 text-sm">

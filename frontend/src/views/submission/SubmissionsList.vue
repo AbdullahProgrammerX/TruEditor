@@ -108,14 +108,9 @@ function logout() {
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="flex items-center justify-between h-16 sm:h-20">
           <RouterLink to="/dashboard" class="flex items-center gap-2 sm:gap-3 group">
-            <div class="relative">
-              <div class="w-9 h-9 sm:w-11 sm:h-11 bg-white rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                <span class="text-primary-500 font-bold text-lg sm:text-xl">T</span>
-              </div>
-              <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-primary-500"></div>
-            </div>
+            <img src="/logo-icon.svg" alt="TruEditor" class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl shadow-lg group-hover:scale-105 transition-transform" />
             <div class="hidden sm:block">
-              <span class="text-xl font-bold text-white tracking-tight">TruEditor</span>
+              <span class="text-xl font-bold text-white tracking-tight">Tru<span class="text-white/70">Editor</span></span>
               <p class="text-xs text-white/60 -mt-0.5">Submissions</p>
             </div>
           </RouterLink>
