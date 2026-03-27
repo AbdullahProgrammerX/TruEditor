@@ -171,7 +171,7 @@ const steps = [
       >
         <div class="max-w-4xl mx-auto flex items-center justify-between">
           <div class="flex items-center gap-2 sm:gap-3">
-            <img src="/logo-icon.png" alt="TruEditor" class="brand-logo brand-logo--header brand-logo--on-dark" />
+            <img src="/logo-icon.svg" alt="TruEditor" class="brand-logo brand-logo--header brand-logo--on-dark" />
             <div>
               <span class="text-xl sm:text-2xl font-bold text-white tracking-tight">Tru<span class="text-white/70">Editor</span></span>
               <p class="text-xs text-white/50 -mt-1 hidden sm:block">Complete Your Profile</p>

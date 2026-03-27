@@ -214,7 +214,7 @@ onMounted(async () => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <router-link to="/dashboard" class="flex items-center gap-2">
-            <img src="/logo-icon.png" alt="TruEditor" class="brand-logo brand-logo--header-sm brand-logo--on-light" />
+            <img src="/logo-icon.svg" alt="TruEditor" class="brand-logo brand-logo--header-sm brand-logo--on-light" />
             <span class="text-lg font-semibold text-gray-900">Tru<span class="text-primary-400">Editor</span></span>
           </router-link>
           <nav class="hidden md:flex items-center gap-6">

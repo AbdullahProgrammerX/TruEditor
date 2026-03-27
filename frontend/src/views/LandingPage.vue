@@ -133,7 +133,7 @@ const stats = [
             class="flex items-center gap-3 transition-all duration-700 ease-out"
             :class="isLoaded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'"
           >
-            <img src="/logo-icon.png" alt="TruEditor" class="brand-logo brand-logo--header brand-logo--on-dark" />
+            <img src="/logo-icon.svg" alt="TruEditor" class="brand-logo brand-logo--header brand-logo--on-dark" />
             <div>
               <span class="text-2xl font-bold text-white tracking-tight">Tru<span class="text-white/70">Editor</span></span>
               <p class="text-xs text-white/50 -mt-1">Manuscript System</p>
@@ -318,7 +318,7 @@ const stats = [
       <div class="max-w-7xl mx-auto px-6">
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
           <div class="flex items-center gap-2 text-white/50">
-            <img src="/logo-icon.png" alt="TruEditor" class="brand-logo brand-logo--footer brand-logo--on-dark" />
+            <img src="/logo-icon.svg" alt="TruEditor" class="brand-logo brand-logo--footer brand-logo--on-dark" />
             <span class="font-medium">TruEditor</span>
           </div>
           <p class="text-white/40 text-sm">
