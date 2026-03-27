@@ -1,18 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80">
-  <defs>
-    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#34d399"/>
-      <stop offset="100%" stop-color="#10b981"/>
-    </linearGradient>
-  </defs>
-  <!-- Icon mark -->
-  <rect x="0" y="0" width="80" height="80" rx="16" fill="rgba(255,255,255,0.15)"/>
-  <rect x="18" y="20" width="44" height="6" rx="2" fill="white" opacity="0.95"/>
-  <rect x="30" y="20" width="6" height="42" rx="2" fill="white" opacity="0.95"/>
-  <rect x="30" y="56" width="32" height="6" rx="2" fill="url(#accent)" opacity="0.9"/>
-  <circle cx="63" cy="23" r="4" fill="#34d399"/>
+  <!-- Icon -->
+  <rect width="80" height="80" rx="17" fill="rgba(255,255,255,0.15)"/>
+  <path d="M22 22 h36 v9 h-13.5 v27 h-9 V31 H22 z" fill="white"/>
+  <rect x="44.5" y="49" width="13.5" height="9" rx="1.5" fill="#34d399"/>
   <!-- Wordmark -->
   <text x="96" y="38" font-family="Inter, -apple-system, sans-serif" font-size="32" font-weight="800" fill="white" letter-spacing="-1">Tru</text>
-  <text x="155" y="38" font-family="Inter, -apple-system, sans-serif" font-size="32" font-weight="800" fill="rgba(255,255,255,0.8)" letter-spacing="-1">Editor</text>
-  <text x="96" y="58" font-family="Inter, -apple-system, sans-serif" font-size="11" font-weight="500" fill="rgba(255,255,255,0.5)" letter-spacing="2">MANUSCRIPT SYSTEM</text>
+  <text x="155" y="38" font-family="Inter, -apple-system, sans-serif" font-size="32" font-weight="800" fill="rgba(255,255,255,0.7)" letter-spacing="-1">Editor</text>
+  <text x="96" y="58" font-family="Inter, -apple-system, sans-serif" font-size="11" font-weight="500" fill="rgba(255,255,255,0.45)" letter-spacing="2">MANUSCRIPT SYSTEM</text>
 </svg>

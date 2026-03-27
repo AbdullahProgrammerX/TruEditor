@@ -24,7 +24,6 @@ onMounted(() => {
   <Transition name="splash">
     <div v-if="!isAppReady" class="splash-screen">
       <div class="splash-content">
-        <!-- Animated Logo -->
         <div class="splash-logo">
           <svg width="80" height="80" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" class="splash-icon">
             <defs>
@@ -32,16 +31,10 @@ onMounted(() => {
                 <stop offset="0%" stop-color="#1e3a5f"/>
                 <stop offset="100%" stop-color="#1a56db"/>
               </linearGradient>
-              <linearGradient id="splash-accent" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#34d399"/>
-                <stop offset="100%" stop-color="#10b981"/>
-              </linearGradient>
             </defs>
-            <rect width="512" height="512" rx="96" fill="url(#splash-bg)"/>
-            <rect class="splash-bar-h" x="120" y="128" width="272" height="36" rx="6" fill="white" opacity="0.95"/>
-            <rect class="splash-bar-v" x="196" y="128" width="36" height="260" rx="6" fill="white" opacity="0.95"/>
-            <rect class="splash-bar-accent" x="196" y="352" width="196" height="36" rx="6" fill="url(#splash-accent)" opacity="0.9"/>
-            <circle class="splash-dot" cx="404" cy="148" r="24" fill="#34d399"/>
+            <rect width="512" height="512" rx="108" fill="url(#splash-bg)"/>
+            <path class="splash-t" d="M148 148 h216 v52 h-82 v164 h-52 V200 h-82 z" fill="white"/>
+            <rect class="splash-accent" x="282" y="312" width="82" height="52" rx="8" fill="#34d399"/>
           </svg>
         </div>
         <h1 class="splash-title">
@@ -85,17 +78,12 @@ onMounted(() => {
   filter: drop-shadow(0 8px 24px rgba(30, 58, 95, 0.5));
 }
 
-.splash-bar-h {
-  animation: slideRight 0.5s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+.splash-t {
+  animation: fadeIn 0.4s 0.25s ease-out both;
 }
-.splash-bar-v {
-  animation: slideDown 0.5s 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.splash-bar-accent {
-  animation: slideRight 0.4s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.splash-dot {
-  animation: popIn 0.3s 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+.splash-accent {
+  animation: accentSlide 0.4s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .splash-title {
@@ -133,7 +121,6 @@ onMounted(() => {
   animation: loaderFill 0.8s 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Splash exit */
 .splash-leave-active {
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
@@ -146,17 +133,9 @@ onMounted(() => {
   from { opacity: 0; transform: scale(0.8) translateY(10px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
-@keyframes slideRight {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 0.95; transform: translateX(0); }
-}
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 0.95; transform: translateY(0); }
-}
-@keyframes popIn {
-  from { opacity: 0; transform: scale(0); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes accentSlide {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(10px); }
