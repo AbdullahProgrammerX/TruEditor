@@ -1,21 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" aria-hidden="true">
-  <defs>
-    <style><![CDATA[
-      .t { fill: #1B4FBD; }
-      .tick {
-        fill: #1B4FBD;
-        stroke: #FFFFFF;
-        stroke-width: 5.5;
-        stroke-linejoin: miter;
-        stroke-linecap: butt;
-        stroke-miterlimit: 3;
-        paint-order: stroke fill;
-      }
-    ]]></style>
-  </defs>
-  <!-- T: bar + stem same thickness (28), stem centered on x=128, sharp corners -->
-  <path class="t" d="M36 48h184v28H142v140h-28V76H36V48z"/>
-  <!-- Check: vertex low at stem base; short arm toward stem; long arm crosses right bar, tip above bar -->
-  <!-- Thick angular check: single sharp vertex, miter-style outline -->
-  <path class="tick" d="M230 36 L158 118 L128 200 L74 168 L88 154 L218 48 Z"/>
+  <!-- TruEditor mark: single rounded T, optical center ~128; no overlap tricks -->
+  <path
+    fill="#1a56db"
+    d="M54 70
+       A16 16 0 0 1 70 54
+       H186
+       A16 16 0 0 1 202 70
+       V94
+       H150
+       V184
+       A16 16 0 0 1 134 200
+       H122
+       A16 16 0 0 1 106 184
+       V94
+       H54
+       V70Z"
+  />
 </svg>
