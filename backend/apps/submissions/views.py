@@ -6,6 +6,7 @@ API views for manuscript submissions (Author Module).
 Developer: Abdullah Dogan
 """
 
+import uuid
 import logging
 from django.utils import timezone
 from rest_framework import viewsets, status
@@ -13,6 +14,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.utils.translation import gettext_lazy as _
+
+from django.db.models import Q
 
 from .models import Submission, Author, SubmissionStatusHistory, Correspondence
 from .serializers import (
@@ -25,7 +28,7 @@ from .serializers import (
     CorrespondenceSerializer,
     CorrespondenceCreateSerializer,
 )
-from .permissions import IsOwnerOrReadOnly, CanEditSubmission, CanDeleteSubmission
+from .permissions import IsOwnerOrCoAuthorReadOnly, CanEditSubmission, CanDeleteSubmission
 from apps.common.response import (
     success_response,
     error_response,
@@ -36,6 +39,106 @@ from apps.common.response import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+from rest_framework.decorators import api_view, permission_classes as perm_classes
+from rest_framework.permissions import AllowAny
+
+
+@api_view(['POST', 'GET'])
+@perm_classes([AllowAny])
+def verify_contribution(request, token):
+    """
+    Public endpoint for co-authors to verify their contribution via email token.
+    Accepts both GET (from email link click) and POST.
+    """
+    try:
+        author = Author.objects.select_related('submission').get(verification_token=token)
+    except Author.DoesNotExist:
+        return not_found_response(_('Invalid or expired verification link.'))
+
+    if author.verification_status == Author.VerificationStatus.VERIFIED:
+        return success_response(
+            data={'already_verified': True},
+            message=_('Contribution already verified.')
+        )
+
+    author.verification_status = Author.VerificationStatus.VERIFIED
+    author.verified_at = timezone.now()
+    author.save(update_fields=['verification_status', 'verified_at'])
+
+    logger.info(
+        f"Co-author {author.email} verified contribution for {author.submission.manuscript_id}"
+    )
+
+    return success_response(
+        data={
+            'author_name': author.full_name,
+            'manuscript_title': author.submission.title,
+            'manuscript_id': author.submission.manuscript_id,
+        },
+        message=_('Thank you! Your contribution has been verified.')
+    )
+
+
+@api_view(['POST', 'GET'])
+@perm_classes([AllowAny])
+def decline_contribution(request, token):
+    """
+    Public endpoint for co-authors to decline authorship via email token.
+    """
+    try:
+        author = Author.objects.select_related('submission', 'submission__submitter').get(
+            verification_token=token
+        )
+    except Author.DoesNotExist:
+        return not_found_response(_('Invalid or expired verification link.'))
+
+    if author.verification_status == Author.VerificationStatus.DECLINED:
+        return success_response(
+            data={'already_declined': True},
+            message=_('Authorship already declined.')
+        )
+
+    author.verification_status = Author.VerificationStatus.DECLINED
+    author.save(update_fields=['verification_status'])
+
+    logger.info(
+        f"Co-author {author.email} declined authorship for {author.submission.manuscript_id}"
+    )
+
+    # Notify the submitter about the declined authorship
+    try:
+        from apps.notifications.email_service import _send
+        from apps.notifications.models import EmailLog
+        submitter = author.submission.submitter
+        if submitter and submitter.email:
+            _send(
+                email_type=EmailLog.EmailType.OTHER,
+                recipient_email=submitter.email,
+                subject=f'Co-author Declined — {author.submission.manuscript_id}',
+                template_name='status_change',
+                context={
+                    'user_name': submitter.full_name or submitter.email,
+                    'manuscript_id': author.submission.manuscript_id,
+                    'title': author.submission.title,
+                    'old_status': 'Co-author Update',
+                    'new_status': f'{author.full_name} has declined authorship',
+                    'notes': 'Please review the author list for this submission.',
+                },
+                recipient_user=submitter,
+                submission=author.submission,
+            )
+    except Exception as e:
+        logger.warning(f"Decline notification email failed: {e}")
+
+    return success_response(
+        data={
+            'author_name': author.full_name,
+            'manuscript_title': author.submission.title,
+        },
+        message=_('Authorship has been declined. The submitter has been notified.')
+    )
 
 
 class SubmissionViewSet(viewsets.ModelViewSet):
@@ -53,16 +156,26 @@ class SubmissionViewSet(viewsets.ModelViewSet):
     - submit: Final submission
     """
     
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly, CanEditSubmission, CanDeleteSubmission]
+    permission_classes = [IsAuthenticated, IsOwnerOrCoAuthorReadOnly, CanEditSubmission, CanDeleteSubmission]
     
     def get_queryset(self):
         """
-        Return submissions for the current user.
-        Optimized with select_related and prefetch_related.
+        Return submissions owned by the user OR where the user is a co-author.
+        Co-authored submissions are read-only (enforced by permissions).
         """
+        user = self.request.user
+
+        coauthored_ids = Author.objects.filter(
+            user=user,
+        ).exclude(
+            submission__submitter=user,
+        ).exclude(
+            submission__status=Submission.Status.DRAFT,
+        ).values_list('submission_id', flat=True)
+
         queryset = Submission.objects.filter(
-            submitter=self.request.user
-        ).select_related(
+            Q(submitter=user) | Q(id__in=coauthored_ids)
+        ).distinct().select_related(
             'submitter',
             'assigned_editor'
         ).prefetch_related(
@@ -76,6 +189,13 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         status_filter = self.request.query_params.get('status', None)
         if status_filter:
             queryset = queryset.filter(status=status_filter)
+
+        # Filter by role: "mine" (submitter only) or "coauthor" only
+        role_filter = self.request.query_params.get('role', None)
+        if role_filter == 'mine':
+            queryset = queryset.filter(submitter=user)
+        elif role_filter == 'coauthor':
+            queryset = queryset.filter(id__in=coauthored_ids)
         
         return queryset
     
@@ -328,6 +448,27 @@ class SubmissionViewSet(viewsets.ModelViewSet):
                 send_submission_confirmation(submission)
             except Exception as email_err:
                 logger.warning(f"Submission email failed: {email_err}")
+
+            # Notify co-authors automatically (non-blocking)
+            try:
+                from apps.notifications.email_service import send_coauthor_notification
+                coauthors = submission.authors.exclude(
+                    Q(user=request.user) | Q(email=request.user.email)
+                )
+                for author in coauthors:
+                    if author.verification_status in (
+                        Author.VerificationStatus.NOT_REQUIRED,
+                        Author.VerificationStatus.PENDING,
+                    ):
+                        author.verification_status = Author.VerificationStatus.PENDING
+                        author.verification_token = uuid.uuid4()
+                        author.notified_at = timezone.now()
+                        author.save(update_fields=[
+                            'verification_status', 'verification_token', 'notified_at'
+                        ])
+                        send_coauthor_notification(submission, author)
+            except Exception as notify_err:
+                logger.warning(f"Co-author notification failed: {notify_err}")
             
             return success_response(
                 data=SubmissionDetailSerializer(submission).data,
@@ -469,6 +610,45 @@ class SubmissionViewSet(viewsets.ModelViewSet):
                 code='REVISION_ERROR',
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    @action(detail=True, methods=['post'], url_path='notify-coauthors')
+    def notify_coauthors(self, request, pk=None):
+        """Send verification emails to all co-authors who haven't been notified yet."""
+        submission = self.get_object()
+
+        if submission.submitter != request.user:
+            return forbidden_response(_('Only the submitter can notify co-authors.'))
+
+        if submission.status == Submission.Status.DRAFT:
+            return validation_error_response(
+                _('Cannot notify co-authors for draft submissions.')
+            )
+
+        coauthors = submission.authors.exclude(
+            Q(user=request.user) | Q(email=request.user.email)
+        )
+
+        notified = 0
+        for author in coauthors:
+            if author.verification_status == Author.VerificationStatus.NOT_REQUIRED:
+                author.verification_status = Author.VerificationStatus.PENDING
+                author.verification_token = uuid.uuid4()
+                author.notified_at = timezone.now()
+                author.save(update_fields=[
+                    'verification_status', 'verification_token', 'notified_at'
+                ])
+
+            try:
+                from apps.notifications.email_service import send_coauthor_notification
+                send_coauthor_notification(submission, author)
+                notified += 1
+            except Exception as e:
+                logger.warning(f"Co-author notification failed for {author.email}: {e}")
+
+        return success_response(
+            data={'notified_count': notified, 'total_coauthors': coauthors.count()},
+            message=_('Co-author notifications sent successfully'),
+        )
 
     @action(detail=True, methods=['get', 'post'])
     def authors(self, request, pk=None):

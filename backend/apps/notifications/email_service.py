@@ -209,6 +209,40 @@ def send_withdrawal_confirmation(submission) -> EmailLog | None:
     )
 
 
+def send_coauthor_notification(submission, author) -> EmailLog | None:
+    """
+    Send notification to a co-author about their inclusion in a submission.
+    Includes verification and decline links.
+    """
+    if not author.email:
+        return None
+
+    frontend_url = getattr(settings, 'FRONTEND_URL', '')
+    verify_url = f"{frontend_url}/verify/{author.verification_token}"
+    decline_url = f"{frontend_url}/verify/{author.verification_token}/decline"
+
+    return _send(
+        email_type=EmailLog.EmailType.COAUTHOR_NOTIFICATION,
+        recipient_email=author.email,
+        subject=f'Co-authorship Verification — {submission.manuscript_id}',
+        template_name='coauthor_notification',
+        context={
+            'author_name': author.full_name,
+            'submitter_name': submission.submitter.full_name or submission.submitter.email,
+            'manuscript_id': submission.manuscript_id,
+            'title': submission.title,
+            'article_type': submission.get_article_type_display(),
+            'contribution': author.contribution or 'Not specified',
+            'author_order': author.order,
+            'is_corresponding': author.is_corresponding,
+            'verify_url': verify_url,
+            'decline_url': decline_url,
+        },
+        recipient_user=author.user,
+        submission=submission,
+    )
+
+
 def send_profile_reminder(user) -> EmailLog | None:
     """Send a reminder to complete their profile."""
     if not user.email:

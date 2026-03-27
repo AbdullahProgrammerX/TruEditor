@@ -1,0 +1,63 @@
+{% extends "email/_base.html" %}
+
+{% block content %}
+<h2>Co-authorship Verification</h2>
+
+<p>Dear {{ author_name }},</p>
+
+<p>
+  You have been listed as a co-author on a manuscript submitted to <strong>TruEditor</strong>
+  by <strong>{{ submitter_name }}</strong>. Please review the details below and verify your contribution.
+</p>
+
+<div class="info-box">
+  <div class="label">Manuscript ID</div>
+  <div class="value">{{ manuscript_id }}</div>
+</div>
+
+<table class="details">
+  <tr>
+    <td class="lbl">Title</td>
+    <td class="val">{{ title }}</td>
+  </tr>
+  <tr>
+    <td class="lbl">Article Type</td>
+    <td class="val">{{ article_type }}</td>
+  </tr>
+  <tr>
+    <td class="lbl">Author Position</td>
+    <td class="val">
+      {{ author_order }}{% if author_order == 1 %}st{% elif author_order == 2 %}nd{% elif author_order == 3 %}rd{% else %}th{% endif %} Author
+      {% if is_corresponding %}<span class="badge badge-blue">Corresponding Author</span>{% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td class="lbl">Contribution</td>
+    <td class="val">{{ contribution }}</td>
+  </tr>
+</table>
+
+<div class="divider"></div>
+
+<p>Please confirm your involvement by clicking one of the buttons below:</p>
+
+<div style="text-align: center; margin: 24px 0;">
+  <a href="{{ verify_url }}" class="btn" style="margin-right: 12px;">
+    ✓ Verify My Contribution
+  </a>
+</div>
+
+<div style="text-align: center; margin: 16px 0;">
+  <a href="{{ decline_url }}" style="color: #991b1b; font-size: 13px; text-decoration: underline;">
+    I am not an author of this manuscript
+  </a>
+</div>
+
+<div class="divider"></div>
+
+<p style="font-size: 13px; color: #6b7280;">
+  If you have questions about this submission, please contact the submitting author
+  ({{ submitter_name }}) directly. If you did not expect this email, you can safely ignore it
+  or click the decline link above.
+</p>
+{% endblock %}

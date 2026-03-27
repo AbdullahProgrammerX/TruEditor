@@ -119,12 +119,13 @@ class SubmissionAdmin(admin.ModelAdmin):
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'email', 'submission_id_short', 'is_corresponding', 'order')
-    list_filter = ('is_corresponding',)
-    search_fields = ('first_name', 'last_name', 'email')
+    list_display = ('full_name', 'email', 'submission_id_short', 'is_corresponding', 'order', 'verification_status')
+    list_filter = ('is_corresponding', 'verification_status')
+    search_fields = ('given_name', 'family_name', 'email')
+    readonly_fields = ('verification_token', 'verified_at', 'notified_at')
 
     def full_name(self, obj):
-        return f"{obj.first_name} {obj.last_name}"
+        return f"{obj.given_name} {obj.family_name}"
     full_name.short_description = 'Name'
 
     def submission_id_short(self, obj):

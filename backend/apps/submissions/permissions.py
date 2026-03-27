@@ -10,19 +10,27 @@ from rest_framework import permissions
 from django.utils.translation import gettext_lazy as _
 
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
+def is_coauthor(user, submission):
+    """Check if the user is a co-author (linked via Author.user) on this submission."""
+    if not user or not user.is_authenticated:
+        return False
+    return submission.authors.filter(user=user).exists()
+
+
+class IsOwnerOrCoAuthorReadOnly(permissions.BasePermission):
     """
-    Permission to allow only submission owner to edit.
-    Others can only read.
+    Owner can read and write.
+    Co-authors (linked via Author.user) can read only.
     """
-    
+
     def has_object_permission(self, request, view, obj):
-        # Read permissions for all authenticated users
-        if request.method in permissions.SAFE_METHODS:
-            return request.user.is_authenticated
-        
-        # Write permissions only to the owner
-        return obj.submitter == request.user
+        if obj.submitter == request.user:
+            return True
+
+        if request.method in permissions.SAFE_METHODS and is_coauthor(request.user, obj):
+            return True
+
+        return False
 
 
 class CanEditSubmission(permissions.BasePermission):

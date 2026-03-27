@@ -222,16 +222,21 @@
 
 ---
 
-### FAZ-17: Ortak Yazar Erişimi & Doğrulama
+### FAZ-17: Ortak Yazar Erişimi & Doğrulama ✅
 
 **Kapsam:**
-- [ ] Ortak yazarlara bildirim gönderme
-- [ ] Ortak yazar katkı doğrulaması
-- [ ] Ortak yazarların gönderiyi görüntüleyebilmesi
-- [ ] "Authorship" sütunu (Sorumlu Yazar / Ortak Yazar)
+- [x] Ortak yazarlara bildirim gönderme (e-posta + token)
+- [x] Ortak yazar katkı doğrulaması (verify / decline public endpoints)
+- [x] Ortak yazarların gönderiyi görüntüleyebilmesi (read-only co-author access)
+- [x] "Authorship" sütunu (Submitter / Co-Author role badge)
+- [x] Verification status badges (Verified / Pending / Declined)
+- [x] Co-author banner on detail page
+- [x] Role filter tabs (All / My Submissions / Co-authored)
+- [x] Public verification page (/verify/:token)
 
 **Tahmini Süre:** 2-3 gün  
-**Bağımlılıklar:** FAZ-11 (e-posta), FAZ-9 (detay sayfası)
+**Bağımlılıklar:** FAZ-11 (e-posta), FAZ-9 (detay sayfası)  
+**Tamamlanma:** 27 Mart 2026
 
 ---
 

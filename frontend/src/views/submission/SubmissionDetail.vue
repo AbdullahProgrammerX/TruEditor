@@ -37,6 +37,8 @@ const isSendingMessage = ref(false)
 
 const submission = computed(() => submissionStore.currentSubmission)
 
+const isCoauthor = computed(() => submission.value?.role === 'coauthor')
+
 const statusInfo = computed(() => {
   if (!submission.value) return null
   return SUBMISSION_STATUS[submission.value.status]
@@ -310,6 +312,21 @@ const tabs = [
 
     <!-- Main Content -->
     <main v-else-if="submission" class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <!-- Co-author banner -->
+      <div v-if="isCoauthor" class="mb-4 bg-amber-50 border border-amber-200 rounded-xl px-5 py-3.5 flex items-center gap-3">
+        <div class="flex-shrink-0 w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-amber-800">You are a co-author on this submission</p>
+          <p class="text-xs text-amber-600 mt-0.5">
+            Submitted by {{ submission.submitter?.full_name || submission.submitter?.email }}. You have read-only access.
+          </p>
+        </div>
+      </div>
+
       <!-- Back link & Title bar -->
       <div class="mb-6">
         <button @click="router.push('/submissions')" class="text-sm text-gray-500 hover:text-primary-600 transition-colors mb-3 flex items-center gap-1">
@@ -461,15 +478,34 @@ const tabs = [
                   :key="author.id"
                   class="p-4 bg-gray-50 rounded-xl"
                 >
-                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start justify-between gap-3">
                     <div class="flex items-center gap-3">
                       <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" :class="author.is_corresponding ? 'bg-primary-100 text-primary-700' : 'bg-gray-200 text-gray-600'">
                         {{ author.order }}
                       </div>
                       <div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                           <p class="font-semibold text-gray-800">{{ author.full_name }}</p>
                           <span v-if="author.is_corresponding" class="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full font-medium">Corresponding</span>
+                          <span
+                            v-if="author.verification_status === 'verified'"
+                            class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-0.5"
+                          >
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            Verified
+                          </span>
+                          <span
+                            v-else-if="author.verification_status === 'pending'"
+                            class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium"
+                          >
+                            Pending
+                          </span>
+                          <span
+                            v-else-if="author.verification_status === 'declined'"
+                            class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium"
+                          >
+                            Declined
+                          </span>
                         </div>
                         <p class="text-sm text-gray-600">{{ author.affiliation }}</p>
                         <div class="flex items-center gap-3 mt-1 text-xs text-gray-500">
@@ -543,8 +579,8 @@ const tabs = [
                 </div>
               </div>
 
-              <!-- Send Message Form (only for non-draft) -->
-              <div v-if="submission.status !== 'draft'" class="border-t border-gray-200 pt-5">
+              <!-- Send Message Form (only for submitter, non-draft) -->
+              <div v-if="!isCoauthor && submission.status !== 'draft'" class="border-t border-gray-200 pt-5">
                 <h4 class="text-sm font-semibold text-gray-700 mb-3">Send Message to Editor</h4>
                 <div class="space-y-3">
                   <input
@@ -572,6 +608,7 @@ const tabs = [
                   </div>
                 </div>
               </div>
+              <p v-else-if="isCoauthor" class="text-sm text-gray-400 text-center">Only the submitter can send messages to the editor.</p>
               <p v-else class="text-sm text-gray-400 text-center">Submit your manuscript before sending messages to the editor.</p>
             </div>
 
@@ -654,12 +691,13 @@ const tabs = [
 
         <!-- Right Sidebar -->
         <div class="space-y-6">
-          <!-- Actions -->
+          <!-- Actions (hidden for co-authors except PDF download) -->
           <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
             <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Actions</h3>
             <div class="space-y-2.5">
-              <!-- Generate PDF -->
+              <!-- Generate PDF (submitter only) -->
               <button
+                v-if="!isCoauthor"
                 @click="handleGeneratePdf"
                 :disabled="isGeneratingPdf"
                 class="w-full flex items-center gap-3 px-4 py-2.5 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors font-medium text-sm disabled:opacity-50"
@@ -669,7 +707,7 @@ const tabs = [
                 {{ isGeneratingPdf ? 'Generating PDF...' : existingPdf ? 'Regenerate PDF' : 'Generate PDF' }}
               </button>
 
-              <!-- View/Download PDF -->
+              <!-- View/Download PDF (everyone) -->
               <button
                 v-if="existingPdf || pdfUrl"
                 @click="handleViewPdf"
@@ -679,9 +717,9 @@ const tabs = [
                 View / Download PDF
               </button>
 
-              <!-- Submit Revision (revision_required) -->
+              <!-- Submit Revision (submitter only) -->
               <button
-                v-if="submission.status === 'revision_required'"
+                v-if="!isCoauthor && submission.status === 'revision_required'"
                 @click="router.push(`/submissions/${submission.id}/revise`)"
                 class="w-full flex items-center gap-3 px-4 py-2.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors font-medium text-sm"
               >
@@ -689,9 +727,9 @@ const tabs = [
                 Submit Revision
               </button>
 
-              <!-- Edit (draft only now) -->
+              <!-- Edit (submitter, draft only) -->
               <button
-                v-if="submission.status === 'draft'"
+                v-if="!isCoauthor && submission.status === 'draft'"
                 @click="router.push(`/submissions/new?edit=${submission.id}`)"
                 class="w-full flex items-center gap-3 px-4 py-2.5 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-medium text-sm"
               >
@@ -699,9 +737,9 @@ const tabs = [
                 Edit Submission
               </button>
 
-              <!-- Withdraw (submitted / under_review / revision_required) -->
+              <!-- Withdraw (submitter only) -->
               <button
-                v-if="submission.can_be_withdrawn && submission.status !== 'draft'"
+                v-if="!isCoauthor && submission.can_be_withdrawn && submission.status !== 'draft'"
                 @click="showWithdrawConfirm = true"
                 class="w-full flex items-center gap-3 px-4 py-2.5 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors font-medium text-sm"
               >
@@ -709,9 +747,9 @@ const tabs = [
                 Withdraw Submission
               </button>
 
-              <!-- Delete (draft only) -->
+              <!-- Delete (submitter, draft only) -->
               <button
-                v-if="submission.status === 'draft'"
+                v-if="!isCoauthor && submission.status === 'draft'"
                 @click="handleDelete"
                 class="w-full flex items-center gap-3 px-4 py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm"
               >
@@ -719,8 +757,13 @@ const tabs = [
                 Delete Draft
               </button>
 
-              <!-- No actions available -->
-              <p v-if="!submission.is_editable && (!submission.can_be_withdrawn || submission.status === 'draft') && submission.status !== 'draft'" class="text-sm text-gray-500 text-center py-2">
+              <!-- Co-author read-only notice -->
+              <p v-if="isCoauthor" class="text-sm text-amber-600 text-center py-2 bg-amber-50 rounded-lg">
+                Read-only access as co-author.
+              </p>
+
+              <!-- No actions available (submitter) -->
+              <p v-else-if="!submission.is_editable && (!submission.can_be_withdrawn || submission.status === 'draft') && submission.status !== 'draft'" class="text-sm text-gray-500 text-center py-2">
                 No actions available for this status.
               </p>
             </div>

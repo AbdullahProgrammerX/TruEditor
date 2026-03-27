@@ -146,6 +146,7 @@ export const useSubmissionStore = defineStore('submission', () => {
       if (filters.value.article_type) params.append('article_type', filters.value.article_type)
       if (filters.value.search) params.append('search', filters.value.search)
       if (filters.value.ordering) params.append('ordering', filters.value.ordering)
+      if (filters.value.role) params.append('role', filters.value.role)
       
       params.append('page', String(currentPage.value))
       params.append('page_size', String(pageSize.value))

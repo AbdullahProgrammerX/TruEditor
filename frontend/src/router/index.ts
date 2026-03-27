@@ -18,6 +18,7 @@ const SubmissionsList = () => import('@/views/submission/SubmissionsList.vue')
 const SubmissionDetail = () => import('@/views/submission/SubmissionDetail.vue')
 const SubmitRevision = () => import('@/views/submission/SubmitRevision.vue')
 const Profile = () => import('@/views/profile/Profile.vue')
+const VerifyContribution = () => import('@/views/submission/VerifyContribution.vue')
 const NotFound = () => import('@/views/NotFound.vue')
 
 /**
@@ -119,6 +120,24 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiresProfile: true 
     }
+  },
+
+  // ================================
+  // PUBLIC VERIFICATION ROUTES
+  // ================================
+  {
+    path: '/verify/:token',
+    name: 'verify-contribution',
+    component: VerifyContribution,
+    meta: { requiresAuth: false },
+    props: true,
+  },
+  {
+    path: '/verify/:token/decline',
+    name: 'decline-contribution',
+    component: VerifyContribution,
+    meta: { requiresAuth: false },
+    props: (route) => ({ token: route.params.token, isDecline: true }),
   },
 
   // ================================

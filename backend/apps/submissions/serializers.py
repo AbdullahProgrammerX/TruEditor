@@ -72,6 +72,9 @@ class AuthorshipSerializer(serializers.ModelSerializer):
     full_name = serializers.ReadOnlyField()
     affiliation = serializers.ReadOnlyField()
     user = UserMinimalSerializer(read_only=True)
+    verification_status_display = serializers.CharField(
+        source='get_verification_status_display', read_only=True
+    )
     
     class Meta:
         model = Author
@@ -91,9 +94,13 @@ class AuthorshipSerializer(serializers.ModelSerializer):
             'order',
             'is_corresponding',
             'contribution',
+            'verification_status',
+            'verification_status_display',
+            'verified_at',
+            'notified_at',
             'created_at',
         ]
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id', 'verification_status', 'verified_at', 'notified_at', 'created_at']
 
 
 class SubmissionListSerializer(serializers.ModelSerializer):
@@ -107,6 +114,7 @@ class SubmissionListSerializer(serializers.ModelSerializer):
     file_count = serializers.ReadOnlyField()
     corresponding_author = serializers.SerializerMethodField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    role = serializers.SerializerMethodField()
     
     class Meta:
         model = Submission
@@ -121,6 +129,7 @@ class SubmissionListSerializer(serializers.ModelSerializer):
             'author_count',
             'file_count',
             'corresponding_author',
+            'role',
             'created_at',
             'updated_at',
             'submitted_at',
@@ -146,6 +155,15 @@ class SubmissionListSerializer(serializers.ModelSerializer):
             }
         return None
 
+    def get_role(self, obj):
+        """Return the current user's role: 'submitter' or 'coauthor'."""
+        request = self.context.get('request')
+        if not request or not request.user:
+            return 'submitter'
+        if obj.submitter_id == request.user.id:
+            return 'submitter'
+        return 'coauthor'
+
 
 class SubmissionDetailSerializer(serializers.ModelSerializer):
     """
@@ -165,6 +183,7 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
     can_be_withdrawn = serializers.ReadOnlyField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     article_type_display = serializers.CharField(source='get_article_type_display', read_only=True)
+    role = serializers.SerializerMethodField()
 
     class Meta:
         model = Submission
@@ -178,6 +197,9 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
             'status_display',
             'is_editable',
             'can_be_withdrawn',
+            
+            # Role
+            'role',
             
             # Submission Info
             'submitter',
@@ -255,6 +277,15 @@ class SubmissionDetailSerializer(serializers.ModelSerializer):
     def get_files(self, obj):
         active_files = obj.files.filter(is_active=True).order_by('order')
         return ManuscriptFileSerializer(active_files, many=True).data
+
+    def get_role(self, obj):
+        """Return the current user's role: 'submitter' or 'coauthor'."""
+        request = self.context.get('request')
+        if not request or not request.user:
+            return 'submitter'
+        if obj.submitter_id == request.user.id:
+            return 'submitter'
+        return 'coauthor'
 
 
 class SubmissionCreateSerializer(serializers.ModelSerializer):

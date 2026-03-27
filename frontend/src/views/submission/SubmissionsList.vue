@@ -23,6 +23,10 @@ const statusFilter = ref<SubmissionStatus | undefined>(
   (route.query.status as SubmissionStatus) || undefined
 )
 
+const roleFilter = ref<'all' | 'mine' | 'coauthor'>(
+  (route.query.role as 'all' | 'mine' | 'coauthor') || 'all'
+)
+
 const statusTabs = [
   { value: undefined as SubmissionStatus | undefined, label: 'All' },
   { value: 'draft' as SubmissionStatus, label: 'Draft' },
@@ -34,11 +38,16 @@ const statusTabs = [
 ]
 
 async function fetchWithFilter() {
-  await submissionStore.filterByStatus(statusFilter.value)
+  const roleParam = roleFilter.value === 'all' ? undefined : roleFilter.value
+  await submissionStore.fetchSubmissions({
+    status: statusFilter.value,
+    role: roleParam,
+  })
 }
 
 onMounted(async () => {
   statusFilter.value = (route.query.status as SubmissionStatus) || undefined
+  roleFilter.value = (route.query.role as 'all' | 'mine' | 'coauthor') || 'all'
   await fetchWithFilter()
 })
 
@@ -52,10 +61,19 @@ watch(
 
 function setFilter(status: SubmissionStatus | undefined) {
   statusFilter.value = status
-  router.replace({
-    path: '/submissions',
-    query: status ? { status } : {},
-  })
+  const query: Record<string, string> = {}
+  if (status) query.status = status
+  if (roleFilter.value !== 'all') query.role = roleFilter.value
+  router.replace({ path: '/submissions', query })
+  fetchWithFilter()
+}
+
+function setRoleFilter(role: 'all' | 'mine' | 'coauthor') {
+  roleFilter.value = role
+  const query: Record<string, string> = {}
+  if (statusFilter.value) query.status = statusFilter.value
+  if (role !== 'all') query.role = role
+  router.replace({ path: '/submissions', query })
   fetchWithFilter()
 }
 
@@ -195,6 +213,28 @@ function logout() {
           </svg>
           New Submission
         </button>
+      </div>
+
+      <!-- Role filter -->
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-sm text-gray-500 font-medium">View:</span>
+        <div class="flex gap-1.5 bg-gray-100 rounded-lg p-1">
+          <button
+            v-for="r in [
+              { value: 'all' as const, label: 'All' },
+              { value: 'mine' as const, label: 'My Submissions' },
+              { value: 'coauthor' as const, label: 'Co-authored' },
+            ]"
+            :key="r.value"
+            @click="setRoleFilter(r.value)"
+            class="px-3 py-1.5 rounded-md text-sm font-medium transition-all"
+            :class="roleFilter === r.value
+              ? 'bg-white text-gray-800 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'"
+          >
+            {{ r.label }}
+          </button>
+        </div>
       </div>
 
       <!-- Status filter tabs -->

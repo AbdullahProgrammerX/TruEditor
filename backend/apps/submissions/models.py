@@ -502,11 +502,18 @@ class Author(models.Model):
     
     Manages authors for a submission.
     Authors can be registered users or external contributors.
+    Co-authors with a linked user account can view the submission.
     
     Relations:
     - Submission: Parent submission
     - User (optional): Registered user in the system
     """
+    
+    class VerificationStatus(models.TextChoices):
+        PENDING = 'pending', _('Pending')
+        VERIFIED = 'verified', _('Verified')
+        DECLINED = 'declined', _('Declined')
+        NOT_REQUIRED = 'not_required', _('Not Required')
     
     # ============================================
     # PRIMARY KEY
@@ -617,6 +624,38 @@ class Author(models.Model):
     )
     
     # ============================================
+    # VERIFICATION (FAZ-17)
+    # ============================================
+    verification_status = models.CharField(
+        _('Verification Status'),
+        max_length=20,
+        choices=VerificationStatus.choices,
+        default=VerificationStatus.NOT_REQUIRED,
+        help_text=_('Co-author contribution verification status')
+    )
+    
+    verification_token = models.UUIDField(
+        _('Verification Token'),
+        default=uuid.uuid4,
+        unique=True,
+        help_text=_('Token for email-based verification link')
+    )
+    
+    verified_at = models.DateTimeField(
+        _('Verified At'),
+        null=True,
+        blank=True,
+        help_text=_('When the co-author verified their contribution')
+    )
+    
+    notified_at = models.DateTimeField(
+        _('Notified At'),
+        null=True,
+        blank=True,
+        help_text=_('When the co-author was last notified')
+    )
+    
+    # ============================================
     # TIMESTAMPS
     # ============================================
     created_at = models.DateTimeField(
@@ -637,6 +676,7 @@ class Author(models.Model):
             models.Index(fields=['submission', 'order']),
             models.Index(fields=['email']),
             models.Index(fields=['orcid_id']),
+            models.Index(fields=['user', 'verification_status']),
         ]
     
     def __str__(self):
@@ -657,6 +697,11 @@ class Author(models.Model):
         if self.country:
             parts.append(self.country)
         return ", ".join(filter(None, parts))
+    
+    @property
+    def is_submitter(self):
+        """Check if this author is also the submitter."""
+        return self.user_id and self.user_id == self.submission.submitter_id
     
     def save(self, *args, **kwargs):
         """Perform validations before saving."""

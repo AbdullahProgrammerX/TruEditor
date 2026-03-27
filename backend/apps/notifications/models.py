@@ -23,6 +23,7 @@ class EmailLog(models.Model):
         REVISION_REQUEST = 'revision_request', _('Revision Request')
         DECISION = 'decision', _('Decision Notification')
         PROFILE_REMINDER = 'profile_reminder', _('Profile Reminder')
+        COAUTHOR_NOTIFICATION = 'coauthor_notification', _('Co-author Notification')
         OTHER = 'other', _('Other')
 
     class Status(models.TextChoices):

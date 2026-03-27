@@ -137,6 +137,11 @@ export const LANGUAGES: Record<Language, string> = {
 // ============================================
 
 /**
+ * Author verification status
+ */
+export type VerificationStatus = 'pending' | 'verified' | 'declined' | 'not_required'
+
+/**
  * Author information
  */
 export interface Author {
@@ -155,6 +160,10 @@ export interface Author {
   order: number
   is_corresponding: boolean
   contribution: string
+  verification_status: VerificationStatus
+  verification_status_display: string
+  verified_at: string | null
+  notified_at: string | null
   created_at: string
 }
 
@@ -247,6 +256,11 @@ export interface CorrespondingAuthor {
 }
 
 /**
+ * User role on a submission
+ */
+export type SubmissionRole = 'submitter' | 'coauthor'
+
+/**
  * Submission list item (for dashboard)
  */
 export interface SubmissionListItem {
@@ -260,6 +274,7 @@ export interface SubmissionListItem {
   author_count: number
   file_count: number
   corresponding_author: CorrespondingAuthor | null
+  role: SubmissionRole
   created_at: string
   updated_at: string
   submitted_at: string | null
@@ -278,6 +293,9 @@ export interface Submission {
   status_display: string
   is_editable: boolean
   can_be_withdrawn: boolean
+  
+  // Role
+  role: SubmissionRole
   
   // Submission Info
   submitter: UserMinimal
@@ -442,6 +460,7 @@ export interface SubmissionFilters {
   article_type?: ArticleType
   search?: string
   ordering?: string
+  role?: 'mine' | 'coauthor'
   page?: number
   page_size?: number
 }
